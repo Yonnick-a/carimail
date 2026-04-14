@@ -6,11 +6,20 @@ import { cookies } from "next/headers";
 
 const SESSION_COOKIE = "cm_session";
 
+type SessionListItem = {
+  id: string;
+  token: string;
+  createdAt: Date;
+  expiresAt: Date;
+};
+
 export async function GET() {
   const user = await getSession();
-  if (!user) return NextResponse.json({ ok: false, error: "Unauthorized." }, { status: 401 });
+  if (!user) {
+    return NextResponse.json({ ok: false, error: "Unauthorized." }, { status: 401 });
+  }
 
-  const sessions = await db.session.findMany({
+  const sessions: SessionListItem[] = await db.session.findMany({
     where: {
       userId: user.id,
       expiresAt: { gt: new Date() },
@@ -42,7 +51,9 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const user = await getSession();
-  if (!user) return NextResponse.json({ ok: false, error: "Unauthorized." }, { status: 401 });
+  if (!user) {
+    return NextResponse.json({ ok: false, error: "Unauthorized." }, { status: 401 });
+  }
 
   try {
     const body = await req.json();
@@ -67,6 +78,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: false, error: "Unknown action." }, { status: 400 });
   } catch (err) {
-    return NextResponse.json({ ok: false, error: err instanceof Error ? err.message : "Failed." }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: err instanceof Error ? err.message : "Failed." },
+      { status: 400 }
+    );
   }
 }
