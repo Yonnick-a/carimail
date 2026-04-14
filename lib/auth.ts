@@ -71,6 +71,11 @@ export async function clearSession() {
 export async function requireAuth(): Promise<SessionUser> {
   const { redirect } = await import("next/navigation");
   const user = await getSession();
-  if (!user) redirect("/sign-in");
+
+  if (!user) {
+    redirect("/sign-in");
+    throw new Error("Unreachable");
+  }
+
   return user;
 }
