@@ -1,0 +1,45 @@
+// app/api/mail/send/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { getSession } from "@/lib/auth";
+import { getAccountConfig } from "@/lib/mail/accounts";
+import { sendEmail } from "@/lib/mail/smtp";
+
+const schema = z.object({
+  accountId: z.string(),
+  to: z.string().min(1),
+  cc: z.string().optional(),
+  bcc: z.string().optional(),
+  subject: z.string().min(1),
+  body: z.string().min(1),
+  isHtml: z.boolean().optional(),
+  inReplyTo: z.string().optional(),
+  references: z.string().optional(),
+});
+
+export async function POST(req: NextRequest) {
+  const user = await getSession();
+  if (!user) return NextResponse.json({ ok: false, error: "Unauthorized." }, { status: 401 });
+
+  try {
+    const body = await req.json();
+    const parsed = schema.parse(body);
+    const { account, smtp } = await getAccountConfig(parsed.accountId, user.id);
+
+    await sendEmail(smtp, {
+      from: account.emailAddress,
+      to: parsed.to,
+      cc: parsed.cc,
+      bcc: parsed.bcc,
+      subject: parsed.subject,
+      body: parsed.body,
+      isHtml: parsed.isHtml,
+      inReplyTo: parsed.inReplyTo,
+      references: parsed.references,
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    return NextResponse.json({ ok: false, error: err instanceof Error ? err.message : "Failed to send." }, { status: 400 });
+  }
+}

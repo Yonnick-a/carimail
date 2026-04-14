@@ -1,0 +1,81 @@
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --orange: #FF914D;
+  --orange-light: #FFB37D;
+  --orange-pale: #FFF6EE;
+  --blue: #0044BC;
+  --blue-light: #EEF4FF;
+  --navy: #0F172A;
+  --slate: #334155;
+  --muted: #64748B;
+  --subtle: #94A3B8;
+  --border: rgba(15,23,42,0.08);
+  --bg: #F4F7FB;
+  --surface: rgba(255,255,255,0.90);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--navy);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.12); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(15,23,42,0.20); }
+
+/* Selection */
+::selection { background: rgba(0,68,188,0.15); color: var(--navy); }
+
+/* Focus visible */
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; border-radius: 6px; }
+
+/* Prose reset for email HTML */
+.email-body * { max-width: 100%; }
+.email-body img { height: auto; }
+.email-body a { color: var(--blue); }
+.email-body pre { white-space: pre-wrap; word-break: break-word; }
+
+/* Gradient mesh background */
+.mesh-bg {
+  background:
+    radial-gradient(ellipse 900px 600px at 0% 0%, rgba(255,145,77,0.12), transparent 55%),
+    radial-gradient(ellipse 700px 500px at 100% 10%, rgba(0,68,188,0.09), transparent 50%),
+    radial-gradient(ellipse 600px 400px at 50% 100%, rgba(15,23,42,0.04), transparent 55%),
+    #F4F7FB;
+}
+
+/* Card surface */
+.card {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.70);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Animate in */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fadeUp 0.22s ease-out both; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in { animation: fadeIn 0.18s ease-out both; }
