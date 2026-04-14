@@ -274,7 +274,7 @@ export default function InboxClient({
                 <button
                   key={msg.uid}
                   type="button"
-                  onClick={() => openMessage(msg)}
+                  onClick={() => isActive ? setSelected(null) : openMessage(msg)}
                   className={`w-full px-4 py-3.5 text-left transition ${isActive ? "bg-[#EEF4FF]" : msg.seen ? "hover:bg-slate-50" : "bg-white hover:bg-slate-50"}`}
                 >
                   <div className="flex items-start gap-3">
@@ -432,7 +432,7 @@ export default function InboxClient({
                     onChange={(e) => setReplyBody(e.target.value)}
                     required
                     rows={4}
-                    className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#0F172A] outline-none transition focus:border-[#FF914D] focus:ring-4 focus:ring-[#FF914D]/15"
+                    className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#0F172A] outline-none transition focus:border-[#FF914D]"
                     placeholder="Write your reply…"
                   />
                   <div className="flex items-center gap-2">

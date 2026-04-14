@@ -32,11 +32,23 @@ export default function SignInPage() {
     }
   }
 
-  const inputCls = "w-full rounded-2xl border border-[#0F172A]/10 bg-[#F8FAFC] px-4 py-3 text-sm text-[#0F172A] outline-none transition placeholder:text-[#94A3B8] focus:border-[#FF914D] focus:bg-white focus:ring-4 focus:ring-[#FF914D]/15";
+  const inputCls =
+    "w-full rounded-2xl border border-[#0F172A]/10 bg-[#F8FAFC] px-4 py-3 text-sm text-[#0F172A] outline-none transition placeholder:text-[#94A3B8] focus:border-[#FF914D] focus:bg-white";
 
   return (
     <div className="animate-fade-up">
-      <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Welcome back</h1>
+      {/* Heading with waving emoji */}
+      <div className="flex items-center gap-2">
+        <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Welcome back</h1>
+        <span
+          className="inline-block select-none text-2xl"
+          style={{ animation: "wave 2.2s ease-in-out infinite" }}
+          role="img"
+          aria-label="waving hand"
+        >
+          👋
+        </span>
+      </div>
       <p className="mt-1.5 text-sm text-[#64748B]">Sign in to your Carimail account</p>
 
       <form onSubmit={handleSubmit} className="mt-7 space-y-4">
@@ -76,9 +88,12 @@ export default function SignInPage() {
         </div>
 
         <button
-          type="submit" disabled={loading}
-          className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0F172A] py-3.5 text-sm font-semibold text-white transition hover:bg-[#1E293B] disabled:opacity-60"
+          type="submit"
+          disabled={loading}
+          className="group relative mt-2 inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[#0F172A] py-3.5 text-sm font-semibold text-white transition hover:bg-[#1E293B] disabled:opacity-60"
         >
+          {/* Shimmer sweep on hover */}
+          <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/8 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           {loading ? "Signing in…" : "Sign in"}
         </button>
@@ -90,6 +105,19 @@ export default function SignInPage() {
           Create one
         </Link>
       </div>
+
+      <style>{`
+        @keyframes wave {
+          0%   { transform: rotate(0deg);   }
+          10%  { transform: rotate(14deg);  }
+          20%  { transform: rotate(-8deg);  }
+          30%  { transform: rotate(14deg);  }
+          40%  { transform: rotate(-4deg);  }
+          50%  { transform: rotate(10deg);  }
+          60%  { transform: rotate(0deg);   }
+          100% { transform: rotate(0deg);   }
+        }
+      `}</style>
     </div>
   );
 }

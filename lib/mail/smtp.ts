@@ -1,4 +1,3 @@
-// lib/mail/smtp.ts
 import "server-only";
 import nodemailer from "nodemailer";
 
@@ -9,6 +8,21 @@ export type SmtpConfig = {
   user: string;
   password: string;
 };
+
+function makeTransport(config: SmtpConfig) {
+  return nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.secure,
+    auth: { user: config.user, pass: config.password },
+    tls: { rejectUnauthorized: false },
+  });
+}
+
+export async function testSmtpConnection(config: SmtpConfig): Promise<void> {
+  const transport = makeTransport(config);
+  await transport.verify();
+}
 
 export async function sendEmail(
   config: SmtpConfig,
@@ -24,13 +38,7 @@ export async function sendEmail(
     references?: string;
   }
 ) {
-  const transport = nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    auth: { user: config.user, pass: config.password },
-    tls: { rejectUnauthorized: false },
-  });
+  const transport = makeTransport(config);
 
   const mail: nodemailer.SendMailOptions = {
     from: opts.from,
