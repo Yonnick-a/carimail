@@ -178,7 +178,8 @@ export async function searchMessages(
     const uids = await client.search({
       or: [{ subject: query }, { from: query }, { body: query }],
     });
-    if (!uids?.length) return [];
+
+    if (!Array.isArray(uids) || uids.length === 0) return [];
 
     const messages: MessageSummary[] = [];
     for await (const msg of client.fetch(uids.slice(-50), {
