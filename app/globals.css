@@ -79,3 +79,189 @@ body {
   to   { opacity: 1; }
 }
 .animate-fade-in { animation: fadeIn 0.18s ease-out both; }
+
+
+/* app/globals.css — Carimail
+   Token system mirrors Hostcari portal --hcp-* tokens.
+   Light mode default; dark via data-theme="dark" on <html>.
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Token system ── */
+:root,
+[data-theme="light"] {
+  --cm-bg:           #F5F7FB;
+  --cm-surface:      #FFFFFF;
+  --cm-surface2:     #F8FAFC;
+  --cm-surface3:     #F1F5F9;
+  --cm-text:         #0F172A;
+  --cm-text2:        #475569;
+  --cm-text3:        #94A3B8;
+  --cm-border:       rgba(15,23,42,0.08);
+  --cm-border2:      rgba(15,23,42,0.14);
+  --cm-accent:       #F97316;
+  --cm-accent2:      #EA580C;
+  --cm-accent-dim:   rgba(249,115,22,0.10);
+  --cm-accent-b:     rgba(249,115,22,0.22);
+  --cm-blue:         #0044BC;
+  --cm-blue2:        #003399;
+  --cm-blue-dim:     rgba(0,68,188,0.08);
+  --cm-blue-light:   #EEF4FF;
+  --cm-sidebar-bg:   #FFFFFF;
+  --cm-sidebar-border: rgba(15,23,42,0.08);
+  --cm-active-bg:    #DCEAFB;
+  --cm-active-text:  #0F172A;
+  --cm-hover-bg:     #EEF4FF;
+  --cm-hover-text:   #0044BC;
+  --cm-shadow:       0 4px 24px rgba(15,23,42,0.07);
+  --cm-shadow-lg:    0 12px 40px rgba(15,23,42,0.10);
+  --cm-shadow-xl:    0 24px 64px rgba(15,23,42,0.13);
+  --cm-unread-dot:   #0044BC;
+  --cm-starred:      #F59E0B;
+  --cm-divider:      rgba(15,23,42,0.06);
+  --cm-input-bg:     #F8FAFC;
+  --cm-input-border: rgba(15,23,42,0.10);
+}
+
+[data-theme="dark"] {
+  --cm-bg:           #0F1117;
+  --cm-surface:      #1A1F2E;
+  --cm-surface2:     #222840;
+  --cm-surface3:     #1E2438;
+  --cm-text:         #F1F5F9;
+  --cm-text2:        #94A3B8;
+  --cm-text3:        #475569;
+  --cm-border:       rgba(255,255,255,0.08);
+  --cm-border2:      rgba(255,255,255,0.14);
+  --cm-accent:       #F97316;
+  --cm-accent2:      #FB923C;
+  --cm-accent-dim:   rgba(249,115,22,0.12);
+  --cm-accent-b:     rgba(249,115,22,0.22);
+  --cm-blue:         #4B9EFF;
+  --cm-blue2:        #3B8EEF;
+  --cm-blue-dim:     rgba(75,158,255,0.10);
+  --cm-blue-light:   rgba(75,158,255,0.12);
+  --cm-sidebar-bg:   #151A27;
+  --cm-sidebar-border: rgba(255,255,255,0.07);
+  --cm-active-bg:    rgba(249,115,22,0.15);
+  --cm-active-text:  #F1F5F9;
+  --cm-hover-bg:     rgba(255,255,255,0.06);
+  --cm-hover-text:   #F1F5F9;
+  --cm-shadow:       0 4px 24px rgba(0,0,0,0.25);
+  --cm-shadow-lg:    0 12px 40px rgba(0,0,0,0.35);
+  --cm-shadow-xl:    0 24px 64px rgba(0,0,0,0.45);
+  --cm-unread-dot:   #4B9EFF;
+  --cm-starred:      #F59E0B;
+  --cm-divider:      rgba(255,255,255,0.06);
+  --cm-input-bg:     rgba(255,255,255,0.05);
+  --cm-input-border: rgba(255,255,255,0.10);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+
+body {
+  background: var(--cm-bg);
+  color: var(--cm-text);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--cm-border2); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cm-text3); }
+
+/* Selection */
+::selection { background: var(--cm-blue-dim); color: var(--cm-text); }
+
+/* Focus */
+:focus-visible { outline: 2px solid var(--cm-accent); outline-offset: 2px; border-radius: 6px; }
+
+/* ── Email body ── */
+.email-body * { max-width: 100%; }
+.email-body img { height: auto; border-radius: 4px; }
+.email-body a { color: var(--cm-blue); text-decoration: underline; }
+.email-body pre { white-space: pre-wrap; word-break: break-word; background: var(--cm-surface2); padding: 12px; border-radius: 8px; font-size: 13px; }
+.email-body blockquote { border-left: 3px solid var(--cm-border2); padding-left: 12px; margin: 8px 0; color: var(--cm-text2); }
+.email-body table { border-collapse: collapse; }
+.email-body td, .email-body th { border: 1px solid var(--cm-border); padding: 6px 10px; }
+
+/* ── Dot grid (auth bg) ── */
+.dot-grid {
+  background-image: radial-gradient(circle, var(--cm-border2) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ── Hostcari client badge ── */
+.hostcari-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, rgba(249,115,22,0.15), rgba(0,68,188,0.12));
+  border: 1px solid rgba(249,115,22,0.28);
+  color: var(--cm-accent);
+}
+
+/* ── Unread dot ── */
+.unread-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--cm-unread-dot);
+  flex-shrink: 0;
+}
+
+/* ── Message list item ── */
+.msg-item { transition: background 0.10s ease; cursor: pointer; }
+.msg-item:hover { background: var(--cm-surface2); }
+.msg-item.active { background: var(--cm-blue-light); }
+[data-theme="dark"] .msg-item.active { background: var(--cm-active-bg); }
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fadeUp 0.24s cubic-bezier(0.16,1,0.3,1) both; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in { animation: fadeIn 0.18s ease-out both; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up { animation: slideUp 0.28s cubic-bezier(0.16,1,0.3,1) both; }
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in { animation: scaleIn 0.20s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* ── Composable content-editable placeholder ── */
+[contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: var(--cm-text3);
+  pointer-events: none;
+}
+
+/* ── Theme transitions (only on color props) ── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.15s;
+  transition-timing-function: ease;
+}
+[class*="animate-"], button svg, .no-transition { transition: none !important; }

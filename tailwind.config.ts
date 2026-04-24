@@ -1,3 +1,4 @@
+// tailwind.config.ts
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -8,25 +9,29 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+      },
       colors: {
-        brand: {
-          orange: "#FF914D",
-          "orange-light": "#FFB37D",
-          "orange-pale": "#FFF6EE",
-          blue: "#0044BC",
-          "blue-light": "#EEF4FF",
-          "blue-mid": "#3B82F6",
-          navy: "#0F172A",
+        cm: {
+          bg:       "var(--cm-bg)",
+          surface:  "var(--cm-surface)",
+          surface2: "var(--cm-surface2)",
+          text:     "var(--cm-text)",
+          text2:    "var(--cm-text2)",
+          text3:    "var(--cm-text3)",
+          border:   "var(--cm-border)",
+          accent:   "var(--cm-accent)",
+          blue:     "var(--cm-blue)",
         },
       },
-      fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "monospace"],
-      },
       boxShadow: {
-        card: "0 12px 32px rgba(15,23,42,0.06)",
-        "card-lg": "0 20px 60px rgba(15,23,42,0.08)",
-        float: "0 8px 24px rgba(15,23,42,0.10)",
+        card:    "0 4px 24px rgba(15,23,42,0.07)",
+        "card-lg": "0 12px 40px rgba(15,23,42,0.10)",
+        float:   "0 8px 24px rgba(15,23,42,0.10)",
+        accent:  "0 4px 14px var(--cm-accent-b)",
+        blue:    "0 4px 14px rgba(0,68,188,0.25)",
       },
       borderRadius: {
         "2xl": "1rem",
@@ -34,18 +39,16 @@ const config: Config = {
         "4xl": "2rem",
       },
       animation: {
-        "fade-in": "fadeIn 0.2s ease-out",
-        "slide-up": "slideUp 0.25s ease-out",
+        "fade-up":   "fadeUp 0.24s cubic-bezier(0.16,1,0.3,1) both",
+        "fade-in":   "fadeIn 0.18s ease-out both",
+        "slide-up":  "slideUp 0.28s cubic-bezier(0.16,1,0.3,1) both",
+        "scale-in":  "scaleIn 0.20s cubic-bezier(0.16,1,0.3,1) both",
       },
       keyframes: {
-        fadeIn: {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-        slideUp: {
-          "0%": { opacity: "0", transform: "translateY(8px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
+        fadeUp:  { from: { opacity: "0", transform: "translateY(12px)" }, to: { opacity: "1", transform: "translateY(0)" } },
+        fadeIn:  { from: { opacity: "0" }, to: { opacity: "1" } },
+        slideUp: { from: { opacity: "0", transform: "translateY(16px)" }, to: { opacity: "1", transform: "translateY(0)" } },
+        scaleIn: { from: { opacity: "0", transform: "scale(0.95)" }, to: { opacity: "1", transform: "scale(1)" } },
       },
     },
   },

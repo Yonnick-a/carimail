@@ -1,23 +1,37 @@
 // app/layout.tsx
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css"
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { ThemeScript } from "@/components/ThemeScript";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
-  title: "Carimail — by Hostcari",
-  description: "A clean, fast email client for everyone.",
+  title: {
+    default: "Carimail — Email by Hostcari",
+    template: "%s | Carimail",
+  },
+  description:
+    "Carimail is Hostcari's premium email client. Connect any IMAP account and manage your email with a polished, fast interface built for business.",
   icons: { icon: "/logo.webp" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
-      </body>
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
