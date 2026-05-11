@@ -48,6 +48,11 @@ export type MailAccountMinAggregateOutputType = {
   smtpPort: number | null
   smtpSecure: boolean | null
   encryptedPassword: string | null
+  authType: string | null
+  oauthProvider: string | null
+  encryptedAccessToken: string | null
+  encryptedRefreshToken: string | null
+  oauthExpiresAt: Date | null
   isPrimary: boolean | null
   isActive: boolean | null
   lastSyncedAt: Date | null
@@ -67,6 +72,11 @@ export type MailAccountMaxAggregateOutputType = {
   smtpPort: number | null
   smtpSecure: boolean | null
   encryptedPassword: string | null
+  authType: string | null
+  oauthProvider: string | null
+  encryptedAccessToken: string | null
+  encryptedRefreshToken: string | null
+  oauthExpiresAt: Date | null
   isPrimary: boolean | null
   isActive: boolean | null
   lastSyncedAt: Date | null
@@ -86,6 +96,11 @@ export type MailAccountCountAggregateOutputType = {
   smtpPort: number
   smtpSecure: number
   encryptedPassword: number
+  authType: number
+  oauthProvider: number
+  encryptedAccessToken: number
+  encryptedRefreshToken: number
+  oauthExpiresAt: number
   isPrimary: number
   isActive: number
   lastSyncedAt: number
@@ -117,6 +132,11 @@ export type MailAccountMinAggregateInputType = {
   smtpPort?: true
   smtpSecure?: true
   encryptedPassword?: true
+  authType?: true
+  oauthProvider?: true
+  encryptedAccessToken?: true
+  encryptedRefreshToken?: true
+  oauthExpiresAt?: true
   isPrimary?: true
   isActive?: true
   lastSyncedAt?: true
@@ -136,6 +156,11 @@ export type MailAccountMaxAggregateInputType = {
   smtpPort?: true
   smtpSecure?: true
   encryptedPassword?: true
+  authType?: true
+  oauthProvider?: true
+  encryptedAccessToken?: true
+  encryptedRefreshToken?: true
+  oauthExpiresAt?: true
   isPrimary?: true
   isActive?: true
   lastSyncedAt?: true
@@ -155,6 +180,11 @@ export type MailAccountCountAggregateInputType = {
   smtpPort?: true
   smtpSecure?: true
   encryptedPassword?: true
+  authType?: true
+  oauthProvider?: true
+  encryptedAccessToken?: true
+  encryptedRefreshToken?: true
+  oauthExpiresAt?: true
   isPrimary?: true
   isActive?: true
   lastSyncedAt?: true
@@ -261,6 +291,11 @@ export type MailAccountGroupByOutputType = {
   smtpPort: number
   smtpSecure: boolean
   encryptedPassword: string
+  authType: string
+  oauthProvider: string | null
+  encryptedAccessToken: string | null
+  encryptedRefreshToken: string | null
+  oauthExpiresAt: Date | null
   isPrimary: boolean
   isActive: boolean
   lastSyncedAt: Date | null
@@ -303,12 +338,19 @@ export type MailAccountWhereInput = {
   smtpPort?: Prisma.IntFilter<"MailAccount"> | number
   smtpSecure?: Prisma.BoolFilter<"MailAccount"> | boolean
   encryptedPassword?: Prisma.StringFilter<"MailAccount"> | string
+  authType?: Prisma.StringFilter<"MailAccount"> | string
+  oauthProvider?: Prisma.StringNullableFilter<"MailAccount"> | string | null
+  encryptedAccessToken?: Prisma.StringNullableFilter<"MailAccount"> | string | null
+  encryptedRefreshToken?: Prisma.StringNullableFilter<"MailAccount"> | string | null
+  oauthExpiresAt?: Prisma.DateTimeNullableFilter<"MailAccount"> | Date | string | null
   isPrimary?: Prisma.BoolFilter<"MailAccount"> | boolean
   isActive?: Prisma.BoolFilter<"MailAccount"> | boolean
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"MailAccount"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MailAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MailAccount"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  messages?: Prisma.MailMessageListRelationFilter
+  conversations?: Prisma.MailConversationListRelationFilter
 }
 
 export type MailAccountOrderByWithRelationInput = {
@@ -323,12 +365,19 @@ export type MailAccountOrderByWithRelationInput = {
   smtpPort?: Prisma.SortOrder
   smtpSecure?: Prisma.SortOrder
   encryptedPassword?: Prisma.SortOrder
+  authType?: Prisma.SortOrder
+  oauthProvider?: Prisma.SortOrderInput | Prisma.SortOrder
+  encryptedAccessToken?: Prisma.SortOrderInput | Prisma.SortOrder
+  encryptedRefreshToken?: Prisma.SortOrderInput | Prisma.SortOrder
+  oauthExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  messages?: Prisma.MailMessageOrderByRelationAggregateInput
+  conversations?: Prisma.MailConversationOrderByRelationAggregateInput
 }
 
 export type MailAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -347,12 +396,19 @@ export type MailAccountWhereUniqueInput = Prisma.AtLeast<{
   smtpPort?: Prisma.IntFilter<"MailAccount"> | number
   smtpSecure?: Prisma.BoolFilter<"MailAccount"> | boolean
   encryptedPassword?: Prisma.StringFilter<"MailAccount"> | string
+  authType?: Prisma.StringFilter<"MailAccount"> | string
+  oauthProvider?: Prisma.StringNullableFilter<"MailAccount"> | string | null
+  encryptedAccessToken?: Prisma.StringNullableFilter<"MailAccount"> | string | null
+  encryptedRefreshToken?: Prisma.StringNullableFilter<"MailAccount"> | string | null
+  oauthExpiresAt?: Prisma.DateTimeNullableFilter<"MailAccount"> | Date | string | null
   isPrimary?: Prisma.BoolFilter<"MailAccount"> | boolean
   isActive?: Prisma.BoolFilter<"MailAccount"> | boolean
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"MailAccount"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MailAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MailAccount"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  messages?: Prisma.MailMessageListRelationFilter
+  conversations?: Prisma.MailConversationListRelationFilter
 }, "id" | "userId_emailAddress">
 
 export type MailAccountOrderByWithAggregationInput = {
@@ -367,6 +423,11 @@ export type MailAccountOrderByWithAggregationInput = {
   smtpPort?: Prisma.SortOrder
   smtpSecure?: Prisma.SortOrder
   encryptedPassword?: Prisma.SortOrder
+  authType?: Prisma.SortOrder
+  oauthProvider?: Prisma.SortOrderInput | Prisma.SortOrder
+  encryptedAccessToken?: Prisma.SortOrderInput | Prisma.SortOrder
+  encryptedRefreshToken?: Prisma.SortOrderInput | Prisma.SortOrder
+  oauthExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -394,6 +455,11 @@ export type MailAccountScalarWhereWithAggregatesInput = {
   smtpPort?: Prisma.IntWithAggregatesFilter<"MailAccount"> | number
   smtpSecure?: Prisma.BoolWithAggregatesFilter<"MailAccount"> | boolean
   encryptedPassword?: Prisma.StringWithAggregatesFilter<"MailAccount"> | string
+  authType?: Prisma.StringWithAggregatesFilter<"MailAccount"> | string
+  oauthProvider?: Prisma.StringNullableWithAggregatesFilter<"MailAccount"> | string | null
+  encryptedAccessToken?: Prisma.StringNullableWithAggregatesFilter<"MailAccount"> | string | null
+  encryptedRefreshToken?: Prisma.StringNullableWithAggregatesFilter<"MailAccount"> | string | null
+  oauthExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MailAccount"> | Date | string | null
   isPrimary?: Prisma.BoolWithAggregatesFilter<"MailAccount"> | boolean
   isActive?: Prisma.BoolWithAggregatesFilter<"MailAccount"> | boolean
   lastSyncedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MailAccount"> | Date | string | null
@@ -412,12 +478,19 @@ export type MailAccountCreateInput = {
   smtpPort?: number
   smtpSecure?: boolean
   encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
   isPrimary?: boolean
   isActive?: boolean
   lastSyncedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAccountsInput
+  messages?: Prisma.MailMessageCreateNestedManyWithoutAccountInput
+  conversations?: Prisma.MailConversationCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUncheckedCreateInput = {
@@ -432,11 +505,18 @@ export type MailAccountUncheckedCreateInput = {
   smtpPort?: number
   smtpSecure?: boolean
   encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
   isPrimary?: boolean
   isActive?: boolean
   lastSyncedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  messages?: Prisma.MailMessageUncheckedCreateNestedManyWithoutAccountInput
+  conversations?: Prisma.MailConversationUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUpdateInput = {
@@ -450,12 +530,19 @@ export type MailAccountUpdateInput = {
   smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
   smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
   encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAccountsNestedInput
+  messages?: Prisma.MailMessageUpdateManyWithoutAccountNestedInput
+  conversations?: Prisma.MailConversationUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateInput = {
@@ -470,11 +557,18 @@ export type MailAccountUncheckedUpdateInput = {
   smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
   smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
   encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.MailMessageUncheckedUpdateManyWithoutAccountNestedInput
+  conversations?: Prisma.MailConversationUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountCreateManyInput = {
@@ -489,6 +583,11 @@ export type MailAccountCreateManyInput = {
   smtpPort?: number
   smtpSecure?: boolean
   encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
   isPrimary?: boolean
   isActive?: boolean
   lastSyncedAt?: Date | string | null
@@ -507,6 +606,11 @@ export type MailAccountUpdateManyMutationInput = {
   smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
   smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
   encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -526,6 +630,11 @@ export type MailAccountUncheckedUpdateManyInput = {
   smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
   smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
   encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -560,6 +669,11 @@ export type MailAccountCountOrderByAggregateInput = {
   smtpPort?: Prisma.SortOrder
   smtpSecure?: Prisma.SortOrder
   encryptedPassword?: Prisma.SortOrder
+  authType?: Prisma.SortOrder
+  oauthProvider?: Prisma.SortOrder
+  encryptedAccessToken?: Prisma.SortOrder
+  encryptedRefreshToken?: Prisma.SortOrder
+  oauthExpiresAt?: Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
@@ -584,6 +698,11 @@ export type MailAccountMaxOrderByAggregateInput = {
   smtpPort?: Prisma.SortOrder
   smtpSecure?: Prisma.SortOrder
   encryptedPassword?: Prisma.SortOrder
+  authType?: Prisma.SortOrder
+  oauthProvider?: Prisma.SortOrder
+  encryptedAccessToken?: Prisma.SortOrder
+  encryptedRefreshToken?: Prisma.SortOrder
+  oauthExpiresAt?: Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
@@ -603,6 +722,11 @@ export type MailAccountMinOrderByAggregateInput = {
   smtpPort?: Prisma.SortOrder
   smtpSecure?: Prisma.SortOrder
   encryptedPassword?: Prisma.SortOrder
+  authType?: Prisma.SortOrder
+  oauthProvider?: Prisma.SortOrder
+  encryptedAccessToken?: Prisma.SortOrder
+  encryptedRefreshToken?: Prisma.SortOrder
+  oauthExpiresAt?: Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
@@ -613,6 +737,11 @@ export type MailAccountMinOrderByAggregateInput = {
 export type MailAccountSumOrderByAggregateInput = {
   imapPort?: Prisma.SortOrder
   smtpPort?: Prisma.SortOrder
+}
+
+export type MailAccountScalarRelationFilter = {
+  is?: Prisma.MailAccountWhereInput
+  isNot?: Prisma.MailAccountWhereInput
 }
 
 export type MailAccountCreateNestedManyWithoutUserInput = {
@@ -669,6 +798,34 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
+export type MailAccountCreateNestedOneWithoutConversationsInput = {
+  create?: Prisma.XOR<Prisma.MailAccountCreateWithoutConversationsInput, Prisma.MailAccountUncheckedCreateWithoutConversationsInput>
+  connectOrCreate?: Prisma.MailAccountCreateOrConnectWithoutConversationsInput
+  connect?: Prisma.MailAccountWhereUniqueInput
+}
+
+export type MailAccountUpdateOneRequiredWithoutConversationsNestedInput = {
+  create?: Prisma.XOR<Prisma.MailAccountCreateWithoutConversationsInput, Prisma.MailAccountUncheckedCreateWithoutConversationsInput>
+  connectOrCreate?: Prisma.MailAccountCreateOrConnectWithoutConversationsInput
+  upsert?: Prisma.MailAccountUpsertWithoutConversationsInput
+  connect?: Prisma.MailAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MailAccountUpdateToOneWithWhereWithoutConversationsInput, Prisma.MailAccountUpdateWithoutConversationsInput>, Prisma.MailAccountUncheckedUpdateWithoutConversationsInput>
+}
+
+export type MailAccountCreateNestedOneWithoutMessagesInput = {
+  create?: Prisma.XOR<Prisma.MailAccountCreateWithoutMessagesInput, Prisma.MailAccountUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.MailAccountCreateOrConnectWithoutMessagesInput
+  connect?: Prisma.MailAccountWhereUniqueInput
+}
+
+export type MailAccountUpdateOneRequiredWithoutMessagesNestedInput = {
+  create?: Prisma.XOR<Prisma.MailAccountCreateWithoutMessagesInput, Prisma.MailAccountUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.MailAccountCreateOrConnectWithoutMessagesInput
+  upsert?: Prisma.MailAccountUpsertWithoutMessagesInput
+  connect?: Prisma.MailAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MailAccountUpdateToOneWithWhereWithoutMessagesInput, Prisma.MailAccountUpdateWithoutMessagesInput>, Prisma.MailAccountUncheckedUpdateWithoutMessagesInput>
+}
+
 export type MailAccountCreateWithoutUserInput = {
   id?: string
   label?: string | null
@@ -680,11 +837,18 @@ export type MailAccountCreateWithoutUserInput = {
   smtpPort?: number
   smtpSecure?: boolean
   encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
   isPrimary?: boolean
   isActive?: boolean
   lastSyncedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  messages?: Prisma.MailMessageCreateNestedManyWithoutAccountInput
+  conversations?: Prisma.MailConversationCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUncheckedCreateWithoutUserInput = {
@@ -698,11 +862,18 @@ export type MailAccountUncheckedCreateWithoutUserInput = {
   smtpPort?: number
   smtpSecure?: boolean
   encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
   isPrimary?: boolean
   isActive?: boolean
   lastSyncedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  messages?: Prisma.MailMessageUncheckedCreateNestedManyWithoutAccountInput
+  conversations?: Prisma.MailConversationUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountCreateOrConnectWithoutUserInput = {
@@ -746,11 +917,248 @@ export type MailAccountScalarWhereInput = {
   smtpPort?: Prisma.IntFilter<"MailAccount"> | number
   smtpSecure?: Prisma.BoolFilter<"MailAccount"> | boolean
   encryptedPassword?: Prisma.StringFilter<"MailAccount"> | string
+  authType?: Prisma.StringFilter<"MailAccount"> | string
+  oauthProvider?: Prisma.StringNullableFilter<"MailAccount"> | string | null
+  encryptedAccessToken?: Prisma.StringNullableFilter<"MailAccount"> | string | null
+  encryptedRefreshToken?: Prisma.StringNullableFilter<"MailAccount"> | string | null
+  oauthExpiresAt?: Prisma.DateTimeNullableFilter<"MailAccount"> | Date | string | null
   isPrimary?: Prisma.BoolFilter<"MailAccount"> | boolean
   isActive?: Prisma.BoolFilter<"MailAccount"> | boolean
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"MailAccount"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MailAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MailAccount"> | Date | string
+}
+
+export type MailAccountCreateWithoutConversationsInput = {
+  id?: string
+  label?: string | null
+  emailAddress: string
+  imapHost: string
+  imapPort?: number
+  imapSecure?: boolean
+  smtpHost: string
+  smtpPort?: number
+  smtpSecure?: boolean
+  encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
+  isPrimary?: boolean
+  isActive?: boolean
+  lastSyncedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutAccountsInput
+  messages?: Prisma.MailMessageCreateNestedManyWithoutAccountInput
+}
+
+export type MailAccountUncheckedCreateWithoutConversationsInput = {
+  id?: string
+  userId: string
+  label?: string | null
+  emailAddress: string
+  imapHost: string
+  imapPort?: number
+  imapSecure?: boolean
+  smtpHost: string
+  smtpPort?: number
+  smtpSecure?: boolean
+  encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
+  isPrimary?: boolean
+  isActive?: boolean
+  lastSyncedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  messages?: Prisma.MailMessageUncheckedCreateNestedManyWithoutAccountInput
+}
+
+export type MailAccountCreateOrConnectWithoutConversationsInput = {
+  where: Prisma.MailAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.MailAccountCreateWithoutConversationsInput, Prisma.MailAccountUncheckedCreateWithoutConversationsInput>
+}
+
+export type MailAccountUpsertWithoutConversationsInput = {
+  update: Prisma.XOR<Prisma.MailAccountUpdateWithoutConversationsInput, Prisma.MailAccountUncheckedUpdateWithoutConversationsInput>
+  create: Prisma.XOR<Prisma.MailAccountCreateWithoutConversationsInput, Prisma.MailAccountUncheckedCreateWithoutConversationsInput>
+  where?: Prisma.MailAccountWhereInput
+}
+
+export type MailAccountUpdateToOneWithWhereWithoutConversationsInput = {
+  where?: Prisma.MailAccountWhereInput
+  data: Prisma.XOR<Prisma.MailAccountUpdateWithoutConversationsInput, Prisma.MailAccountUncheckedUpdateWithoutConversationsInput>
+}
+
+export type MailAccountUpdateWithoutConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  imapHost?: Prisma.StringFieldUpdateOperationsInput | string
+  imapPort?: Prisma.IntFieldUpdateOperationsInput | number
+  imapSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.StringFieldUpdateOperationsInput | string
+  smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutAccountsNestedInput
+  messages?: Prisma.MailMessageUpdateManyWithoutAccountNestedInput
+}
+
+export type MailAccountUncheckedUpdateWithoutConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  imapHost?: Prisma.StringFieldUpdateOperationsInput | string
+  imapPort?: Prisma.IntFieldUpdateOperationsInput | number
+  imapSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.StringFieldUpdateOperationsInput | string
+  smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.MailMessageUncheckedUpdateManyWithoutAccountNestedInput
+}
+
+export type MailAccountCreateWithoutMessagesInput = {
+  id?: string
+  label?: string | null
+  emailAddress: string
+  imapHost: string
+  imapPort?: number
+  imapSecure?: boolean
+  smtpHost: string
+  smtpPort?: number
+  smtpSecure?: boolean
+  encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
+  isPrimary?: boolean
+  isActive?: boolean
+  lastSyncedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutAccountsInput
+  conversations?: Prisma.MailConversationCreateNestedManyWithoutAccountInput
+}
+
+export type MailAccountUncheckedCreateWithoutMessagesInput = {
+  id?: string
+  userId: string
+  label?: string | null
+  emailAddress: string
+  imapHost: string
+  imapPort?: number
+  imapSecure?: boolean
+  smtpHost: string
+  smtpPort?: number
+  smtpSecure?: boolean
+  encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
+  isPrimary?: boolean
+  isActive?: boolean
+  lastSyncedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  conversations?: Prisma.MailConversationUncheckedCreateNestedManyWithoutAccountInput
+}
+
+export type MailAccountCreateOrConnectWithoutMessagesInput = {
+  where: Prisma.MailAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.MailAccountCreateWithoutMessagesInput, Prisma.MailAccountUncheckedCreateWithoutMessagesInput>
+}
+
+export type MailAccountUpsertWithoutMessagesInput = {
+  update: Prisma.XOR<Prisma.MailAccountUpdateWithoutMessagesInput, Prisma.MailAccountUncheckedUpdateWithoutMessagesInput>
+  create: Prisma.XOR<Prisma.MailAccountCreateWithoutMessagesInput, Prisma.MailAccountUncheckedCreateWithoutMessagesInput>
+  where?: Prisma.MailAccountWhereInput
+}
+
+export type MailAccountUpdateToOneWithWhereWithoutMessagesInput = {
+  where?: Prisma.MailAccountWhereInput
+  data: Prisma.XOR<Prisma.MailAccountUpdateWithoutMessagesInput, Prisma.MailAccountUncheckedUpdateWithoutMessagesInput>
+}
+
+export type MailAccountUpdateWithoutMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  imapHost?: Prisma.StringFieldUpdateOperationsInput | string
+  imapPort?: Prisma.IntFieldUpdateOperationsInput | number
+  imapSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.StringFieldUpdateOperationsInput | string
+  smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutAccountsNestedInput
+  conversations?: Prisma.MailConversationUpdateManyWithoutAccountNestedInput
+}
+
+export type MailAccountUncheckedUpdateWithoutMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  imapHost?: Prisma.StringFieldUpdateOperationsInput | string
+  imapPort?: Prisma.IntFieldUpdateOperationsInput | number
+  imapSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.StringFieldUpdateOperationsInput | string
+  smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  conversations?: Prisma.MailConversationUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountCreateManyUserInput = {
@@ -764,6 +1172,11 @@ export type MailAccountCreateManyUserInput = {
   smtpPort?: number
   smtpSecure?: boolean
   encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
   isPrimary?: boolean
   isActive?: boolean
   lastSyncedAt?: Date | string | null
@@ -782,11 +1195,18 @@ export type MailAccountUpdateWithoutUserInput = {
   smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
   smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
   encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.MailMessageUpdateManyWithoutAccountNestedInput
+  conversations?: Prisma.MailConversationUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateWithoutUserInput = {
@@ -800,11 +1220,18 @@ export type MailAccountUncheckedUpdateWithoutUserInput = {
   smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
   smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
   encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.MailMessageUncheckedUpdateManyWithoutAccountNestedInput
+  conversations?: Prisma.MailConversationUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateManyWithoutUserInput = {
@@ -818,6 +1245,11 @@ export type MailAccountUncheckedUpdateManyWithoutUserInput = {
   smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
   smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
   encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -825,6 +1257,44 @@ export type MailAccountUncheckedUpdateManyWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type MailAccountCountOutputType
+ */
+
+export type MailAccountCountOutputType = {
+  messages: number
+  conversations: number
+}
+
+export type MailAccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  messages?: boolean | MailAccountCountOutputTypeCountMessagesArgs
+  conversations?: boolean | MailAccountCountOutputTypeCountConversationsArgs
+}
+
+/**
+ * MailAccountCountOutputType without action
+ */
+export type MailAccountCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MailAccountCountOutputType
+   */
+  select?: Prisma.MailAccountCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MailAccountCountOutputType without action
+ */
+export type MailAccountCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MailMessageWhereInput
+}
+
+/**
+ * MailAccountCountOutputType without action
+ */
+export type MailAccountCountOutputTypeCountConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MailConversationWhereInput
+}
 
 
 export type MailAccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -839,12 +1309,20 @@ export type MailAccountSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   smtpPort?: boolean
   smtpSecure?: boolean
   encryptedPassword?: boolean
+  authType?: boolean
+  oauthProvider?: boolean
+  encryptedAccessToken?: boolean
+  encryptedRefreshToken?: boolean
+  oauthExpiresAt?: boolean
   isPrimary?: boolean
   isActive?: boolean
   lastSyncedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  messages?: boolean | Prisma.MailAccount$messagesArgs<ExtArgs>
+  conversations?: boolean | Prisma.MailAccount$conversationsArgs<ExtArgs>
+  _count?: boolean | Prisma.MailAccountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mailAccount"]>
 
 export type MailAccountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -859,6 +1337,11 @@ export type MailAccountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   smtpPort?: boolean
   smtpSecure?: boolean
   encryptedPassword?: boolean
+  authType?: boolean
+  oauthProvider?: boolean
+  encryptedAccessToken?: boolean
+  encryptedRefreshToken?: boolean
+  oauthExpiresAt?: boolean
   isPrimary?: boolean
   isActive?: boolean
   lastSyncedAt?: boolean
@@ -879,6 +1362,11 @@ export type MailAccountSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   smtpPort?: boolean
   smtpSecure?: boolean
   encryptedPassword?: boolean
+  authType?: boolean
+  oauthProvider?: boolean
+  encryptedAccessToken?: boolean
+  encryptedRefreshToken?: boolean
+  oauthExpiresAt?: boolean
   isPrimary?: boolean
   isActive?: boolean
   lastSyncedAt?: boolean
@@ -899,6 +1387,11 @@ export type MailAccountSelectScalar = {
   smtpPort?: boolean
   smtpSecure?: boolean
   encryptedPassword?: boolean
+  authType?: boolean
+  oauthProvider?: boolean
+  encryptedAccessToken?: boolean
+  encryptedRefreshToken?: boolean
+  oauthExpiresAt?: boolean
   isPrimary?: boolean
   isActive?: boolean
   lastSyncedAt?: boolean
@@ -906,9 +1399,12 @@ export type MailAccountSelectScalar = {
   updatedAt?: boolean
 }
 
-export type MailAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "label" | "emailAddress" | "imapHost" | "imapPort" | "imapSecure" | "smtpHost" | "smtpPort" | "smtpSecure" | "encryptedPassword" | "isPrimary" | "isActive" | "lastSyncedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["mailAccount"]>
+export type MailAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "label" | "emailAddress" | "imapHost" | "imapPort" | "imapSecure" | "smtpHost" | "smtpPort" | "smtpSecure" | "encryptedPassword" | "authType" | "oauthProvider" | "encryptedAccessToken" | "encryptedRefreshToken" | "oauthExpiresAt" | "isPrimary" | "isActive" | "lastSyncedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["mailAccount"]>
 export type MailAccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  messages?: boolean | Prisma.MailAccount$messagesArgs<ExtArgs>
+  conversations?: boolean | Prisma.MailAccount$conversationsArgs<ExtArgs>
+  _count?: boolean | Prisma.MailAccountCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MailAccountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -921,6 +1417,8 @@ export type $MailAccountPayload<ExtArgs extends runtime.Types.Extensions.Interna
   name: "MailAccount"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    messages: Prisma.$MailMessagePayload<ExtArgs>[]
+    conversations: Prisma.$MailConversationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -934,6 +1432,11 @@ export type $MailAccountPayload<ExtArgs extends runtime.Types.Extensions.Interna
     smtpPort: number
     smtpSecure: boolean
     encryptedPassword: string
+    authType: string
+    oauthProvider: string | null
+    encryptedAccessToken: string | null
+    encryptedRefreshToken: string | null
+    oauthExpiresAt: Date | null
     isPrimary: boolean
     isActive: boolean
     lastSyncedAt: Date | null
@@ -1334,6 +1837,8 @@ readonly fields: MailAccountFieldRefs;
 export interface Prisma__MailAccountClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  messages<T extends Prisma.MailAccount$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MailAccount$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MailMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  conversations<T extends Prisma.MailAccount$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MailAccount$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MailConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1374,6 +1879,11 @@ export interface MailAccountFieldRefs {
   readonly smtpPort: Prisma.FieldRef<"MailAccount", 'Int'>
   readonly smtpSecure: Prisma.FieldRef<"MailAccount", 'Boolean'>
   readonly encryptedPassword: Prisma.FieldRef<"MailAccount", 'String'>
+  readonly authType: Prisma.FieldRef<"MailAccount", 'String'>
+  readonly oauthProvider: Prisma.FieldRef<"MailAccount", 'String'>
+  readonly encryptedAccessToken: Prisma.FieldRef<"MailAccount", 'String'>
+  readonly encryptedRefreshToken: Prisma.FieldRef<"MailAccount", 'String'>
+  readonly oauthExpiresAt: Prisma.FieldRef<"MailAccount", 'DateTime'>
   readonly isPrimary: Prisma.FieldRef<"MailAccount", 'Boolean'>
   readonly isActive: Prisma.FieldRef<"MailAccount", 'Boolean'>
   readonly lastSyncedAt: Prisma.FieldRef<"MailAccount", 'DateTime'>
@@ -1777,6 +2287,54 @@ export type MailAccountDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many MailAccounts to delete.
    */
   limit?: number
+}
+
+/**
+ * MailAccount.messages
+ */
+export type MailAccount$messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MailMessage
+   */
+  select?: Prisma.MailMessageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MailMessage
+   */
+  omit?: Prisma.MailMessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MailMessageInclude<ExtArgs> | null
+  where?: Prisma.MailMessageWhereInput
+  orderBy?: Prisma.MailMessageOrderByWithRelationInput | Prisma.MailMessageOrderByWithRelationInput[]
+  cursor?: Prisma.MailMessageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MailMessageScalarFieldEnum | Prisma.MailMessageScalarFieldEnum[]
+}
+
+/**
+ * MailAccount.conversations
+ */
+export type MailAccount$conversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MailConversation
+   */
+  select?: Prisma.MailConversationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MailConversation
+   */
+  omit?: Prisma.MailConversationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MailConversationInclude<ExtArgs> | null
+  where?: Prisma.MailConversationWhereInput
+  orderBy?: Prisma.MailConversationOrderByWithRelationInput | Prisma.MailConversationOrderByWithRelationInput[]
+  cursor?: Prisma.MailConversationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MailConversationScalarFieldEnum | Prisma.MailConversationScalarFieldEnum[]
 }
 
 /**

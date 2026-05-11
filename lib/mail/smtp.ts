@@ -6,7 +6,8 @@ export type SmtpConfig = {
   port: number;
   secure: boolean;
   user: string;
-  password: string;
+  password?: string;
+  accessToken?: string;
 };
 
 function makeTransport(config: SmtpConfig) {
@@ -14,7 +15,9 @@ function makeTransport(config: SmtpConfig) {
     host: config.host,
     port: config.port,
     secure: config.secure,
-    auth: { user: config.user, pass: config.password },
+    auth: config.accessToken
+      ? { type: "OAuth2", user: config.user, accessToken: config.accessToken }
+      : { user: config.user, pass: config.password || "" },
     tls: { rejectUnauthorized: false },
   });
 }

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getAccountConfig } from "@/lib/mail/accounts";
 import { getMessages, getMessage, searchMessages, getFolders, getAttachment } from "@/lib/mail/imap";
+import { getIndexedConversation, getIndexedConversations, syncFolderToDb } from "@/lib/mail/sync";
 
 function json(data: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
@@ -31,7 +32,24 @@ export async function GET(req: NextRequest) {
       const uid = parseInt(sp.get("uid") || "0");
       if (!uid) return json({ ok: false, error: "UID required." }, { status: 400 });
       const message = await getMessage(imap, folder, uid);
-      return json({ ok: true, message });
+      const conversationId = sp.get("conversationId") || "";
+      let threadMessages = [];
+      if (conversationId) {
+        const conversation = await getIndexedConversation(conversationId, accountId);
+        threadMessages = conversation?.messages?.map((m: any) => ({
+          uid: m.uid,
+          subject: m.subject,
+          from: m.from,
+          fromName: m.fromName,
+          to: m.to,
+          date: m.date.toISOString(),
+          seen: m.seen,
+          flagged: m.flagged,
+          hasAttachment: m.hasAttachment,
+          snippet: m.snippet,
+        })) || [];
+      }
+      return json({ ok: true, message: message ? { ...message, conversationId, threadMessages } : message });
     }
 
     if (action === "attachment") {
@@ -54,10 +72,21 @@ export async function GET(req: NextRequest) {
       return json({ ok: true, messages });
     }
 
+    if (action === "sync") {
+      const result = await syncFolderToDb(accountId, imap, folder, parseInt(sp.get("limit") || "60"));
+      return json({ ok: true, ...result });
+    }
+
     const page = parseInt(sp.get("page") || "1");
     const pageSize = parseInt(sp.get("pageSize") || "30");
-    const result = await getMessages(imap, folder, page, pageSize);
-    return json({ ok: true, ...result });
+    try {
+      await syncFolderToDb(accountId, imap, folder, Math.min(40, pageSize * 2));
+      const result = await getIndexedConversations(accountId, folder, page, pageSize);
+      return json({ ok: true, threaded: true, ...result });
+    } catch {
+      const result = await getMessages(imap, folder, page, pageSize);
+      return json({ ok: true, threaded: false, ...result });
+    }
   } catch (err) {
     return json({ ok: false, error: err instanceof Error ? err.message : "Failed." }, { status: 400 });
   }

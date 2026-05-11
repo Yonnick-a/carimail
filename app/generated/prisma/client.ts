@@ -61,3 +61,13 @@ export type PasswordResetToken = Prisma.PasswordResetTokenModel
  * 
  */
 export type MailAccount = Prisma.MailAccountModel
+/**
+ * Model MailConversation
+ * 
+ */
+export type MailConversation = Prisma.MailConversationModel
+/**
+ * Model MailMessage
+ * 
+ */
+export type MailMessage = Prisma.MailMessageModel

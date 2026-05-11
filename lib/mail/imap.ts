@@ -7,7 +7,8 @@ export type ImapConfig = {
   port: number;
   secure: boolean;
   user: string;
-  password: string;
+  password?: string;
+  accessToken?: string;
 };
 
 export type Folder = {
@@ -38,6 +39,8 @@ export type MessageSummary = {
 export type MessageFull = MessageSummary & {
   cc: string;
   replyTo: string;
+  inReplyTo?: string;
+  references?: string;
   bodyHtml: string | null;
   bodyText: string | null;
   attachments: { id: number; filename: string; size: number; contentType: string }[];
@@ -50,7 +53,9 @@ function makeClient(config: ImapConfig) {
     host: config.host,
     port: config.port,
     secure: config.secure,
-    auth: { user: config.user, pass: config.password },
+    auth: config.accessToken
+      ? { user: config.user, accessToken: config.accessToken }
+      : { user: config.user, pass: config.password || "" },
     logger: false,
     tls: { rejectUnauthorized: false },
   });
@@ -139,13 +144,14 @@ export async function getMessages(
 export async function getMessage(
   config: ImapConfig,
   folder: string,
-  uid: number
+  uid: number,
+  markSeen = true
 ): Promise<MessageFull | null> {
   const client = makeClient(config);
   try {
     await client.connect();
     await client.mailboxOpen(folder);
-    await client.messageFlagsAdd({ uid }, ["\\Seen"], { uid: true });
+    if (markSeen) await client.messageFlagsAdd({ uid }, ["\\Seen"], { uid: true });
 
     let result: MessageFull | null = null;
     for await (const msg of client.fetch({ uid }, {
@@ -157,6 +163,7 @@ export async function getMessage(
         ? msg.source
         : Buffer.from(String(msg.source || ""), "utf8");
       const { html, text, attachments } = parseMime(source);
+      const rawHeaders = source.toString("latin1").slice(0, Math.max(0, source.toString("latin1").indexOf("\r\n\r\n")));
 
       result = {
         uid: msg.uid,
@@ -167,6 +174,8 @@ export async function getMessage(
         to: env?.to?.[0]?.address || "",
         cc: env?.cc?.[0]?.address || "",
         replyTo: env?.replyTo?.[0]?.address || "",
+        inReplyTo: decodeHeaderLine(rawHeaders, "in-reply-to"),
+        references: decodeHeaderLine(rawHeaders, "references"),
         date: env?.date?.toISOString() || new Date().toISOString(),
         seen: true,
         flagged: msg.flags?.has("\\Flagged") ?? false,
@@ -182,6 +191,12 @@ export async function getMessage(
   } finally {
     await client.logout().catch(() => {});
   }
+}
+
+function decodeHeaderLine(headers: string, name: string): string {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = headers.match(new RegExp(`^${escaped}:\\s*([^\\r\\n]*(?:\\r?\\n[\\t ][^\\r\\n]*)*)`, "im"));
+  return match?.[1]?.replace(/\r?\n[\t ]+/g, " ").trim() || "";
 }
 
 export async function getAttachment(

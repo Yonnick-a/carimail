@@ -54,7 +54,9 @@ export const ModelName = {
   User: 'User',
   Session: 'Session',
   PasswordResetToken: 'PasswordResetToken',
-  MailAccount: 'MailAccount'
+  MailAccount: 'MailAccount',
+  MailConversation: 'MailConversation',
+  MailMessage: 'MailMessage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -122,6 +124,11 @@ export const MailAccountScalarFieldEnum = {
   smtpPort: 'smtpPort',
   smtpSecure: 'smtpSecure',
   encryptedPassword: 'encryptedPassword',
+  authType: 'authType',
+  oauthProvider: 'oauthProvider',
+  encryptedAccessToken: 'encryptedAccessToken',
+  encryptedRefreshToken: 'encryptedRefreshToken',
+  oauthExpiresAt: 'oauthExpiresAt',
   isPrimary: 'isPrimary',
   isActive: 'isActive',
   lastSyncedAt: 'lastSyncedAt',
@@ -130,6 +137,50 @@ export const MailAccountScalarFieldEnum = {
 } as const
 
 export type MailAccountScalarFieldEnum = (typeof MailAccountScalarFieldEnum)[keyof typeof MailAccountScalarFieldEnum]
+
+
+export const MailConversationScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  threadKey: 'threadKey',
+  subject: 'subject',
+  participants: 'participants',
+  messageCount: 'messageCount',
+  unreadCount: 'unreadCount',
+  hasAttachment: 'hasAttachment',
+  lastMessageAt: 'lastMessageAt',
+  snippet: 'snippet',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MailConversationScalarFieldEnum = (typeof MailConversationScalarFieldEnum)[keyof typeof MailConversationScalarFieldEnum]
+
+
+export const MailMessageScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  conversationId: 'conversationId',
+  folder: 'folder',
+  uid: 'uid',
+  seq: 'seq',
+  messageId: 'messageId',
+  inReplyTo: 'inReplyTo',
+  references: 'references',
+  subject: 'subject',
+  from: 'from',
+  fromName: 'fromName',
+  to: 'to',
+  date: 'date',
+  seen: 'seen',
+  flagged: 'flagged',
+  hasAttachment: 'hasAttachment',
+  size: 'size',
+  snippet: 'snippet',
+  syncedAt: 'syncedAt'
+} as const
+
+export type MailMessageScalarFieldEnum = (typeof MailMessageScalarFieldEnum)[keyof typeof MailMessageScalarFieldEnum]
 
 
 export const SortOrder = {

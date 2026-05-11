@@ -16,11 +16,14 @@ type Message = {
   from: string; fromName: string; to: string;
   date: string; seen: boolean; flagged: boolean;
   hasAttachment: boolean; size?: number; messageId?: string;
+  conversationId?: string; threadCount?: number; snippet?: string;
 };
 type MessageFull = Message & {
   cc: string; replyTo: string;
+  inReplyTo?: string; references?: string;
   bodyHtml: string | null; bodyText: string | null;
   attachments: { id: number; filename: string; size: number; contentType: string }[];
+  threadMessages?: Message[];
 };
 type WorkspaceMode = "split" | "focus" | "compact";
 type MailFilter = "all" | "unread" | "starred" | "attachments" | "billing" | "security" | "support";
@@ -187,7 +190,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
     if (!accountId) return;
     setMsgLoading(true); setSelected(null); setReplyOpen(false);
     try {
-      const res = await fetch(`/api/mail/messages?accountId=${accountId}&action=message&folder=${encodeURIComponent(folder)}&uid=${msg.uid}`, { cache: "no-store" });
+      const res = await fetch(`/api/mail/messages?accountId=${accountId}&action=message&folder=${encodeURIComponent(folder)}&uid=${msg.uid}${msg.conversationId ? `&conversationId=${encodeURIComponent(msg.conversationId)}` : ""}`, { cache: "no-store" });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "Failed.");
       setSelected(data.message);
@@ -458,6 +461,11 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                       <div className={`mt-0.5 truncate text-[11.5px] ${msg.seen ? "" : "font-[600]"}`} style={{ color: msg.seen ? "var(--cm-text3)" : "var(--cm-text2)" }}>
                         {msg.subject}
                       </div>
+                      {msg.snippet && workspaceMode !== "compact" && (
+                        <div className="mt-0.5 line-clamp-2 text-[10.5px] leading-snug" style={{ color: "var(--cm-text3)" }}>
+                          {msg.snippet}
+                        </div>
+                      )}
                       {workspaceMode !== "compact" && (
                         <div className="mt-1 flex flex-wrap items-center gap-1.5">
                           {smartTags(msg).map(tag => (
@@ -469,6 +477,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                         {!msg.seen && <div className="unread-dot" />}
                         {msg.flagged && <Star className="h-3 w-3" style={{ color: "var(--cm-starred)" }} />}
                         {msg.hasAttachment && <Paperclip className="h-3 w-3" style={{ color: "var(--cm-text3)" }} />}
+                        {msg.threadCount && msg.threadCount > 1 && <span className="rounded-full px-1.5 py-0.5 text-[9px] font-[800]" style={{ background: "var(--cm-blue-light)", color: "var(--cm-blue)" }}>{msg.threadCount}</span>}
                         {msg.size && <span className="text-[10px]" style={{ color: "var(--cm-text3)" }}>{formatBytes(msg.size)}</span>}
                       </div>
                     </div>
@@ -662,6 +671,37 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                           </div>
                           <a href={attachmentUrl(att)} title="Download" className="ml-1 transition hover:opacity-70" style={{ color: "var(--cm-text3)" }}><Download className="h-3.5 w-3.5" /></a>
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selected.threadMessages && selected.threadMessages.length > 1 && (
+                  <div className="mt-7 border-t pt-5" style={{ borderColor: "var(--cm-border)" }}>
+                    <p className="mb-3 text-[11.5px] font-[700] uppercase tracking-[0.12em]" style={{ color: "var(--cm-text3)" }}>
+                      Conversation
+                    </p>
+                    <div className="space-y-2">
+                      {selected.threadMessages.map(item => (
+                        <button
+                          key={`${item.uid}-${item.date}`}
+                          type="button"
+                          onClick={() => openMessage(item)}
+                          className="flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition hover:opacity-80"
+                          style={{
+                            borderColor: item.uid === selected.uid ? "var(--cm-blue)" : "var(--cm-border)",
+                            background: item.uid === selected.uid ? "var(--cm-blue-light)" : "var(--cm-surface)",
+                          }}
+                        >
+                          <Avatar name={item.fromName} email={item.from} size="sm" />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="truncate text-[12px] font-[700]" style={{ color: "var(--cm-text)" }}>{item.fromName || item.from}</span>
+                              <span className="shrink-0 text-[10px]" style={{ color: "var(--cm-text3)" }}>{formatDate(item.date)}</span>
+                            </div>
+                            <p className="truncate text-[11px]" style={{ color: "var(--cm-text3)" }}>{item.snippet || item.subject}</p>
+                          </div>
+                        </button>
                       ))}
                     </div>
                   </div>
