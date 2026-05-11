@@ -63,6 +63,7 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
   const searchParams = useSearchParams();
   const currentAccountId = searchParams.get("accountId") || accounts[0]?.id || "";
   const currentFolder = searchParams.get("folder") || "INBOX";
+  const currentSearch = searchParams.get("q") || "";
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -76,6 +77,10 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
   const searchRef = useRef<HTMLInputElement>(null);
   const { theme, toggle: toggleTheme } = useTheme();
   const currentAccount = accounts.find(a => a.id === currentAccountId) || accounts[0];
+
+  useEffect(() => {
+    setSearchQuery(currentSearch);
+  }, [currentSearch]);
 
   const loadFolders = useCallback((silent = false) => {
     if (!currentAccountId) return;
@@ -144,10 +149,19 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
     const p = new URLSearchParams();
     if (currentAccountId) p.set("accountId", currentAccountId);
-    p.set("folder", currentFolder); p.set("q", searchQuery.trim());
+    p.set("folder", currentFolder);
+    if (searchQuery.trim()) p.set("q", searchQuery.trim());
+    router.push(`/inbox?${p}`);
+  }
+
+  function clearSearch() {
+    setSearchQuery("");
+    if (!currentSearch) return;
+    const p = new URLSearchParams();
+    if (currentAccountId) p.set("accountId", currentAccountId);
+    p.set("folder", currentFolder);
     router.push(`/inbox?${p}`);
   }
 
@@ -352,7 +366,7 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
   );
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "var(--cm-bg)" }}>
+    <div data-cm-readable className="flex h-screen overflow-hidden" style={{ background: "var(--cm-bg)" }}>
       {/* Desktop sidebar */}
       <aside className={`hidden lg:flex flex-col border-r shrink-0 transition-[width] duration-250 ease-out overflow-hidden ${sidebarOpen ? "w-[232px]" : "w-[60px]"}`}
         style={{ borderColor: "var(--cm-sidebar-border)", background: "var(--cm-sidebar-bg)" }}>
@@ -405,7 +419,7 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
                 }}
               />
               {searchQuery && (
-                <button type="button" onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--cm-text3)" }}>
+                <button type="button" onClick={clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--cm-text3)" }}>
                   <X className="h-3.5 w-3.5" />
                 </button>
               )}

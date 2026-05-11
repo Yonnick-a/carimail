@@ -191,3 +191,41 @@ export async function getIndexedConversation(conversationId: string, accountId: 
     include: { messages: { orderBy: { date: "asc" } } },
   });
 }
+
+export async function searchIndexedMessages(accountId: string, folder: string, query: string, limit = 50) {
+  const q = query.trim();
+  if (!q) return [];
+  const messages = await (db as any).mailMessage.findMany({
+    where: {
+      accountId,
+      folder,
+      OR: [
+        { subject: { contains: q, mode: "insensitive" } },
+        { from: { contains: q, mode: "insensitive" } },
+        { fromName: { contains: q, mode: "insensitive" } },
+        { to: { contains: q, mode: "insensitive" } },
+        { snippet: { contains: q, mode: "insensitive" } },
+      ],
+    },
+    orderBy: { date: "desc" },
+    take: limit,
+    include: { conversation: true },
+  });
+  return messages.map((message: any) => ({
+    uid: message.uid,
+    seq: message.seq,
+    subject: message.conversation?.subject || message.subject,
+    from: message.from,
+    fromName: message.fromName,
+    to: message.to,
+    date: message.date.toISOString(),
+    seen: message.seen,
+    flagged: message.flagged,
+    hasAttachment: message.hasAttachment,
+    size: message.size,
+    messageId: message.messageId,
+    conversationId: message.conversationId,
+    threadCount: message.conversation?.messageCount,
+    snippet: message.snippet,
+  }));
+}

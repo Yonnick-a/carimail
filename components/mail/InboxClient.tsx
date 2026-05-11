@@ -106,6 +106,10 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
   const [mailFilter, setMailFilter] = useState<MailFilter>("all");
   const [folders, setFolders] = useState<FolderOption[]>([]);
   const [previewAttachment, setPreviewAttachment] = useState<{ filename: string; url: string; contentType: string } | null>(null);
+  const [snoozeOpen, setSnoozeOpen] = useState(false);
+  const [reminderOpen, setReminderOpen] = useState(false);
+  const [featureDate, setFeatureDate] = useState("");
+  const [featureNote, setFeatureNote] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
   const replyRef = useRef<HTMLTextAreaElement>(null);
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -296,20 +300,40 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
     if (!data.ok) throw new Error(data.error || "Action failed.");
   }
 
-  async function snoozeSelected() {
-    const value = prompt("Snooze until (example: 2026-05-12 09:00)");
+  function defaultDateTime(hours = 1) {
+    const date = new Date(Date.now() + hours * 60 * 60 * 1000);
+    date.setMinutes(Math.ceil(date.getMinutes() / 15) * 15, 0, 0);
+    const pad = (value: number) => String(value).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  function openSnoozeModal() {
+    setFeatureDate(defaultDateTime(4));
+    setSnoozeOpen(true);
+  }
+
+  function openReminderModal() {
+    setFeatureDate(defaultDateTime(24));
+    setFeatureNote(selected?.subject || "");
+    setReminderOpen(true);
+  }
+
+  async function snoozeSelected(value: string) {
     if (!value) return;
     try {
       await createFeature("snooze", { until: new Date(value).toISOString() });
+      setSnoozeOpen(false);
       notify("Message snoozed");
+      setSelected(null);
+      load(page, true);
     } catch (err) { notify(err instanceof Error ? err.message : "Snooze failed", "err"); }
   }
 
-  async function remindSelected() {
-    const value = prompt("Remind me at (example: 2026-05-12 09:00)");
+  async function remindSelected(value: string, note: string) {
     if (!value) return;
     try {
-      await createFeature("reminder", { remindAt: new Date(value).toISOString(), note: selected?.subject });
+      await createFeature("reminder", { remindAt: new Date(value).toISOString(), note: note || selected?.subject });
+      setReminderOpen(false);
       notify("Reminder saved");
     } catch (err) { notify(err instanceof Error ? err.message : "Reminder failed", "err"); }
   }
@@ -375,6 +399,49 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
               </div>
             </div>
             <iframe title={previewAttachment.filename} src={previewAttachment.url} className="min-h-0 flex-1 bg-white" />
+          </div>
+        </div>
+      )}
+
+      {(snoozeOpen || reminderOpen) && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border shadow-2xl" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+            <div className="flex items-center justify-between border-b px-5 py-4" style={{ borderColor: "var(--cm-border)" }}>
+              <div>
+                <p className="text-[15px] font-[900]" style={{ color: "var(--cm-text)" }}>{snoozeOpen ? "Snooze message" : "Set reminder"}</p>
+                <p className="mt-0.5 text-[12.5px]" style={{ color: "var(--cm-text3)" }}>{selected?.subject}</p>
+              </div>
+              <button type="button" onClick={() => { setSnoozeOpen(false); setReminderOpen(false); }} className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ color: "var(--cm-text3)" }}>
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-4 px-5 py-5">
+              <label className="block">
+                <span className="text-[12px] font-[800]" style={{ color: "var(--cm-text2)" }}>{snoozeOpen ? "Return to inbox" : "Remind me"}</span>
+                <input type="datetime-local" value={featureDate} onChange={e => setFeatureDate(e.target.value)} className="mt-2 w-full rounded-xl border px-3 py-2.5 text-[14px] outline-none" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text)" }} />
+              </label>
+              {reminderOpen && (
+                <label className="block">
+                  <span className="text-[12px] font-[800]" style={{ color: "var(--cm-text2)" }}>Note</span>
+                  <textarea value={featureNote} onChange={e => setFeatureNote(e.target.value)} rows={3} className="mt-2 w-full resize-none rounded-xl border px-3 py-2.5 text-[14px] outline-none" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text)" }} />
+                </label>
+              )}
+              <div className="flex flex-wrap gap-2">
+                {[
+                  ["Later today", 4],
+                  ["Tomorrow", 24],
+                  ["Next week", 24 * 7],
+                ].map(([label, hours]) => (
+                  <button key={String(label)} type="button" onClick={() => setFeatureDate(defaultDateTime(Number(hours)))} className="rounded-xl border px-3 py-2 text-[12px] font-[800]" style={{ borderColor: "var(--cm-border)", color: "var(--cm-text2)" }}>{label}</button>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 border-t px-5 py-4" style={{ borderColor: "var(--cm-border)" }}>
+              <button type="button" onClick={() => { setSnoozeOpen(false); setReminderOpen(false); }} className="rounded-xl border px-4 py-2 text-[13px] font-[800]" style={{ borderColor: "var(--cm-border)", color: "var(--cm-text2)" }}>Cancel</button>
+              <button type="button" onClick={() => snoozeOpen ? snoozeSelected(featureDate) : remindSelected(featureDate, featureNote)} className="rounded-xl px-4 py-2 text-[13px] font-[900] text-white" style={{ background: "var(--cm-blue)" }}>
+                {snoozeOpen ? "Snooze" : "Save reminder"}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -683,19 +750,26 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                 </select>
               </label>
 
-              <button type="button" onClick={snoozeSelected} disabled={actionBusy}
+              <button type="button" onClick={openSnoozeModal} disabled={actionBusy}
                 className={toolBtnBase} style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
                 <Clock className="h-3.5 w-3.5" />
                 <span className="hidden lg:inline">Snooze</span>
               </button>
 
-              <button type="button" onClick={remindSelected} disabled={actionBusy}
+              <button type="button" onClick={openReminderModal} disabled={actionBusy}
                 className={toolBtnBase} style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
                 <Bell className="h-3.5 w-3.5" />
                 <span className="hidden lg:inline">Remind</span>
               </button>
 
               <div className="ml-auto flex items-center gap-1">
+                <div className="hidden rounded-xl border p-0.5 sm:flex" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
+                  {(["split", "focus", "compact"] as const).map(mode => (
+                    <button key={mode} type="button" onClick={() => changeWorkspaceMode(mode)} className="rounded-lg px-2.5 py-1 text-[11.5px] font-[800] capitalize transition" style={{ background: workspaceMode === mode ? "var(--cm-blue)" : "transparent", color: workspaceMode === mode ? "#fff" : "var(--cm-text3)" }}>
+                      {mode}
+                    </button>
+                  ))}
+                </div>
                 <button type="button" onClick={() => setFontSize(s => Math.max(11, s - 1))} title="Smaller" className="flex h-7 w-7 items-center justify-center rounded-lg transition" style={{ color: "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><ZoomOut className="h-3.5 w-3.5" /></button>
                 <button type="button" onClick={() => setFontSize(s => Math.min(22, s + 1))} title="Larger" className="flex h-7 w-7 items-center justify-center rounded-lg transition" style={{ color: "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><ZoomIn className="h-3.5 w-3.5" /></button>
                 <button type="button" onClick={() => setShowImages(v => !v)} title={showImages ? "Hide images" : "Show images"} className="flex h-7 w-7 items-center justify-center rounded-lg transition" style={{ color: "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>{showImages ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}</button>

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getAccountConfig } from "@/lib/mail/accounts";
 import { getMessages, getMessage, searchMessages, getFolders, getAttachment } from "@/lib/mail/imap";
-import { getIndexedConversation, getIndexedConversations, syncFolderToDb } from "@/lib/mail/sync";
+import { getIndexedConversation, getIndexedConversations, searchIndexedMessages, syncFolderToDb } from "@/lib/mail/sync";
 
 function json(data: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   const folder = sp.get("folder") || "INBOX";
 
   try {
-    const { imap } = await getAccountConfig(accountId, user.id);
+    const { account, imap } = await getAccountConfig(accountId, user.id);
 
     if (action === "folders") {
       const folders = await getFolders(imap);
@@ -69,7 +69,12 @@ export async function GET(req: NextRequest) {
     if (action === "search") {
       const q = sp.get("q") || "";
       if (!q) return json({ ok: true, messages: [] });
-      const messages = await searchMessages(imap, folder, q);
+      const indexed = await searchIndexedMessages(accountId, folder, q);
+      if (indexed.length > 0) return json({ ok: true, messages: indexed, indexed: true });
+      await syncFolderToDb(accountId, imap, folder, 80).catch(() => null);
+      const refreshed = await searchIndexedMessages(accountId, folder, q);
+      if (refreshed.length > 0) return json({ ok: true, messages: refreshed, indexed: true });
+      const messages = await searchMessages(imap, folder, q).catch(() => []);
       return json({ ok: true, messages });
     }
 
@@ -81,7 +86,10 @@ export async function GET(req: NextRequest) {
     const page = parseInt(sp.get("page") || "1");
     const pageSize = parseInt(sp.get("pageSize") || "30");
     try {
-      await syncFolderToDb(accountId, imap, folder, Math.min(40, pageSize * 2));
+      const lastSyncedAt = account.lastSyncedAt ? new Date(account.lastSyncedAt).getTime() : 0;
+      if (!lastSyncedAt || Date.now() - lastSyncedAt > 30_000 || sp.get("fresh") === "1") {
+        await syncFolderToDb(accountId, imap, folder, Math.min(40, pageSize * 2));
+      }
       const result = await getIndexedConversations(accountId, folder, page, pageSize);
       return json({ ok: true, threaded: true, ...result });
     } catch {

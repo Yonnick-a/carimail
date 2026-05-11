@@ -170,6 +170,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+[data-cm-readable] [class*="text-[9px]"] { font-size: 11px !important; }
+[data-cm-readable] [class*="text-[9.5px]"] { font-size: 11.5px !important; }
+[data-cm-readable] [class*="text-[10px]"] { font-size: 12px !important; }
+[data-cm-readable] [class*="text-[10.5px]"] { font-size: 12.5px !important; }
+[data-cm-readable] [class*="text-[11px]"] { font-size: 13px !important; }
+[data-cm-readable] [class*="text-[11.5px]"] { font-size: 13.5px !important; }
+[data-cm-readable] [class*="text-[12px]"] { font-size: 14px !important; }
+[data-cm-readable] [class*="text-[12.5px]"] { font-size: 14.5px !important; }
+[data-cm-readable] [class*="text-[13px]"] { font-size: 15px !important; }
+[data-cm-readable] [class*="text-[13.5px]"] { font-size: 15.5px !important; }
+
 /* Scrollbars */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }

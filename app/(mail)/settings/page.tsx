@@ -131,7 +131,7 @@ export default function SettingsPage() {
     <div className="min-h-full" style={{ background: "var(--cm-bg)" }}>
       {/* Header */}
       <div className="border-b px-4 py-5 sm:px-6 lg:px-8" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-[1500px]">
           <p className="text-[10px] font-[700] uppercase tracking-[0.24em]" style={{ color: "var(--cm-blue)" }}>Carimail</p>
           <h1 className="mt-1 text-[20px] font-[800] tracking-tight" style={{ color: "var(--cm-text)" }}>Settings</h1>
           <p className="mt-1 text-[13px]" style={{ color: "var(--cm-text2)" }}>
@@ -140,9 +140,10 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8 space-y-4">
+      <div className="mx-auto max-w-[1500px] px-4 py-5 sm:px-6 lg:px-8">
         {/* Nav cards */}
-        <div className="overflow-hidden rounded-[22px] border" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+        <div className="overflow-hidden rounded-2xl border" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
           {sections.map((s, i) => (
             <Link key={s.href} href={s.href}
               className="group flex items-center gap-4 px-5 py-4 transition"
@@ -164,7 +165,7 @@ export default function SettingsPage() {
         </div>
 
         {/* About card */}
-        <div className="relative overflow-hidden rounded-[22px] border px-5 py-5"
+        <div className="relative overflow-hidden rounded-2xl border px-5 py-5"
           style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
           {/* Ambient */}
           <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-2xl"
@@ -193,8 +194,9 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+        </div>
 
-        <div className="rounded-[22px] border px-5 py-5" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+        <div className="mt-4 rounded-2xl border px-5 py-4" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
           <p className="text-[13.5px] font-[800]" style={{ color: "var(--cm-text)" }}>Import / Export</p>
           <p className="mt-1 text-[12px]" style={{ color: "var(--cm-text2)" }}>Export account metadata and rules, or import rules from another Carimail workspace.</p>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -208,7 +210,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="rounded-[22px] border px-5 py-5" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+        <div className="mt-4 rounded-2xl border px-5 py-5" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[13.5px] font-[800]" style={{ color: "var(--cm-text)" }}>Mail Automation</p>
