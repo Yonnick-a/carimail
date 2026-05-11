@@ -16,6 +16,8 @@ export type Folder = {
   delimiter: string;
   specialUse?: string;
   flags: string[];
+  unread?: number;
+  total?: number;
 };
 
 export type MessageSummary = {
@@ -38,8 +40,10 @@ export type MessageFull = MessageSummary & {
   replyTo: string;
   bodyHtml: string | null;
   bodyText: string | null;
-  attachments: { filename: string; size: number; contentType: string }[];
+  attachments: { id: number; filename: string; size: number; contentType: string }[];
 };
+
+type ParsedAttachment = { id: number; filename: string; size: number; contentType: string; content: Buffer };
 
 function makeClient(config: ImapConfig) {
   return new ImapFlow({
@@ -63,13 +67,27 @@ export async function getFolders(config: ImapConfig): Promise<Folder[]> {
   try {
     await client.connect();
     const list = await client.list();
-    return list.map((f) => ({
-      path: f.path,
-      name: f.name,
-      delimiter: f.delimiter ?? "/",
-      specialUse: (f as any).specialUse,
-      flags: Array.from(f.flags ?? []),
+    const folders = await Promise.all(list.map(async (f) => {
+      let unread = 0;
+      let total = 0;
+      try {
+        const status = await client.status(f.path, { messages: true, unseen: true });
+        unread = status.unseen ?? 0;
+        total = status.messages ?? 0;
+      } catch {
+        // Some virtual or provider-owned folders do not support STATUS.
+      }
+      return {
+        path: f.path,
+        name: f.name,
+        delimiter: f.delimiter ?? "/",
+        specialUse: (f as any).specialUse,
+        flags: Array.from(f.flags ?? []),
+        unread,
+        total,
+      };
     }));
+    return folders;
   } finally {
     await client.logout().catch(() => {});
   }
@@ -135,7 +153,9 @@ export async function getMessage(
     }, { uid: true })) {
       const env = msg.envelope;
       const from = env?.from?.[0];
-      const source = msg.source?.toString() || "";
+      const source = Buffer.isBuffer(msg.source)
+        ? msg.source
+        : Buffer.from(String(msg.source || ""), "utf8");
       const { html, text, attachments } = parseMime(source);
 
       result = {
@@ -155,10 +175,51 @@ export async function getMessage(
         messageId: env?.messageId,
         bodyHtml: html,
         bodyText: text,
-        attachments,
+        attachments: attachments.map(({ content: _content, ...attachment }, id) => ({ ...attachment, id })),
       };
     }
     return result;
+  } finally {
+    await client.logout().catch(() => {});
+  }
+}
+
+export async function getAttachment(
+  config: ImapConfig,
+  folder: string,
+  uid: number,
+  attachmentId: number
+): Promise<ParsedAttachment | null> {
+  const client = makeClient(config);
+  try {
+    await client.connect();
+    await client.mailboxOpen(folder);
+
+    for await (const msg of client.fetch({ uid }, { uid: true, source: true }, { uid: true })) {
+      const source = Buffer.isBuffer(msg.source)
+        ? msg.source
+        : Buffer.from(String(msg.source || ""), "utf8");
+      const { attachments } = parseMime(source);
+      return attachments.map((attachment, id) => ({ ...attachment, id })).find((attachment) => attachment.id === attachmentId) ?? null;
+    }
+    return null;
+  } finally {
+    await client.logout().catch(() => {});
+  }
+}
+
+export async function appendToSent(config: ImapConfig, rawMessage: string): Promise<void> {
+  const client = makeClient(config);
+  try {
+    await client.connect();
+    const folders = await client.list();
+    const sent = folders.find((f) => {
+      const path = f.path.toLowerCase();
+      const specialUse = String((f as any).specialUse || "").toLowerCase();
+      return specialUse.includes("sent") || path === "sent" || path.endsWith("/sent") || path.endsWith(".sent");
+    });
+    const sentPath = sent?.path || "Sent";
+    await client.append(sentPath, rawMessage, ["\\Seen"]);
   } finally {
     await client.logout().catch(() => {});
   }
@@ -254,21 +315,22 @@ function checkAttachment(structure: any): boolean {
   return false;
 }
 
-function parseMime(source: string, depth = 0, seen = new Set<string>()): {
+function parseMime(rawSource: Buffer | string, depth = 0, seen = new Set<string>()): {
   html: string | null;
   text: string | null;
-  attachments: { filename: string; size: number; contentType: string }[];
+  attachments: ParsedAttachment[];
 } {
-  const attachments: { filename: string; size: number; contentType: string }[] = [];
+  const attachments: ParsedAttachment[] = [];
   if (depth > 8) return { html: null, text: null, attachments };
 
+  const source = Buffer.isBuffer(rawSource) ? rawSource.toString("latin1") : rawSource;
   const boundaryMatch = source.match(/boundary="?([^"\r\n;]+)"?/i);
   const boundary = boundaryMatch?.[1]?.trim();
 
   if (!boundary) {
-    const sep = source.indexOf("\r\n\r\n");
-    const headers = sep > -1 ? source.slice(0, sep) : "";
-    const body = sep > -1 ? source.slice(sep + 4) : source;
+    const sep = findHeaderSeparator(source);
+    const headers = sep.index > -1 ? source.slice(0, sep.index) : "";
+    const body = sep.index > -1 ? source.slice(sep.index + sep.length) : source;
     if (headers.toLowerCase().includes("text/html")) {
       return { html: decodeBody(body, headers), text: null, attachments };
     }
@@ -285,21 +347,23 @@ function parseMime(source: string, depth = 0, seen = new Set<string>()): {
   for (const part of parts) {
     const t = part.trim();
     if (!t || t === "--" || t.startsWith("--")) continue;
-    const sep = part.indexOf("\r\n\r\n");
-    if (sep === -1) continue;
+    const sep = findHeaderSeparator(part);
+    if (sep.index === -1) continue;
 
-    const ph = part.slice(0, sep).toLowerCase();
-    const pb = part.slice(sep + 4).replace(/\r\n$/, "");
+    const partHeaders = part.slice(0, sep.index);
+    const ph = partHeaders.toLowerCase();
+    const pb = part.slice(sep.index + sep.length).replace(/\r?\n$/, "");
     const ct = ph.match(/content-type:\s*([^;\r\n]+)/)?.[1]?.trim() || "";
     const disp = ph.match(/content-disposition:\s*([^;\r\n]+)/)?.[1]?.trim() || "";
-    const fname = ph.match(/filename[*]?=\s*"?([^";\r\n]+)"?/i)?.[1]?.trim();
+    const fname = decodeHeaderParam(partHeaders.match(/filename\*?=\s*"?([^";\r\n]+)"?/i)?.[1]?.trim());
 
     if (disp === "attachment" && fname) {
-      attachments.push({ filename: fname, size: pb.length, contentType: ct });
+      const content = decodePartToBuffer(pb, partHeaders);
+      attachments.push({ id: attachments.length, filename: fname, size: content.length, contentType: ct || "application/octet-stream", content });
       continue;
     }
-    if (ct.includes("text/html") && !html) { html = decodeBody(pb, ph); }
-    else if (ct.includes("text/plain") && !text) { text = decodeBody(pb, ph); }
+    if (ct.includes("text/html") && !html) { html = decodeBody(pb, partHeaders); }
+    else if (ct.includes("text/plain") && !text) { text = decodeBody(pb, partHeaders); }
     else if (ct.includes("multipart/")) {
       const n = parseMime(part, depth + 1, seen);
       if (!html && n.html) html = n.html;
@@ -310,13 +374,77 @@ function parseMime(source: string, depth = 0, seen = new Set<string>()): {
   return { html, text, attachments };
 }
 
-function decodeBody(body: string, headers: string): string {
+function findHeaderSeparator(source: string): { index: number; length: number } {
+  const crlf = source.indexOf("\r\n\r\n");
+  if (crlf > -1) return { index: crlf, length: 4 };
+  const lf = source.indexOf("\n\n");
+  return { index: lf, length: lf > -1 ? 2 : 0 };
+}
+
+function decodePartToBuffer(body: string, headers: string): Buffer {
   const enc = headers.match(/content-transfer-encoding:\s*([^\r\n]+)/i)?.[1]?.trim().toLowerCase();
   if (enc === "base64") {
-    try { return Buffer.from(body.replace(/\s/g, ""), "base64").toString("utf8"); } catch { return body; }
+    try { return Buffer.from(body.replace(/\s/g, ""), "base64"); } catch { return Buffer.from(body, "latin1"); }
   }
-  if (enc === "quoted-printable") {
-    return body.replace(/=\r\n/g, "").replace(/=([0-9A-Fa-f]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
+  if (enc === "quoted-printable") return decodeQuotedPrintableToBuffer(body);
+  return Buffer.from(body, "latin1");
+}
+
+function decodeBody(body: string, headers: string): string {
+  const charset = normalizeCharset(headers.match(/charset="?([^";\r\n]+)"?/i)?.[1]?.trim());
+  const bytes = decodePartToBuffer(body, headers);
+
+  try {
+    return new TextDecoder(charset, { fatal: false }).decode(bytes);
+  } catch {
+    return bytes.toString("utf8");
   }
-  return body;
+}
+
+function decodeQuotedPrintableToBuffer(body: string): Buffer {
+  const normalized = body.replace(/=\r?\n/g, "");
+  const bytes: number[] = [];
+  for (let i = 0; i < normalized.length; i++) {
+    if (normalized[i] === "=" && /^[0-9A-Fa-f]{2}$/.test(normalized.slice(i + 1, i + 3))) {
+      bytes.push(parseInt(normalized.slice(i + 1, i + 3), 16));
+      i += 2;
+    } else {
+      bytes.push(normalized.charCodeAt(i) & 0xff);
+    }
+  }
+  return Buffer.from(bytes);
+}
+
+function normalizeCharset(charset?: string): string {
+  if (!charset) return "utf-8";
+  const c = charset.toLowerCase().replace(/^["']|["']$/g, "");
+  if (c === "iso-8859-1" || c === "latin1") return "windows-1252";
+  if (c === "us-ascii") return "utf-8";
+  return c;
+}
+
+function decodeHeaderParam(value?: string): string {
+  if (!value) return "";
+  const rfc5987 = value.match(/^([^']*)''(.+)$/);
+  if (rfc5987) {
+    try {
+      return new TextDecoder(normalizeCharset(rfc5987[1])).decode(percentEncodedToBuffer(rfc5987[2]));
+    } catch {
+      return decodeURIComponent(rfc5987[2]);
+    }
+  }
+  return value.replace(/^"|"$/g, "");
+}
+
+function percentEncodedToBuffer(value: string): Buffer {
+  const bytes: number[] = [];
+  for (let i = 0; i < value.length; i++) {
+    if (value[i] === "%" && /^[0-9A-Fa-f]{2}$/.test(value.slice(i + 1, i + 3))) {
+      bytes.push(parseInt(value.slice(i + 1, i + 3), 16));
+      i += 2;
+    } else {
+      bytes.push(value.charCodeAt(i) & 0xff);
+    }
+  }
+  return Buffer.from(bytes);
 }

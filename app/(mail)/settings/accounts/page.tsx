@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle, CheckCircle2, ChevronDown, ChevronUp,
   Eye, EyeOff, Loader2, Mail, Plus, Server,
-  ShieldCheck, Star, Trash2, Wifi, X, Zap,
+  ShieldCheck, Star, Trash2, Wifi, X, Zap, KeyRound, HelpCircle,
 } from "lucide-react";
 
 type Account = { id: string; emailAddress: string; label: string | null; isPrimary: boolean; imapHost: string; smtpHost: string; createdAt: string };
@@ -140,6 +140,35 @@ export default function AccountsSettingsPage() {
               <div className="text-[11px] font-[500]" style={{ color: "var(--cm-text3)" }}>{stat.label}</div>
             </div>
           ))}
+        </div>
+
+        <div className="grid gap-3 lg:grid-cols-2">
+          <div className="rounded-[22px] border px-5 py-4" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: "var(--cm-blue-light)", color: "var(--cm-blue)" }}>
+                <HelpCircle className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-[13px] font-[800]" style={{ color: "var(--cm-text)" }}>Before you connect</p>
+                <p className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--cm-text2)" }}>
+                  Pick a provider, enter your full email address, then use your mailbox password or an app password. Keep Advanced closed unless your host gave you custom server details.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-[22px] border px-5 py-4" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: "var(--cm-accent-dim)", color: "var(--cm-accent)" }}>
+                <KeyRound className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-[13px] font-[800]" style={{ color: "var(--cm-text)" }}>App passwords</p>
+                <p className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--cm-text2)" }}>
+                  Gmail, Yahoo, and many Microsoft accounts require an app password when two-factor authentication is enabled.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Add account form */}

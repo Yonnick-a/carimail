@@ -107,13 +107,13 @@ export default function SecuritySettingsPage() {
   }
 
   return (
-    <div className="min-h-full bg-[#F4F7FB]">
+    <div className="min-h-full" style={{ background: "var(--cm-bg)" }}>
       {/* Header */}
-      <div className="border-b border-slate-200/80 bg-white/80 backdrop-blur-xl px-4 py-5 sm:px-6 lg:px-8">
+      <div className="border-b px-4 py-5 sm:px-6 lg:px-8" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
         <div className="mx-auto max-w-xl">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#0044BC]">Settings</div>
-          <h1 className="mt-1 text-xl font-bold tracking-tight text-[#0F172A]">Security</h1>
-          <p className="mt-1 text-sm text-[#64748B]">Review active sessions and manage account access.</p>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--cm-blue)" }}>Settings</div>
+          <h1 className="mt-1 text-xl font-bold tracking-tight" style={{ color: "var(--cm-text)" }}>Security</h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--cm-text2)" }}>Review active sessions and manage account access.</p>
         </div>
       </div>
 
@@ -123,15 +123,15 @@ export default function SecuritySettingsPage() {
         )}
 
         {/* Sessions card */}
-        <div className="overflow-hidden rounded-[24px] border border-white/70 bg-white/90 shadow-[0_12px_32px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-          <div className="flex items-center justify-between border-b border-[#0F172A]/6 px-5 py-4">
+        <div className="overflow-hidden rounded-[24px] border" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+          <div className="flex items-center justify-between border-b px-5 py-4" style={{ borderColor: "var(--cm-border)" }}>
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
                 <Shield className="h-4 w-4" />
               </div>
               <div>
-                <div className="text-sm font-bold text-[#0F172A]">Active sessions</div>
-                <div className="text-xs text-[#64748B]">
+                <div className="text-sm font-bold" style={{ color: "var(--cm-text)" }}>Active sessions</div>
+                <div className="text-xs" style={{ color: "var(--cm-text2)" }}>
                   {loading ? "Loading…" : `${sessions.length} session${sessions.length !== 1 ? "s" : ""} active`}
                 </div>
               </div>
@@ -146,24 +146,24 @@ export default function SecuritySettingsPage() {
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center gap-3 py-12 text-sm text-[#64748B]">
+            <div className="flex items-center justify-center gap-3 py-12 text-sm" style={{ color: "var(--cm-text2)" }}>
               <Loader2 className="h-5 w-5 animate-spin" />
             </div>
           ) : sessions.length === 0 ? (
             <div className="px-5 py-10 text-center">
               <Monitor className="mx-auto h-8 w-8 text-slate-200" />
-              <p className="mt-3 text-sm text-[#64748B]">No active sessions found.</p>
+              <p className="mt-3 text-sm" style={{ color: "var(--cm-text2)" }}>No active sessions found.</p>
             </div>
           ) : (
-            <div className="divide-y divide-[#0F172A]/5">
+            <div>
               {sessions.map((s, i) => (
-                <div key={s.id} className={`flex items-center gap-4 px-5 py-4 ${i === 0 ? "bg-emerald-50/40" : "hover:bg-slate-50/60"} transition`}>
+                <div key={s.id} className="flex items-center gap-4 border-b px-5 py-4 last:border-b-0 transition" style={{ borderColor: "var(--cm-border)", background: i === 0 ? "rgba(16,185,129,0.06)" : "transparent" }}>
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${i === 0 ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-[#0F172A]/8 bg-[#F8FAFC] text-[#64748B]"}`}>
                     <Monitor className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-semibold text-[#0F172A]">
+                      <span className="text-sm font-semibold" style={{ color: "var(--cm-text)" }}>
                         {i === 0 ? "This device" : `Session ${i + 1}`}
                       </span>
                       {i === 0 && (
@@ -172,7 +172,7 @@ export default function SecuritySettingsPage() {
                         </span>
                       )}
                     </div>
-                    <div className="mt-0.5 text-[11px] text-[#94A3B8]">
+                    <div className="mt-0.5 text-[11px]" style={{ color: "var(--cm-text3)" }}>
                       Started {timeAgo(s.createdAt)} · Expires {formatDate(s.expiresAt)}
                     </div>
                   </div>
@@ -183,15 +183,15 @@ export default function SecuritySettingsPage() {
         </div>
 
         {/* Danger zone */}
-        <div className="overflow-hidden rounded-[24px] border border-red-100/80 bg-white/90 shadow-[0_12px_32px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+        <div className="overflow-hidden rounded-[24px] border" style={{ borderColor: "rgba(239,68,68,0.22)", background: "var(--cm-surface)" }}>
           <div className="border-b border-red-100/60 bg-red-50/40 px-5 py-3">
             <div className="text-[10px] font-bold uppercase tracking-[0.20em] text-red-600">Danger zone</div>
           </div>
           <div className="px-5 py-4">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div className="min-w-0">
-                <div className="text-sm font-semibold text-[#0F172A]">Sign out everywhere</div>
-                <p className="mt-0.5 text-xs text-[#64748B]">
+                <div className="text-sm font-semibold" style={{ color: "var(--cm-text)" }}>Sign out everywhere</div>
+                <p className="mt-0.5 text-xs" style={{ color: "var(--cm-text2)" }}>
                   Signs you out of all devices including this one. You will need to sign in again.
                 </p>
               </div>

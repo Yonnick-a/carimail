@@ -1,7 +1,7 @@
 "use client";
 // components/mail/InboxClient.tsx
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   AlertCircle, Archive, Check, ChevronLeft, ChevronRight,
   Copy, Download, Eye, EyeOff, Forward, Inbox,
@@ -20,8 +20,10 @@ type Message = {
 type MessageFull = Message & {
   cc: string; replyTo: string;
   bodyHtml: string | null; bodyText: string | null;
-  attachments: { filename: string; size: number; contentType: string }[];
+  attachments: { id: number; filename: string; size: number; contentType: string }[];
 };
+type WorkspaceMode = "split" | "focus" | "compact";
+type MailFilter = "all" | "unread" | "starred" | "attachments" | "billing" | "security" | "support";
 
 const PAGE_SIZE = 30;
 
@@ -37,6 +39,20 @@ function formatBytes(b?: number) {
   if (b < 1024) return `${b}B`;
   if (b < 1024 * 1024) return `${(b / 1024).toFixed(0)}KB`;
   return `${(b / 1024 / 1024).toFixed(1)}MB`;
+}
+function senderDomain(email: string) {
+  return email.includes("@") ? email.split("@").pop() || "" : "";
+}
+function smartTags(msg: Message | MessageFull) {
+  const subject = msg.subject.toLowerCase();
+  const tags: string[] = [];
+  if (msg.flagged) tags.push("Priority");
+  if (!msg.seen) tags.push("Unread");
+  if (msg.hasAttachment) tags.push("Attachment");
+  if (/(invoice|receipt|payment|billing|paid|subscription)/.test(subject)) tags.push("Billing");
+  if (/(security|login|password|verify|2fa|alert)/.test(subject)) tags.push("Security");
+  if (/(support|ticket|case|request)/.test(subject)) tags.push("Support");
+  return tags.slice(0, 3);
 }
 
 const AVATAR_COLORS = ["from-[#F97316] to-[#EA580C]","from-[#0044BC] to-[#003399]","from-[#7C3AED] to-[#6D28D9]","from-[#059669] to-[#047857]","from-[#DC2626] to-[#B91C1C]","from-[#0891B2] to-[#0E7490]"];
@@ -58,7 +74,6 @@ function CopyBtn({ text }: { text: string }) {
 }
 
 export default function InboxClient({ accountId, folder }: { accountId: string | null; folder: string }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const searchQ = searchParams.get("q") || "";
 
@@ -81,6 +96,11 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
   const [showImages, setShowImages] = useState(true);
   const [fontSize, setFontSize] = useState(14);
   const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+  const [listWidth, setListWidth] = useState(380);
+  const [resizing, setResizing] = useState(false);
+  const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>("split");
+  const [mailFilter, setMailFilter] = useState<MailFilter>("all");
+  const rootRef = useRef<HTMLDivElement>(null);
   const replyRef = useRef<HTMLTextAreaElement>(null);
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -89,23 +109,62 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
     setTimeout(() => setToast(null), 3000);
   }
 
-  const load = useCallback(async (p = page) => {
+  useEffect(() => {
+    const saved = localStorage.getItem("carimail-workspace-mode") as WorkspaceMode | null;
+    if (saved === "split" || saved === "focus" || saved === "compact") setWorkspaceMode(saved);
+  }, []);
+
+  function changeWorkspaceMode(mode: WorkspaceMode) {
+    setWorkspaceMode(mode);
+    localStorage.setItem("carimail-workspace-mode", mode);
+  }
+
+  const load = useCallback(async (p: number, silent = false) => {
     if (!accountId) return;
-    setLoading(true); setError("");
+    if (!silent) setLoading(true);
+    setError("");
     try {
       const url = searchQ
         ? `/api/mail/messages?accountId=${accountId}&action=search&folder=${encodeURIComponent(folder)}&q=${encodeURIComponent(searchQ)}`
         : `/api/mail/messages?accountId=${accountId}&folder=${encodeURIComponent(folder)}&page=${p}&pageSize=${PAGE_SIZE}`;
-      const res = await fetch(url);
+      const res = await fetch(url, { cache: "no-store" });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "Failed to load.");
       setMessages(data.messages || []);
       setTotal(data.total || data.messages?.length || 0);
     } catch (err) { setError(err instanceof Error ? err.message : "Failed to load messages."); }
-    finally { setLoading(false); }
-  }, [accountId, folder, page, searchQ]);
+    finally { if (!silent) setLoading(false); }
+  }, [accountId, folder, searchQ]);
 
-  useEffect(() => { setSelected(null); setPage(1); setSelectedUids(new Set()); load(1); }, [accountId, folder, searchQ]);
+  useEffect(() => { setSelected(null); setPage(1); setSelectedUids(new Set()); load(1); }, [accountId, folder, searchQ, load]);
+
+  useEffect(() => {
+    if (!accountId) return;
+    const id = window.setInterval(() => {
+      if (document.visibilityState === "visible") load(page, true);
+    }, 15000);
+    return () => window.clearInterval(id);
+  }, [accountId, page, load]);
+
+  useEffect(() => {
+    if (!resizing) return;
+    function onMove(e: MouseEvent) {
+      const left = rootRef.current?.getBoundingClientRect().left ?? 0;
+      const max = Math.min(560, window.innerWidth - left - 420);
+      setListWidth(Math.max(280, Math.min(max, e.clientX - left)));
+    }
+    function onUp() { setResizing(false); }
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [resizing]);
 
   // Keyboard shortcuts in reader
   useEffect(() => {
@@ -128,11 +187,12 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
     if (!accountId) return;
     setMsgLoading(true); setSelected(null); setReplyOpen(false);
     try {
-      const res = await fetch(`/api/mail/messages?accountId=${accountId}&action=message&folder=${encodeURIComponent(folder)}&uid=${msg.uid}`);
+      const res = await fetch(`/api/mail/messages?accountId=${accountId}&action=message&folder=${encodeURIComponent(folder)}&uid=${msg.uid}`, { cache: "no-store" });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "Failed.");
       setSelected(data.message);
       setMessages(prev => prev.map(m => m.uid === msg.uid ? { ...m, seen: true } : m));
+      if (!msg.seen) window.dispatchEvent(new Event("carimail:mailbox-changed"));
     } catch (err) { setError(err instanceof Error ? err.message : "Failed to open message."); }
     finally { setMsgLoading(false); }
   }
@@ -144,6 +204,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
       const res = await fetch("/api/mail/action", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accountId, action, folder, uid, ...extra }) });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
+      window.dispatchEvent(new Event("carimail:mailbox-changed"));
       const labels: Record<string, string> = { trash: "Moved to trash", archive: "Archived", read: "Marked as read", unread: "Marked as unread", flag: "Starred", unflag: "Unstarred" };
       notify(labels[action] || "Done");
       if (["trash", "delete", "move", "archive"].includes(action)) {
@@ -175,6 +236,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
     }
     setSelectedUids(new Set()); setSelectAll(false);
     notify(`${count} message${count !== 1 ? "s" : ""} ${action === "trash" ? "deleted" : action}`);
+    window.dispatchEvent(new Event("carimail:mailbox-changed"));
     setActionBusy(false);
   }
 
@@ -201,7 +263,12 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
 
   function toggleSelectAll() {
     if (selectAll) { setSelectedUids(new Set()); setSelectAll(false); }
-    else { setSelectedUids(new Set(messages.map(m => m.uid))); setSelectAll(true); }
+    else { setSelectedUids(new Set(visibleMessages.map(m => m.uid))); setSelectAll(true); }
+  }
+
+  function attachmentUrl(att: MessageFull["attachments"][number]) {
+    if (!accountId || !selected) return "#";
+    return `/api/mail/messages?accountId=${accountId}&action=attachment&folder=${encodeURIComponent(folder)}&uid=${selected.uid}&attachmentId=${att.id}`;
   }
 
   if (!accountId) {
@@ -220,9 +287,21 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
 
   const unread = messages.filter(m => !m.seen).length;
   const toolBtnBase = "inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11.5px] font-[600] transition";
+  const showListWithReader = workspaceMode !== "focus";
+  const visibleMessages = messages.filter((msg) => {
+    if (mailFilter === "all") return true;
+    if (mailFilter === "unread") return !msg.seen;
+    if (mailFilter === "starred") return msg.flagged;
+    if (mailFilter === "attachments") return msg.hasAttachment;
+    return smartTags(msg).map(tag => tag.toLowerCase()).includes(mailFilter);
+  });
+  const listClass = selected || msgLoading
+    ? showListWithReader ? "hidden md:flex" : "hidden"
+    : `flex flex-1 md:flex-none ${workspaceMode === "compact" ? "md:w-[300px] lg:w-[330px]" : "md:w-[340px] lg:w-[380px]"}`;
+  const listRowPadding = workspaceMode === "compact" ? "px-3 py-2.5" : "px-4 py-3";
 
   return (
-    <div className="flex min-h-0 flex-1 overflow-hidden">
+    <div ref={rootRef} className="flex min-h-0 flex-1 overflow-hidden">
 
       {/* Toast */}
       {toast && (
@@ -236,8 +315,16 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
       )}
 
       {/* Message list */}
-      <div className={`flex flex-col border-r ${selected || msgLoading ? "hidden md:flex md:w-[300px] lg:w-[340px] xl:w-[380px]" : "flex flex-1 md:flex-none md:w-[300px] lg:w-[340px] xl:w-[380px]"}`}
-        style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+      <div
+        className={`flex flex-col border-r ${listClass}`}
+        style={{
+          borderColor: "var(--cm-border)",
+          background: "var(--cm-surface)",
+          width: (selected || msgLoading) && showListWithReader ? listWidth : undefined,
+          minWidth: (selected || msgLoading) && showListWithReader ? 280 : undefined,
+          maxWidth: (selected || msgLoading) && showListWithReader ? 560 : undefined,
+        }}
+      >
 
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b px-4 py-3" style={{ borderColor: "var(--cm-border)" }}>
@@ -265,7 +352,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                 <span className="text-[10px] font-[600] px-1" style={{ color: "var(--cm-text3)" }}>{selectedUids.size}</span>
               </>
             )}
-            <button type="button" onClick={() => load()} disabled={loading}
+            <button type="button" onClick={() => load(page)} disabled={loading}
               className="rounded-lg p-1.5 transition" style={{ color: "var(--cm-text3)" }}
               onMouseEnter={e => { e.currentTarget.style.background = "var(--cm-hover-bg)"; e.currentTarget.style.color = "var(--cm-blue)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--cm-text3)"; }}>
@@ -276,9 +363,55 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
 
         {/* Select all row */}
         {messages.length > 0 && (
-          <div className="flex shrink-0 items-center gap-2 border-b px-4 py-1.5" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
-            <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} className="rounded border cursor-pointer" style={{ accentColor: "var(--cm-blue)", borderColor: "var(--cm-border2)" }} />
-            <span className="text-[10.5px]" style={{ color: "var(--cm-text3)" }}>{selectAll ? "Deselect all" : "Select all"}</span>
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b px-4 py-2" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} className="rounded border cursor-pointer" style={{ accentColor: "var(--cm-blue)", borderColor: "var(--cm-border2)" }} />
+              <span className="text-[10.5px]" style={{ color: "var(--cm-text3)" }}>{selectAll ? "Deselect all" : "Select all"}</span>
+            </label>
+            <div className="hidden rounded-xl border p-0.5 sm:flex" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+              {(["split", "focus", "compact"] as const).map(mode => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => changeWorkspaceMode(mode)}
+                  className="rounded-lg px-2.5 py-1 text-[10.5px] font-[700] capitalize transition"
+                  style={{
+                    background: workspaceMode === mode ? "var(--cm-blue)" : "transparent",
+                    color: workspaceMode === mode ? "#fff" : "var(--cm-text3)",
+                  }}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {messages.length > 0 && (
+          <div className="flex shrink-0 gap-1 overflow-x-auto border-b px-4 py-2" style={{ borderColor: "var(--cm-border)" }}>
+            {([
+              ["all", "All"],
+              ["unread", "Unread"],
+              ["starred", "Starred"],
+              ["attachments", "Files"],
+              ["billing", "Billing"],
+              ["security", "Security"],
+              ["support", "Support"],
+            ] as [MailFilter, string][]).map(([filter, label]) => (
+              <button
+                key={filter}
+                type="button"
+                onClick={() => setMailFilter(filter)}
+                className="shrink-0 rounded-full border px-2.5 py-1 text-[10.5px] font-[700] transition"
+                style={{
+                  borderColor: mailFilter === filter ? "var(--cm-blue)" : "var(--cm-border)",
+                  background: mailFilter === filter ? "var(--cm-blue-light)" : "var(--cm-surface)",
+                  color: mailFilter === filter ? "var(--cm-blue)" : "var(--cm-text3)",
+                }}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         )}
 
@@ -294,20 +427,20 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
             <div className="flex items-center justify-center gap-2.5 py-20 text-[13px]" style={{ color: "var(--cm-text3)" }}>
               <Loader2 className="h-5 w-5 animate-spin" />Loading…
             </div>
-          ) : messages.length === 0 ? (
+          ) : visibleMessages.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 py-20 text-center px-6">
               <Inbox className="h-10 w-10" style={{ color: "var(--cm-border2)" }} />
-              <p className="text-[13px]" style={{ color: "var(--cm-text3)" }}>{searchQ ? "No results found." : "Nothing here yet."}</p>
+              <p className="text-[13px]" style={{ color: "var(--cm-text3)" }}>{searchQ ? "No results found." : mailFilter === "all" ? "Nothing here yet." : "No messages match this filter."}</p>
             </div>
           ) : (
-            messages.map(msg => {
+            visibleMessages.map(msg => {
               const isActive = selected?.uid === msg.uid;
               const isChecked = selectedUids.has(msg.uid);
               return (
                 <div key={msg.uid} className={`msg-item group relative border-b ${isActive ? "active" : ""}`}
                   style={{ borderColor: "var(--cm-divider)" }} onClick={() => isActive ? setSelected(null) : openMessage(msg)}>
                   {!msg.seen && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full" style={{ background: "var(--cm-unread-dot)" }} />}
-                  <div className="flex items-start gap-2.5 px-4 py-3">
+                  <div className={`flex items-start gap-2.5 ${listRowPadding}`}>
                     <div className="flex shrink-0 items-center pt-0.5" onClick={e => { e.stopPropagation(); setSelectedUids(prev => { const next = new Set(prev); if (next.has(msg.uid)) next.delete(msg.uid); else next.add(msg.uid); return next; }); }}>
                       <input type="checkbox" checked={isChecked} onChange={() => {}} className="rounded border cursor-pointer"
                         style={{ accentColor: "var(--cm-blue)", borderColor: "var(--cm-border2)", opacity: isChecked ? 1 : 0 }}
@@ -325,6 +458,13 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                       <div className={`mt-0.5 truncate text-[11.5px] ${msg.seen ? "" : "font-[600]"}`} style={{ color: msg.seen ? "var(--cm-text3)" : "var(--cm-text2)" }}>
                         {msg.subject}
                       </div>
+                      {workspaceMode !== "compact" && (
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                          {smartTags(msg).map(tag => (
+                            <span key={tag} className="rounded-full px-1.5 py-0.5 text-[9px] font-[700]" style={{ background: "var(--cm-surface3)", color: "var(--cm-text3)" }}>{tag}</span>
+                          ))}
+                        </div>
+                      )}
                       <div className="mt-1 flex items-center gap-1.5">
                         {!msg.seen && <div className="unread-dot" />}
                         {msg.flagged && <Star className="h-3 w-3" style={{ color: "var(--cm-starred)" }} />}
@@ -362,6 +502,16 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
           </div>
         )}
       </div>
+
+      {(selected || msgLoading) && showListWithReader && (
+        <button
+          type="button"
+          aria-label="Resize message list"
+          onMouseDown={() => setResizing(true)}
+          className="hidden w-1 shrink-0 cursor-col-resize transition hover:bg-orange-400/40 md:block"
+          style={{ background: resizing ? "var(--cm-accent)" : "transparent" }}
+        />
+      )}
 
       {/* Message reader */}
       <div className={`flex min-w-0 flex-1 flex-col ${!selected && !msgLoading ? "hidden md:flex" : "flex"}`}
@@ -453,7 +603,8 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto">
-              <div className="mx-auto max-w-3xl px-5 py-6 sm:px-8 sm:py-7">
+              <div className={`mx-auto grid w-full gap-5 px-5 py-6 sm:px-8 sm:py-7 ${workspaceMode === "compact" ? "max-w-3xl" : "max-w-6xl xl:grid-cols-[minmax(0,1fr)_280px]"}`}>
+                <article className="min-w-0">
                 <h1 className="text-[20px] font-[800] leading-tight tracking-tight" style={{ color: "var(--cm-text)" }}>{selected.subject}</h1>
 
                 <div className="mt-5 flex items-start gap-3.5">
@@ -509,11 +660,63 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                             <div className="text-[12px] font-[600]" style={{ color: "var(--cm-text)" }}>{att.filename}</div>
                             <div className="text-[10px]" style={{ color: "var(--cm-text3)" }}>{att.contentType} · {formatBytes(att.size)}</div>
                           </div>
-                          <button type="button" title="Download" className="ml-1 transition hover:opacity-70" style={{ color: "var(--cm-text3)" }}><Download className="h-3.5 w-3.5" /></button>
+                          <a href={attachmentUrl(att)} title="Download" className="ml-1 transition hover:opacity-70" style={{ color: "var(--cm-text3)" }}><Download className="h-3.5 w-3.5" /></a>
                         </div>
                       ))}
                     </div>
                   </div>
+                )}
+                </article>
+
+                {workspaceMode !== "compact" && (
+                  <aside className="hidden space-y-3 xl:block">
+                    <div className="rounded-2xl border p-4" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+                      <p className="text-[10px] font-[800] uppercase tracking-[0.18em]" style={{ color: "var(--cm-text3)" }}>Contact</p>
+                      <div className="mt-3 flex items-center gap-3">
+                        <Avatar name={selected.fromName} email={selected.from} size="md" />
+                        <div className="min-w-0">
+                          <p className="truncate text-[13px] font-[800]" style={{ color: "var(--cm-text)" }}>{selected.fromName || selected.from}</p>
+                          <p className="truncate text-[11px]" style={{ color: "var(--cm-text3)" }}>{selected.from}</p>
+                        </div>
+                      </div>
+                      {senderDomain(selected.from) && (
+                        <div className="mt-3 rounded-xl px-3 py-2" style={{ background: "var(--cm-surface2)" }}>
+                          <p className="text-[10px] font-[700]" style={{ color: "var(--cm-text3)" }}>Domain</p>
+                          <p className="truncate text-[12px] font-[700]" style={{ color: "var(--cm-text2)" }}>{senderDomain(selected.from)}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="rounded-2xl border p-4" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+                      <p className="text-[10px] font-[800] uppercase tracking-[0.18em]" style={{ color: "var(--cm-text3)" }}>Workspace</p>
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {smartTags(selected).length > 0 ? smartTags(selected).map(tag => (
+                          <span key={tag} className="rounded-full px-2 py-1 text-[10px] font-[800]" style={{ background: "var(--cm-blue-light)", color: "var(--cm-blue)" }}>{tag}</span>
+                        )) : (
+                          <span className="text-[11.5px]" style={{ color: "var(--cm-text3)" }}>No smart labels yet</span>
+                        )}
+                      </div>
+                      <div className="mt-4 space-y-2 text-[11.5px]" style={{ color: "var(--cm-text2)" }}>
+                        <div className="flex justify-between gap-3"><span style={{ color: "var(--cm-text3)" }}>Received</span><span className="text-right">{formatDateFull(selected.date)}</span></div>
+                        <div className="flex justify-between gap-3"><span style={{ color: "var(--cm-text3)" }}>Size</span><span>{formatBytes(selected.size) || "Unknown"}</span></div>
+                        <div className="flex justify-between gap-3"><span style={{ color: "var(--cm-text3)" }}>Attachments</span><span>{selected.attachments.length}</span></div>
+                      </div>
+                    </div>
+
+                    {selected.attachments.length > 0 && (
+                      <div className="rounded-2xl border p-4" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+                        <p className="text-[10px] font-[800] uppercase tracking-[0.18em]" style={{ color: "var(--cm-text3)" }}>Files</p>
+                        <div className="mt-3 space-y-2">
+                          {selected.attachments.slice(0, 4).map((att, i) => (
+                            <a key={i} href={attachmentUrl(att)} className="block rounded-xl px-3 py-2 transition hover:opacity-80" style={{ background: "var(--cm-surface2)" }}>
+                              <p className="truncate text-[11.5px] font-[700]" style={{ color: "var(--cm-text)" }}>{att.filename}</p>
+                              <p className="text-[10px]" style={{ color: "var(--cm-text3)" }}>{formatBytes(att.size)}</p>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </aside>
                 )}
               </div>
             </div>
@@ -556,7 +759,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                     <button type="button" onClick={() => setReplyOpen(false)}
                       className="rounded-2xl border px-4 py-2.5 text-[13px] font-[500] transition"
                       style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>Cancel</button>
-                    <span className="text-[10px]" style={{ color: "var(--cm-text3)" }}>⌘↵ to send</span>
+                    <span className="text-[10px]" style={{ color: "var(--cm-text3)" }}>Ctrl+Enter to send</span>
                   </div>
                 </form>
               </div>

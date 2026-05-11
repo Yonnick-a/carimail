@@ -14,7 +14,7 @@ import {
 
 type Account = { id: string; emailAddress: string; label: string | null; isPrimary: boolean; imapHost: string; smtpHost: string };
 type SessionUser = { id: string; email: string; name: string | null; isHostcariClient?: boolean };
-type Folder = { path: string; name: string; specialUse?: string; unread?: number };
+type Folder = { path: string; name: string; specialUse?: string; unread?: number; total?: number };
 
 function getFolderIcon(path: string, specialUse?: string) {
   const p = path.toLowerCase(), u = (specialUse || "").toLowerCase();
@@ -77,13 +77,30 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
   const { theme, toggle: toggleTheme } = useTheme();
   const currentAccount = accounts.find(a => a.id === currentAccountId) || accounts[0];
 
+  const loadFolders = useCallback((silent = false) => {
+    if (!currentAccountId) return;
+    if (!silent) setLoadingFolders(true);
+    fetch(`/api/mail/messages?accountId=${currentAccountId}&action=folders`, { cache: "no-store" })
+      .then(r => r.json()).then(d => { if (d.ok) setFolders(d.folders || []); })
+      .catch(() => {}).finally(() => { if (!silent) setLoadingFolders(false); });
+  }, [currentAccountId]);
+
+  useEffect(() => {
+    loadFolders();
+  }, [loadFolders]);
+
   useEffect(() => {
     if (!currentAccountId) return;
-    setLoadingFolders(true);
-    fetch(`/api/mail/messages?accountId=${currentAccountId}&action=folders`)
-      .then(r => r.json()).then(d => { if (d.ok) setFolders(d.folders || []); })
-      .catch(() => {}).finally(() => setLoadingFolders(false));
-  }, [currentAccountId]);
+    const id = window.setInterval(() => {
+      if (document.visibilityState === "visible") loadFolders(true);
+    }, 20000);
+    const onMailboxChanged = () => loadFolders(true);
+    window.addEventListener("carimail:mailbox-changed", onMailboxChanged);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("carimail:mailbox-changed", onMailboxChanged);
+    };
+  }, [currentAccountId, loadFolders]);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -253,6 +270,8 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
           <nav className="space-y-0.5">
             {sortedFolders.map(folder => {
               const active = currentFolder === folder.path;
+              const count = folder.unread && folder.unread > 0 ? folder.unread : folder.total || 0;
+              const countIsUnread = !!folder.unread && folder.unread > 0;
               return (
                 <button key={folder.path} type="button" onClick={() => navigateTo(folder.path)}
                   title={!sidebarOpen ? folder.name : undefined}
@@ -262,12 +281,20 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
                   onMouseLeave={e => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--cm-text2)"; } }}>
                   {active && <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full" style={{ background: "var(--cm-accent)" }} />}
                   <span className="shrink-0" style={{ color: active ? "var(--cm-accent)" : "inherit" }}>{getFolderIcon(folder.path, folder.specialUse)}</span>
+                  {!sidebarOpen && countIsUnread && (
+                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full" style={{ background: "var(--cm-unread-dot)" }} />
+                  )}
                   {sidebarOpen && (
                     <>
                       <span className="flex-1 truncate text-left">{folder.name}</span>
-                      {folder.unread && folder.unread > 0 ? (
-                        <span className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-[700] text-white" style={{ background: "var(--cm-unread-dot)" }}>
-                          {folder.unread > 99 ? "99+" : folder.unread}
+                      {count > 0 ? (
+                        <span
+                          className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-[700]"
+                          style={countIsUnread
+                            ? { background: "var(--cm-unread-dot)", color: "white" }
+                            : { background: "var(--cm-surface3)", color: "var(--cm-text3)" }}
+                        >
+                          {count > 99 ? "99+" : count}
                         </span>
                       ) : null}
                     </>
@@ -502,7 +529,41 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
   const [charCount, setCharCount] = useState(0);
   const editorRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { toRef.current?.focus(); }, []);
+  const draftKey = `carimail-compose-draft:${accountId}`;
+
+  useEffect(() => {
+    const raw = localStorage.getItem(draftKey);
+    if (raw && !replyTo) {
+      try {
+        const draft = JSON.parse(raw) as { to?: string; cc?: string; bcc?: string; subject?: string; html?: string };
+        setTo(draft.to || "");
+        setCc(draft.cc || "");
+        setBcc(draft.bcc || "");
+        setSubject(draft.subject || "");
+        if (draft.cc) setShowCc(true);
+        if (draft.bcc) setShowBcc(true);
+        if (editorRef.current) {
+          editorRef.current.innerHTML = draft.html || "";
+          setCharCount(editorRef.current.innerText.length || 0);
+        }
+      } catch {}
+    }
+    toRef.current?.focus();
+  }, [draftKey, replyTo]);
+
+  useEffect(() => {
+    if (sent || replyTo) return;
+    const id = window.setInterval(() => {
+      const html = editorRef.current?.innerHTML || "";
+      const text = editorRef.current?.innerText || "";
+      if (!to && !cc && !bcc && !subject && !text.trim()) {
+        localStorage.removeItem(draftKey);
+        return;
+      }
+      localStorage.setItem(draftKey, JSON.stringify({ to, cc, bcc, subject, html }));
+    }, 1200);
+    return () => window.clearInterval(id);
+  }, [bcc, cc, draftKey, replyTo, sent, subject, to]);
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); doSend(); }
@@ -521,6 +582,8 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "Send failed.");
+      localStorage.removeItem(draftKey);
+      window.dispatchEvent(new Event("carimail:mailbox-changed"));
       setSent(true); setTimeout(onClose, 1400);
     } catch (err) { setError(err instanceof Error ? err.message : "Send failed."); setSending(false); }
   }

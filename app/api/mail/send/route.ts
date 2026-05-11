@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { getAccountConfig } from "@/lib/mail/accounts";
+import { appendToSent } from "@/lib/mail/imap";
 import { sendEmail } from "@/lib/mail/smtp";
 
 const schema = z.object({
@@ -24,9 +25,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const parsed = schema.parse(body);
-    const { account, smtp } = await getAccountConfig(parsed.accountId, user.id);
+    const { account, smtp, imap } = await getAccountConfig(parsed.accountId, user.id);
 
-    await sendEmail(smtp, {
+    const sent = await sendEmail(smtp, {
       from: account.emailAddress,
       to: parsed.to,
       cc: parsed.cc,
@@ -37,6 +38,10 @@ export async function POST(req: NextRequest) {
       inReplyTo: parsed.inReplyTo,
       references: parsed.references,
     });
+
+    if (sent.raw) {
+      await appendToSent(imap, sent.raw).catch(() => {});
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
