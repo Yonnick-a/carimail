@@ -176,15 +176,12 @@ export default function AccountsSettingsPage() {
             <div>
               <p className="text-[13px] font-[800]" style={{ color: "var(--cm-text)" }}>Connect with OAuth</p>
               <p className="mt-1 text-[12px]" style={{ color: "var(--cm-text2)" }}>
-                Use secure sign-in for Gmail or Microsoft 365 instead of storing an app password.
+                Use secure Google sign-in for Gmail instead of storing an app password.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <a href="/api/mail/oauth/google" className="inline-flex items-center justify-center rounded-xl border px-3.5 py-2 text-[12px] font-[800] transition" style={{ borderColor: "var(--cm-border)", color: "var(--cm-text)", background: "var(--cm-surface2)" }}>
                 Gmail
-              </a>
-              <a href="/api/mail/oauth/microsoft" className="inline-flex items-center justify-center rounded-xl border px-3.5 py-2 text-[12px] font-[800] transition" style={{ borderColor: "var(--cm-border)", color: "var(--cm-text)", background: "var(--cm-surface2)" }}>
-                Microsoft
               </a>
             </div>
           </div>

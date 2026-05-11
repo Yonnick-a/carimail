@@ -71,3 +71,28 @@ export type MailConversation = Prisma.MailConversationModel
  * 
  */
 export type MailMessage = Prisma.MailMessageModel
+/**
+ * Model MailRule
+ * 
+ */
+export type MailRule = Prisma.MailRuleModel
+/**
+ * Model ScheduledEmail
+ * 
+ */
+export type ScheduledEmail = Prisma.ScheduledEmailModel
+/**
+ * Model MailSnooze
+ * 
+ */
+export type MailSnooze = Prisma.MailSnoozeModel
+/**
+ * Model MailReminder
+ * 
+ */
+export type MailReminder = Prisma.MailReminderModel
+/**
+ * Model MailSignature
+ * 
+ */
+export type MailSignature = Prisma.MailSignatureModel

@@ -8,7 +8,7 @@ import {
   Archive, Bold, ChevronDown, Flag, Inbox,
   Italic, Link as LinkIcon, List, ListOrdered,
   Loader2, LogOut, Mail, Maximize2, Menu,
-  Minimize2, Moon, Pencil, Plus, RefreshCw,
+  Minimize2, Moon, Paperclip, Pencil, Plus, RefreshCw,
   Send, Settings, Star, Sun, Trash2, Underline, X,
 } from "lucide-react";
 
@@ -527,6 +527,9 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
   const [fullscreen, setFullscreen] = useState(false);
   const [sent, setSent] = useState(false);
   const [charCount, setCharCount] = useState(0);
+  const [attachments, setAttachments] = useState<{ filename: string; contentType?: string; content: string; size: number }[]>([]);
+  const [scheduledAt, setScheduledAt] = useState("");
+  const [signatureHtml, setSignatureHtml] = useState("");
   const editorRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLInputElement>(null);
   const draftKey = `carimail-compose-draft:${accountId}`;
@@ -565,20 +568,48 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
     return () => window.clearInterval(id);
   }, [bcc, cc, draftKey, replyTo, sent, subject, to]);
 
+  useEffect(() => {
+    if (!accountId || replyTo) return;
+    fetch(`/api/mail/features?accountId=${accountId}`, { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => {
+        const sig = data.signatures?.find((s: { isDefault: boolean }) => s.isDefault) || data.signatures?.[0];
+        if (sig?.html) setSignatureHtml(sig.html);
+      })
+      .catch(() => {});
+  }, [accountId, replyTo]);
+
   function handleKeyDown(e: React.KeyboardEvent) {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); doSend(); }
     if (e.key === "Escape" && !fullscreen) onClose();
   }
 
   async function doSend() {
-    const html = editorRef.current?.innerHTML || "";
+    const html = `${editorRef.current?.innerHTML || ""}${signatureHtml ? `<br>${signatureHtml}` : ""}`;
     const text = editorRef.current?.innerText || "";
     if (!to || !subject || !text.trim()) return;
     setSending(true); setError("");
     try {
+      if (scheduledAt) {
+        const res = await fetch("/api/mail/features", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "schedule",
+            accountId,
+            scheduledAt: new Date(scheduledAt).toISOString(),
+            payload: { to, cc: cc || undefined, bcc: bcc || undefined, subject, body: html, isHtml: true, attachments },
+          }),
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || "Schedule failed.");
+        localStorage.removeItem(draftKey);
+        setSent(true); setTimeout(onClose, 1400);
+        return;
+      }
       const res = await fetch("/api/mail/send", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accountId, to, cc: cc || undefined, bcc: bcc || undefined, subject, body: html, isHtml: true, inReplyTo: replyTo?.messageId }),
+        body: JSON.stringify({ accountId, to, cc: cc || undefined, bcc: bcc || undefined, subject, body: html, isHtml: true, inReplyTo: replyTo?.messageId, attachments }),
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "Send failed.");
@@ -586,6 +617,24 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
       window.dispatchEvent(new Event("carimail:mailbox-changed"));
       setSent(true); setTimeout(onClose, 1400);
     } catch (err) { setError(err instanceof Error ? err.message : "Send failed."); setSending(false); }
+  }
+
+  function fileToBase64(file: File) {
+    return new Promise<{ filename: string; contentType?: string; content: string; size: number }>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const value = String(reader.result || "");
+        resolve({ filename: file.name, contentType: file.type || "application/octet-stream", size: file.size, content: value.split(",")[1] || "" });
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function addAttachments(files: FileList | null) {
+    if (!files) return;
+    const next = await Promise.all(Array.from(files).map(fileToBase64));
+    setAttachments(prev => [...prev, ...next]);
   }
 
   if (minimized) {
@@ -659,12 +708,38 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
             <input value={subject} onChange={e => setSubject(e.target.value)} required className="flex-1 bg-transparent text-[13px] font-[500] outline-none placeholder:opacity-40" style={{ color: "var(--cm-text)" }} placeholder="Subject" />
           </div>
           <RichToolbar editorRef={editorRef} />
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 border-b px-4 py-2" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
+          {attachments.map((att, index) => (
+                <div key={`${att.filename}-${index}`} className="inline-flex items-center gap-2 rounded-xl border px-2.5 py-1.5 text-[11px]" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
+                  <Paperclip className="h-3.5 w-3.5" />
+                  <span className="max-w-[160px] truncate">{att.filename}</span>
+                  <button type="button" onClick={() => setAttachments(prev => prev.filter((_, i) => i !== index))} style={{ color: "var(--cm-text3)" }}><X className="h-3 w-3" /></button>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex items-center gap-2 border-b px-4 py-2" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
+            <span className="text-[11px] font-[700]" style={{ color: "var(--cm-text3)" }}>Send later</span>
+            <input type="datetime-local" value={scheduledAt} onChange={e => setScheduledAt(e.target.value)}
+              className="rounded-lg border px-2 py-1 text-[11px] outline-none"
+              style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text)" }} />
+          </div>
           <div ref={editorRef} contentEditable suppressContentEditableWarning data-placeholder="Write your message…"
             onInput={() => setCharCount(editorRef.current?.innerText.length || 0)}
             className={`min-h-0 flex-1 overflow-y-auto px-4 py-3 text-[13.5px] leading-relaxed outline-none ${fullscreen ? "min-h-[240px]" : "min-h-[160px]"}`}
             style={{ color: "var(--cm-text)" }} />
+          {signatureHtml && (
+            <div className="border-t px-4 py-2 text-[12px]" style={{ borderColor: "var(--cm-border)", color: "var(--cm-text3)" }}
+              dangerouslySetInnerHTML={{ __html: signatureHtml }} />
+          )}
           <div className="flex shrink-0 items-center justify-between border-t px-4 py-3" style={{ borderColor: "var(--cm-border)" }}>
             <div className="flex items-center gap-3">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-[12px] font-[700] transition" style={{ borderColor: "var(--cm-border)", color: "var(--cm-text2)", background: "var(--cm-surface)" }}>
+                <Paperclip className="h-4 w-4" />
+                <span className="hidden sm:inline">Attach</span>
+                <input type="file" multiple className="hidden" onChange={e => addAttachments(e.target.files)} />
+              </label>
               <button type="submit" disabled={sending}
                 className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-[700] text-white transition active:scale-[0.97] disabled:opacity-60"
                 style={{ background: "linear-gradient(135deg, var(--cm-accent), var(--cm-accent2))", boxShadow: "0 4px 12px var(--cm-accent-b)" }}>

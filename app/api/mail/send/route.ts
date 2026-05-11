@@ -16,6 +16,11 @@ const schema = z.object({
   isHtml: z.boolean().optional(),
   inReplyTo: z.string().optional(),
   references: z.string().optional(),
+  attachments: z.array(z.object({
+    filename: z.string().min(1),
+    contentType: z.string().optional(),
+    content: z.string().min(1),
+  })).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -37,6 +42,7 @@ export async function POST(req: NextRequest) {
       isHtml: parsed.isHtml,
       inReplyTo: parsed.inReplyTo,
       references: parsed.references,
+      attachments: parsed.attachments,
     });
 
     if (sent.raw) {

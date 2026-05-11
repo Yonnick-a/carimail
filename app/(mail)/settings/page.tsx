@@ -2,7 +2,8 @@
 "use client"
 
 import Link from "next/link";
-import { Mail, User, Shield, ChevronRight, ExternalLink } from "lucide-react";
+import { Mail, User, Shield, ChevronRight, ExternalLink, Download, Upload } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const sections = [
   {
@@ -32,11 +33,105 @@ const sections = [
 ];
 
 export default function SettingsPage() {
+  const [accounts, setAccounts] = useState<{ id: string; emailAddress: string }[]>([]);
+  const [accountId, setAccountId] = useState("");
+  const [features, setFeatures] = useState<any>({});
+  const [sigName, setSigName] = useState("Default");
+  const [sigHtml, setSigHtml] = useState("");
+  const [ruleName, setRuleName] = useState("");
+  const [ruleField, setRuleField] = useState("from");
+  const [ruleValue, setRuleValue] = useState("");
+  const [ruleAction, setRuleAction] = useState("tag");
+  const [ruleDestination, setRuleDestination] = useState("");
+
+  useEffect(() => {
+    fetch("/api/mail/accounts").then(r => r.json()).then(d => {
+      const list = d.accounts || [];
+      setAccounts(list);
+      setAccountId(list[0]?.id || "");
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!accountId) return;
+    refreshFeatures().catch(() => {});
+  }, [accountId]);
+
+  async function refreshFeatures() {
+    if (!accountId) return;
+    const refreshed = await fetch(`/api/mail/features?accountId=${accountId}`, { cache: "no-store" }).then(r => r.json());
+    setFeatures(refreshed);
+  }
+
+  async function saveSignature() {
+    if (!accountId) return;
+    await fetch("/api/mail/features", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "signature", accountId, name: sigName, html: sigHtml, isDefault: true }),
+    });
+    await refreshFeatures();
+    setSigHtml("");
+  }
+
+  async function saveRule() {
+    if (!accountId || !ruleValue.trim()) return;
+    await fetch("/api/mail/features", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "rule",
+        accountId,
+        name: ruleName || `${ruleField} contains ${ruleValue}`,
+        field: ruleField,
+        operator: "contains",
+        value: ruleValue,
+        ruleAction,
+        destination: ruleDestination || null,
+      }),
+    });
+    setRuleName("");
+    setRuleValue("");
+    setRuleDestination("");
+    await refreshFeatures();
+  }
+
+  async function deleteFeature(feature: string, id: string) {
+    if (!accountId) return;
+    await fetch("/api/mail/features", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "delete-feature", accountId, feature, id }),
+    });
+    await refreshFeatures();
+  }
+  async function exportSettings() {
+    const res = await fetch("/api/mail/features?type=export", { cache: "no-store" });
+    const data = await res.json();
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "carimail-settings.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function importSettings(file: File | null) {
+    if (!file) return;
+    const data = JSON.parse(await file.text());
+    await fetch("/api/mail/features", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "import", rules: data.rules || [] }),
+    });
+    alert("Settings import finished.");
+  }
+
   return (
     <div className="min-h-full" style={{ background: "var(--cm-bg)" }}>
       {/* Header */}
       <div className="border-b px-4 py-5 sm:px-6 lg:px-8" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
-        <div className="mx-auto max-w-xl">
+        <div className="mx-auto max-w-5xl">
           <p className="text-[10px] font-[700] uppercase tracking-[0.24em]" style={{ color: "var(--cm-blue)" }}>Carimail</p>
           <h1 className="mt-1 text-[20px] font-[800] tracking-tight" style={{ color: "var(--cm-text)" }}>Settings</h1>
           <p className="mt-1 text-[13px]" style={{ color: "var(--cm-text2)" }}>
@@ -45,7 +140,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-xl px-4 py-6 sm:px-6 lg:px-8 space-y-4">
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8 space-y-4">
         {/* Nav cards */}
         <div className="overflow-hidden rounded-[22px] border" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
           {sections.map((s, i) => (
@@ -98,7 +193,133 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+
+        <div className="rounded-[22px] border px-5 py-5" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+          <p className="text-[13.5px] font-[800]" style={{ color: "var(--cm-text)" }}>Import / Export</p>
+          <p className="mt-1 text-[12px]" style={{ color: "var(--cm-text2)" }}>Export account metadata and rules, or import rules from another Carimail workspace.</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button type="button" onClick={exportSettings} className="inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-[12px] font-[800]" style={{ borderColor: "var(--cm-border)", color: "var(--cm-text2)" }}>
+              <Download className="h-4 w-4" />Export
+            </button>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border px-3.5 py-2 text-[12px] font-[800]" style={{ borderColor: "var(--cm-border)", color: "var(--cm-text2)" }}>
+              <Upload className="h-4 w-4" />Import
+              <input type="file" accept="application/json" className="hidden" onChange={e => importSettings(e.target.files?.[0] || null)} />
+            </label>
+          </div>
+        </div>
+
+        <div className="rounded-[22px] border px-5 py-5" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[13.5px] font-[800]" style={{ color: "var(--cm-text)" }}>Mail Automation</p>
+              <p className="mt-1 text-[12px]" style={{ color: "var(--cm-text2)" }}>Manage scheduled mail, snoozes, reminders, rules, and signatures.</p>
+            </div>
+            <select value={accountId} onChange={e => setAccountId(e.target.value)} className="rounded-xl border px-3 py-2 text-[12px] outline-none" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text)" }}>
+              {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.emailAddress}</option>)}
+            </select>
+          </div>
+
+          <div className="mt-5 grid gap-3 lg:grid-cols-4">
+            {[
+              ["Scheduled", features.scheduled?.length || 0],
+              ["Snoozed", features.snoozes?.length || 0],
+              ["Reminders", features.reminders?.length || 0],
+              ["Rules", features.rules?.length || 0],
+            ].map(([label, count]) => (
+              <div key={label} className="rounded-2xl border px-4 py-3" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
+                <p className="text-[20px] font-[900]" style={{ color: "var(--cm-text)" }}>{count}</p>
+                <p className="text-[11px] font-[700]" style={{ color: "var(--cm-text3)" }}>{label}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <div className="rounded-2xl border p-4" style={{ borderColor: "var(--cm-border)" }}>
+              <p className="text-[12.5px] font-[800]" style={{ color: "var(--cm-text)" }}>Rules</p>
+              <div className="mt-3 grid gap-2">
+                <input value={ruleName} onChange={e => setRuleName(e.target.value)} placeholder="Rule name" className="rounded-xl border px-3 py-2 text-[12px] outline-none" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text)" }} />
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <select value={ruleField} onChange={e => setRuleField(e.target.value)} className="rounded-xl border px-3 py-2 text-[12px] outline-none" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text)" }}>
+                    <option value="from">From</option>
+                    <option value="subject">Subject</option>
+                    <option value="to">To</option>
+                  </select>
+                  <input value={ruleValue} onChange={e => setRuleValue(e.target.value)} placeholder="Contains" className="rounded-xl border px-3 py-2 text-[12px] outline-none" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text)" }} />
+                  <select value={ruleAction} onChange={e => setRuleAction(e.target.value)} className="rounded-xl border px-3 py-2 text-[12px] outline-none" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text)" }}>
+                    <option value="tag">Tag</option>
+                    <option value="move">Move</option>
+                    <option value="archive">Archive</option>
+                    <option value="read">Mark read</option>
+                  </select>
+                </div>
+                {ruleAction === "move" && (
+                  <input value={ruleDestination} onChange={e => setRuleDestination(e.target.value)} placeholder="Destination folder path" className="rounded-xl border px-3 py-2 text-[12px] outline-none" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text)" }} />
+                )}
+                <button type="button" onClick={saveRule} className="w-fit rounded-xl px-3 py-2 text-[12px] font-[800] text-white" style={{ background: "var(--cm-blue)" }}>Create rule</button>
+              </div>
+              <div className="mt-4 space-y-2">
+                {(features.rules || []).map((rule: any) => (
+                  <FeatureRow key={rule.id} title={rule.name} meta={`${rule.field} contains "${rule.value}" -> ${rule.action}${rule.destination ? ` ${rule.destination}` : ""}`} onDelete={() => deleteFeature("rule", rule.id)} />
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border p-4" style={{ borderColor: "var(--cm-border)" }}>
+              <p className="text-[12.5px] font-[800]" style={{ color: "var(--cm-text)" }}>Scheduled, snoozed, and reminders</p>
+              <div className="mt-3 space-y-2">
+                {(features.scheduled || []).map((item: any) => (
+                  <FeatureRow key={item.id} title={item.payload?.subject || "Scheduled email"} meta={`Sends ${new Date(item.scheduledAt).toLocaleString()}`} onDelete={() => deleteFeature("scheduled", item.id)} />
+                ))}
+                {(features.snoozes || []).map((item: any) => (
+                  <FeatureRow key={item.id} title={`Snoozed message #${item.uid}`} meta={`Returns ${new Date(item.until).toLocaleString()}`} onDelete={() => deleteFeature("snooze", item.id)} />
+                ))}
+                {(features.reminders || []).map((item: any) => (
+                  <FeatureRow key={item.id} title={item.note || `Reminder #${item.uid}`} meta={`Remind ${new Date(item.remindAt).toLocaleString()}`} onDelete={() => deleteFeature("reminder", item.id)} />
+                ))}
+                {!features.scheduled?.length && !features.snoozes?.length && !features.reminders?.length && (
+                  <p className="text-[11.5px]" style={{ color: "var(--cm-text3)" }}>No scheduled sends, snoozes, or reminders for this account.</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <div className="rounded-2xl border p-4" style={{ borderColor: "var(--cm-border)" }}>
+              <p className="text-[12.5px] font-[800]" style={{ color: "var(--cm-text)" }}>HTML signature</p>
+              <input value={sigName} onChange={e => setSigName(e.target.value)} className="mt-3 w-full rounded-xl border px-3 py-2 text-[12px] outline-none" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text)" }} />
+              <textarea value={sigHtml} onChange={e => setSigHtml(e.target.value)} rows={5} placeholder="<strong>Your Name</strong><br>Company"
+                className="mt-2 w-full rounded-xl border px-3 py-2 text-[12px] font-mono outline-none" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text)" }} />
+              <button type="button" onClick={saveSignature} className="mt-2 rounded-xl px-3 py-2 text-[12px] font-[800] text-white" style={{ background: "var(--cm-blue)" }}>Save signature</button>
+            </div>
+            <div className="rounded-2xl border p-4" style={{ borderColor: "var(--cm-border)" }}>
+              <p className="text-[12.5px] font-[800]" style={{ color: "var(--cm-text)" }}>Current signatures</p>
+              <div className="mt-3 space-y-2">
+                {(features.signatures || []).map((sig: any) => (
+                  <div key={sig.id} className="rounded-xl border px-3 py-2" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[12px] font-[800]" style={{ color: "var(--cm-text)" }}>{sig.name}{sig.isDefault ? " · Default" : ""}</p>
+                      <button type="button" onClick={() => deleteFeature("signature", sig.id)} className="text-[10px] font-[800]" style={{ color: "#dc2626" }}>Delete</button>
+                    </div>
+                    <div className="mt-1 text-[11px]" style={{ color: "var(--cm-text2)" }} dangerouslySetInnerHTML={{ __html: sig.html }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+  );
+}
+
+function FeatureRow({ title, meta, onDelete }: { title: string; meta: string; onDelete: () => void }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border px-3 py-2" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
+      <div className="min-w-0">
+        <p className="truncate text-[12px] font-[800]" style={{ color: "var(--cm-text)" }}>{title}</p>
+        <p className="truncate text-[10.5px]" style={{ color: "var(--cm-text3)" }}>{meta}</p>
+      </div>
+      <button type="button" onClick={onDelete} className="shrink-0 text-[10px] font-[800]" style={{ color: "#dc2626" }}>Delete</button>
     </div>
   );
 }

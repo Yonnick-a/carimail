@@ -39,6 +39,13 @@ export default function SignInPage() {
       </div>
       <p className="text-[13px] mb-7" style={{ color: "var(--cm-text2)" }}>Sign in to your Carimail inbox</p>
 
+      <a href="/api/auth/google"
+        className="mb-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border py-3 text-[13.5px] font-[800] transition hover:-translate-y-0.5"
+        style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text)" }}>
+        <span className="flex h-5 w-5 items-center justify-center rounded-full border text-[11px] font-[900]" style={{ borderColor: "var(--cm-border)", color: "var(--cm-blue)" }}>G</span>
+        Continue with Google
+      </a>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="flex items-center gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[12.5px] text-red-700">

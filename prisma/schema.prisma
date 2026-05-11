@@ -76,6 +76,11 @@ model MailAccount {
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages          MailMessage[]
   conversations     MailConversation[]
+  rules             MailRule[]
+  scheduledEmails   ScheduledEmail[]
+  snoozes           MailSnooze[]
+  reminders         MailReminder[]
+  signatures        MailSignature[]
 
   @@index([userId])
   @@index([emailAddress])
@@ -132,4 +137,82 @@ model MailMessage {
   @@index([accountId, folder, date])
   @@index([accountId, messageId])
   @@index([conversationId])
+}
+
+model MailRule {
+  id          String   @id @default(cuid())
+  accountId   String
+  name        String
+  field       String
+  operator    String   @default("contains")
+  value       String
+  action      String
+  destination String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  account     MailAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, isActive])
+}
+
+model ScheduledEmail {
+  id          String    @id @default(cuid())
+  accountId   String
+  payload     Json
+  scheduledAt DateTime
+  sentAt      DateTime?
+  failedAt    DateTime?
+  error       String?
+  createdAt   DateTime  @default(now())
+
+  account     MailAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledAt, sentAt])
+  @@index([accountId])
+}
+
+model MailSnooze {
+  id        String   @id @default(cuid())
+  accountId String
+  folder    String
+  uid       Int
+  until     DateTime
+  createdAt DateTime @default(now())
+
+  account   MailAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, folder, uid])
+  @@index([until])
+}
+
+model MailReminder {
+  id        String    @id @default(cuid())
+  accountId String
+  folder    String
+  uid       Int
+  remindAt  DateTime
+  note      String?
+  doneAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  account   MailAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, remindAt])
+  @@index([doneAt])
+}
+
+model MailSignature {
+  id        String   @id @default(cuid())
+  accountId String
+  name      String
+  html      String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  account   MailAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, isDefault])
 }

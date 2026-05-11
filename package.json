@@ -10,7 +10,8 @@
     "lint": "next lint",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev"
+    "db:migrate": "prisma migrate dev",
+    "worker:idle": "node scripts/imap-idle-worker.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.7.0",

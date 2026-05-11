@@ -2,6 +2,7 @@ import "server-only";
 import { db } from "@/lib/db";
 import type { ImapConfig, MessageFull, MessageSummary } from "./imap";
 import { getMessage, getMessages } from "./imap";
+import { applyRules, extractCalendarHint } from "./features";
 
 function normalizeSubject(subject: string) {
   return (subject || "(no subject)").replace(/^\s*((re|fw|fwd):\s*)+/i, "").trim() || "(no subject)";
@@ -19,6 +20,13 @@ function snippetFor(message: Pick<MessageFull, "bodyText" | "bodyHtml">) {
 }
 
 async function upsertIndexedMessage(accountId: string, folder: string, summary: MessageSummary, full?: MessageFull) {
+  const matchedRules = await applyRules(accountId, { ...summary, folder }).catch(() => []);
+  const calendarHint = full ? extractCalendarHint(full) : { hasEvent: false, summary: "" };
+  const enrichedSnippet = [
+    calendarHint.hasEvent ? `[Calendar${calendarHint.summary ? `: ${calendarHint.summary}` : ""}]` : "",
+    matchedRules.length ? `[Rules: ${matchedRules.join(", ")}]` : "",
+    full ? snippetFor(full) : "",
+  ].filter(Boolean).join(" ");
   const threadKey = threadKeyFor({
     messageId: full?.messageId || summary.messageId,
     inReplyTo: full?.inReplyTo,
@@ -31,7 +39,7 @@ async function upsertIndexedMessage(accountId: string, folder: string, summary: 
       subject: normalizeSubject(summary.subject),
       lastMessageAt: new Date(summary.date),
       hasAttachment: summary.hasAttachment,
-      snippet: full ? snippetFor(full) : undefined,
+      snippet: enrichedSnippet || undefined,
     },
     create: {
       accountId,
@@ -39,7 +47,7 @@ async function upsertIndexedMessage(accountId: string, folder: string, summary: 
       subject: normalizeSubject(summary.subject),
       lastMessageAt: new Date(summary.date),
       hasAttachment: summary.hasAttachment,
-      snippet: full ? snippetFor(full) : undefined,
+      snippet: enrichedSnippet || undefined,
     },
   });
 
@@ -60,7 +68,7 @@ async function upsertIndexedMessage(accountId: string, folder: string, summary: 
       flagged: summary.flagged,
       hasAttachment: summary.hasAttachment,
       size: summary.size,
-      snippet: full ? snippetFor(full) : undefined,
+      snippet: enrichedSnippet || undefined,
       syncedAt: new Date(),
     },
     create: {
@@ -81,7 +89,7 @@ async function upsertIndexedMessage(accountId: string, folder: string, summary: 
       flagged: summary.flagged,
       hasAttachment: summary.hasAttachment,
       size: summary.size,
-      snippet: full ? snippetFor(full) : undefined,
+      snippet: enrichedSnippet || undefined,
     },
   });
 
@@ -137,10 +145,24 @@ export async function getIndexedConversations(accountId: string, folder: string,
     }),
     (db as any).mailConversation.count({ where }),
   ]);
+  const latest = conversations.map((conv: any) => conv.messages[0]).filter(Boolean);
+  const snoozes = latest.length
+    ? await (db as any).mailSnooze.findMany({
+        where: {
+          accountId,
+          until: { gt: new Date() },
+          OR: latest.map((m: any) => ({ folder: m.folder, uid: m.uid })),
+        },
+      })
+    : [];
+  const snoozedKeys = new Set(snoozes.map((s: any) => `${s.folder}:${s.uid}`));
 
   return {
     total,
-    messages: conversations.map((conv: any) => {
+    messages: conversations.filter((conv: any) => {
+      const latest = conv.messages[0];
+      return latest && !snoozedKeys.has(`${latest.folder}:${latest.uid}`);
+    }).map((conv: any) => {
       const latest = conv.messages[0];
       return {
         uid: latest.uid,

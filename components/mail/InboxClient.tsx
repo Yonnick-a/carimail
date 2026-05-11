@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   AlertCircle, Archive, Check, ChevronLeft, ChevronRight,
-  Copy, Download, Eye, EyeOff, Forward, Inbox,
-  Loader2, Mail, MailOpen, MailX, Paperclip,
+  Bell, Clock, Copy, Download, Eye, EyeOff, Forward, Inbox,
+  Loader2, Mail, MailOpen, MailX, MoveRight, Paperclip,
   Printer, RefreshCw, Reply, ReplyAll, Send,
   Star, StarOff, Tag, Trash2, X, ZoomIn, ZoomOut,
 } from "lucide-react";
@@ -27,6 +27,7 @@ type MessageFull = Message & {
 };
 type WorkspaceMode = "split" | "focus" | "compact";
 type MailFilter = "all" | "unread" | "starred" | "attachments" | "billing" | "security" | "support";
+type FolderOption = { path: string; name: string };
 
 const PAGE_SIZE = 30;
 
@@ -103,6 +104,8 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
   const [resizing, setResizing] = useState(false);
   const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>("split");
   const [mailFilter, setMailFilter] = useState<MailFilter>("all");
+  const [folders, setFolders] = useState<FolderOption[]>([]);
+  const [previewAttachment, setPreviewAttachment] = useState<{ filename: string; url: string; contentType: string } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const replyRef = useRef<HTMLTextAreaElement>(null);
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -148,6 +151,14 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
     }, 15000);
     return () => window.clearInterval(id);
   }, [accountId, page, load]);
+
+  useEffect(() => {
+    if (!accountId) return;
+    fetch(`/api/mail/messages?accountId=${accountId}&action=folders`, { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => { if (data.ok) setFolders(data.folders || []); })
+      .catch(() => {});
+  }, [accountId]);
 
   useEffect(() => {
     if (!resizing) return;
@@ -274,6 +285,35 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
     return `/api/mail/messages?accountId=${accountId}&action=attachment&folder=${encodeURIComponent(folder)}&uid=${selected.uid}&attachmentId=${att.id}`;
   }
 
+  async function createFeature(action: string, payload: object) {
+    if (!accountId || !selected) return;
+    const res = await fetch("/api/mail/features", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, accountId, folder, uid: selected.uid, ...payload }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "Action failed.");
+  }
+
+  async function snoozeSelected() {
+    const value = prompt("Snooze until (example: 2026-05-12 09:00)");
+    if (!value) return;
+    try {
+      await createFeature("snooze", { until: new Date(value).toISOString() });
+      notify("Message snoozed");
+    } catch (err) { notify(err instanceof Error ? err.message : "Snooze failed", "err"); }
+  }
+
+  async function remindSelected() {
+    const value = prompt("Remind me at (example: 2026-05-12 09:00)");
+    if (!value) return;
+    try {
+      await createFeature("reminder", { remindAt: new Date(value).toISOString(), note: selected?.subject });
+      notify("Reminder saved");
+    } catch (err) { notify(err instanceof Error ? err.message : "Reminder failed", "err"); }
+  }
+
   if (!accountId) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-5 p-8 text-center">
@@ -313,6 +353,28 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
             style={toast.type === "ok" ? { background: "var(--cm-text)", borderColor: "var(--cm-border)" } : {}}>
             {toast.type === "ok" ? <Check className="h-4 w-4 text-emerald-400" /> : <AlertCircle className="h-4 w-4" />}
             {toast.msg}
+          </div>
+        </div>
+      )}
+
+      {previewAttachment && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 p-3 sm:p-6">
+          <div className="flex h-[86vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border shadow-2xl" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b px-4 py-3" style={{ borderColor: "var(--cm-border)" }}>
+              <div className="min-w-0">
+                <p className="truncate text-[13px] font-[800]" style={{ color: "var(--cm-text)" }}>{previewAttachment.filename}</p>
+                <p className="text-[11px]" style={{ color: "var(--cm-text3)" }}>{previewAttachment.contentType || "Attachment preview"}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <a href={previewAttachment.url.replace("&preview=1", "")} className={toolBtnBase} style={{ borderColor: "var(--cm-border)", color: "var(--cm-text2)" }}>
+                  <Download className="h-3.5 w-3.5" />Download
+                </a>
+                <button type="button" onClick={() => setPreviewAttachment(null)} className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ color: "var(--cm-text3)" }}>
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <iframe title={previewAttachment.filename} src={previewAttachment.url} className="min-h-0 flex-1 bg-white" />
           </div>
         </div>
       )}
@@ -601,6 +663,38 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                 <span className="hidden sm:inline">Delete</span>
               </button>
 
+              <label className={`${toolBtnBase} max-w-[160px]`} style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
+                <MoveRight className="h-3.5 w-3.5" />
+                <select
+                  value=""
+                  disabled={actionBusy}
+                  onChange={e => {
+                    if (!e.target.value) return;
+                    doAction("move", selected.uid, { destination: e.target.value });
+                    e.target.value = "";
+                  }}
+                  className="min-w-0 bg-transparent text-[11.5px] font-[700] outline-none"
+                  style={{ color: "inherit" }}
+                >
+                  <option value="">Move</option>
+                  {folders.filter(f => f.path !== folder).map(f => (
+                    <option key={f.path} value={f.path}>{f.name}</option>
+                  ))}
+                </select>
+              </label>
+
+              <button type="button" onClick={snoozeSelected} disabled={actionBusy}
+                className={toolBtnBase} style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
+                <Clock className="h-3.5 w-3.5" />
+                <span className="hidden lg:inline">Snooze</span>
+              </button>
+
+              <button type="button" onClick={remindSelected} disabled={actionBusy}
+                className={toolBtnBase} style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
+                <Bell className="h-3.5 w-3.5" />
+                <span className="hidden lg:inline">Remind</span>
+              </button>
+
               <div className="ml-auto flex items-center gap-1">
                 <button type="button" onClick={() => setFontSize(s => Math.max(11, s - 1))} title="Smaller" className="flex h-7 w-7 items-center justify-center rounded-lg transition" style={{ color: "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><ZoomOut className="h-3.5 w-3.5" /></button>
                 <button type="button" onClick={() => setFontSize(s => Math.min(22, s + 1))} title="Larger" className="flex h-7 w-7 items-center justify-center rounded-lg transition" style={{ color: "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><ZoomIn className="h-3.5 w-3.5" /></button>
@@ -669,6 +763,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                             <div className="text-[12px] font-[600]" style={{ color: "var(--cm-text)" }}>{att.filename}</div>
                             <div className="text-[10px]" style={{ color: "var(--cm-text3)" }}>{att.contentType} · {formatBytes(att.size)}</div>
                           </div>
+                          <button type="button" onClick={() => setPreviewAttachment({ filename: att.filename, contentType: att.contentType, url: `${attachmentUrl(att)}&preview=1` })} title="Preview" className="ml-1 text-[10px] font-[800] transition hover:opacity-70" style={{ color: "var(--cm-blue)" }}>Preview</button>
                           <a href={attachmentUrl(att)} title="Download" className="ml-1 transition hover:opacity-70" style={{ color: "var(--cm-text3)" }}><Download className="h-3.5 w-3.5" /></a>
                         </div>
                       ))}
@@ -748,10 +843,10 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                         <p className="text-[10px] font-[800] uppercase tracking-[0.18em]" style={{ color: "var(--cm-text3)" }}>Files</p>
                         <div className="mt-3 space-y-2">
                           {selected.attachments.slice(0, 4).map((att, i) => (
-                            <a key={i} href={attachmentUrl(att)} className="block rounded-xl px-3 py-2 transition hover:opacity-80" style={{ background: "var(--cm-surface2)" }}>
+                            <button key={i} type="button" onClick={() => setPreviewAttachment({ filename: att.filename, contentType: att.contentType, url: `${attachmentUrl(att)}&preview=1` })} className="block w-full rounded-xl px-3 py-2 text-left transition hover:opacity-80" style={{ background: "var(--cm-surface2)" }}>
                               <p className="truncate text-[11.5px] font-[700]" style={{ color: "var(--cm-text)" }}>{att.filename}</p>
                               <p className="text-[10px]" style={{ color: "var(--cm-text3)" }}>{formatBytes(att.size)}</p>
-                            </a>
+                            </button>
                           ))}
                         </div>
                       </div>

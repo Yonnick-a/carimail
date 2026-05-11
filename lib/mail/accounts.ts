@@ -94,17 +94,7 @@ export function getOAuthProviderConfig(provider: string) {
     };
   }
   if (provider === "microsoft") {
-    return {
-      clientId: process.env.MICROSOFT_OAUTH_CLIENT_ID || "",
-      clientSecret: process.env.MICROSOFT_OAUTH_CLIENT_SECRET || "",
-      authUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-      tokenUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-      scopes: ["openid", "email", "offline_access", "https://outlook.office.com/IMAP.AccessAsUser.All", "https://outlook.office.com/SMTP.Send"],
-      imapHost: "outlook.office365.com",
-      imapPort: 993,
-      smtpHost: "smtp.office365.com",
-      smtpPort: 587,
-    };
+    throw new Error("Microsoft OAuth is not enabled for this Carimail build.");
   }
   throw new Error("Unsupported OAuth provider.");
 }

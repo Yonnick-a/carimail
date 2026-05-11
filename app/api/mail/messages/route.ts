@@ -61,7 +61,8 @@ export async function GET(req: NextRequest) {
       const headers = new Headers();
       headers.set("Cache-Control", "no-store");
       headers.set("Content-Type", attachment.contentType || "application/octet-stream");
-      headers.set("Content-Disposition", `attachment; filename="${attachment.filename.replace(/"/g, "")}"`);
+      const disposition = sp.get("preview") === "1" ? "inline" : "attachment";
+      headers.set("Content-Disposition", `${disposition}; filename="${attachment.filename.replace(/"/g, "")}"`);
       return new NextResponse(new Uint8Array(attachment.content), { headers });
     }
 

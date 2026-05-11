@@ -110,14 +110,14 @@ export default function SecuritySettingsPage() {
     <div className="min-h-full" style={{ background: "var(--cm-bg)" }}>
       {/* Header */}
       <div className="border-b px-4 py-5 sm:px-6 lg:px-8" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
-        <div className="mx-auto max-w-xl">
+        <div className="mx-auto max-w-5xl">
           <div className="text-[10px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--cm-blue)" }}>Settings</div>
           <h1 className="mt-1 text-xl font-bold tracking-tight" style={{ color: "var(--cm-text)" }}>Security</h1>
           <p className="mt-1 text-sm" style={{ color: "var(--cm-text2)" }}>Review active sessions and manage account access.</p>
         </div>
       </div>
 
-      <div className="mx-auto max-w-xl px-4 py-6 sm:px-6 lg:px-8 space-y-5">
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8 space-y-5">
         {(error || success) && (
           <Notice type={error ? "error" : "success"} message={error || success} onDismiss={() => { setError(""); setSuccess(""); }} />
         )}

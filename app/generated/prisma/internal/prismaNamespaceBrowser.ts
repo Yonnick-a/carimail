@@ -56,7 +56,12 @@ export const ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   MailAccount: 'MailAccount',
   MailConversation: 'MailConversation',
-  MailMessage: 'MailMessage'
+  MailMessage: 'MailMessage',
+  MailRule: 'MailRule',
+  ScheduledEmail: 'ScheduledEmail',
+  MailSnooze: 'MailSnooze',
+  MailReminder: 'MailReminder',
+  MailSignature: 'MailSignature'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -183,12 +188,89 @@ export const MailMessageScalarFieldEnum = {
 export type MailMessageScalarFieldEnum = (typeof MailMessageScalarFieldEnum)[keyof typeof MailMessageScalarFieldEnum]
 
 
+export const MailRuleScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  name: 'name',
+  field: 'field',
+  operator: 'operator',
+  value: 'value',
+  action: 'action',
+  destination: 'destination',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MailRuleScalarFieldEnum = (typeof MailRuleScalarFieldEnum)[keyof typeof MailRuleScalarFieldEnum]
+
+
+export const ScheduledEmailScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  payload: 'payload',
+  scheduledAt: 'scheduledAt',
+  sentAt: 'sentAt',
+  failedAt: 'failedAt',
+  error: 'error',
+  createdAt: 'createdAt'
+} as const
+
+export type ScheduledEmailScalarFieldEnum = (typeof ScheduledEmailScalarFieldEnum)[keyof typeof ScheduledEmailScalarFieldEnum]
+
+
+export const MailSnoozeScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  folder: 'folder',
+  uid: 'uid',
+  until: 'until',
+  createdAt: 'createdAt'
+} as const
+
+export type MailSnoozeScalarFieldEnum = (typeof MailSnoozeScalarFieldEnum)[keyof typeof MailSnoozeScalarFieldEnum]
+
+
+export const MailReminderScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  folder: 'folder',
+  uid: 'uid',
+  remindAt: 'remindAt',
+  note: 'note',
+  doneAt: 'doneAt',
+  createdAt: 'createdAt'
+} as const
+
+export type MailReminderScalarFieldEnum = (typeof MailReminderScalarFieldEnum)[keyof typeof MailReminderScalarFieldEnum]
+
+
+export const MailSignatureScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  name: 'name',
+  html: 'html',
+  isDefault: 'isDefault',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MailSignatureScalarFieldEnum = (typeof MailSignatureScalarFieldEnum)[keyof typeof MailSignatureScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -205,4 +287,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

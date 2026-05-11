@@ -80,14 +80,14 @@ export default function ProfileSettingsPage() {
   return (
     <div className="min-h-full" style={{ background: "var(--cm-bg)" }}>
       <div className="border-b px-4 py-5 sm:px-6 lg:px-8" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-5xl">
           <p className="text-[10px] font-[700] uppercase tracking-[0.24em]" style={{ color: "var(--cm-blue)" }}>Settings</p>
           <h1 className="mt-1 text-[20px] font-[800] tracking-tight" style={{ color: "var(--cm-text)" }}>Profile</h1>
           <p className="mt-1 text-[13px]" style={{ color: "var(--cm-text2)" }}>Update your display name and account password.</p>
         </div>
       </div>
 
-      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:px-8 space-y-5">
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8 space-y-5">
         {(error || success) && (
           <Notice type={error ? "error" : "success"} message={error || success} onDismiss={() => { setError(""); setSuccess(""); }} />
         )}

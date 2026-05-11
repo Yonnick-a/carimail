@@ -39,6 +39,7 @@ export async function sendEmail(
     isHtml?: boolean;
     inReplyTo?: string;
     references?: string;
+    attachments?: { filename: string; contentType?: string; content: string }[];
   }
 ): Promise<{ raw: string }> {
   const transport = makeTransport(config);
@@ -57,6 +58,13 @@ export async function sendEmail(
   if (opts.bcc) mail.bcc = opts.bcc;
   if (opts.inReplyTo) mail.inReplyTo = opts.inReplyTo;
   if (opts.references) mail.references = opts.references;
+  if (opts.attachments?.length) {
+    mail.attachments = opts.attachments.map(att => ({
+      filename: att.filename,
+      contentType: att.contentType,
+      content: Buffer.from(att.content, "base64"),
+    }));
+  }
   mail.messageId = messageId;
 
   await transport.sendMail(mail);
@@ -79,9 +87,14 @@ function buildRawMessage(opts: {
   isHtml?: boolean;
   inReplyTo?: string;
   references?: string;
+  attachments?: { filename: string; contentType?: string; content: string }[];
   messageId: string;
 }) {
   const date = new Date().toUTCString();
+  const boundary = `carimail-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const contentHeaders = opts.attachments?.length
+    ? [`Content-Type: multipart/mixed; boundary="${boundary}"`]
+    : [`Content-Type: ${opts.isHtml ? "text/html" : "text/plain"}; charset=utf-8`, "Content-Transfer-Encoding: base64"];
   const headers = [
     `From: ${opts.from}`,
     `To: ${opts.to}`,
@@ -92,9 +105,26 @@ function buildRawMessage(opts: {
     opts.inReplyTo ? `In-Reply-To: ${opts.inReplyTo}` : "",
     opts.references ? `References: ${opts.references}` : "",
     "MIME-Version: 1.0",
-    `Content-Type: ${opts.isHtml ? "text/html" : "text/plain"}; charset=utf-8`,
-    "Content-Transfer-Encoding: base64",
+    ...contentHeaders,
   ].filter(Boolean);
 
-  return `${headers.join("\r\n")}\r\n\r\n${Buffer.from(opts.body, "utf8").toString("base64")}\r\n`;
+  if (!opts.attachments?.length) return `${headers.join("\r\n")}\r\n\r\n${Buffer.from(opts.body, "utf8").toString("base64")}\r\n`;
+
+  const parts = [
+    `--${boundary}`,
+    `Content-Type: ${opts.isHtml ? "text/html" : "text/plain"}; charset=utf-8`,
+    "Content-Transfer-Encoding: base64",
+    "",
+    Buffer.from(opts.body, "utf8").toString("base64"),
+    ...opts.attachments.flatMap(att => [
+      `--${boundary}`,
+      `Content-Type: ${att.contentType || "application/octet-stream"}; name="${att.filename.replace(/"/g, "")}"`,
+      "Content-Transfer-Encoding: base64",
+      `Content-Disposition: attachment; filename="${att.filename.replace(/"/g, "")}"`,
+      "",
+      att.content,
+    ]),
+    `--${boundary}--`,
+  ];
+  return `${headers.join("\r\n")}\r\n\r\n${parts.join("\r\n")}\r\n`;
 }
