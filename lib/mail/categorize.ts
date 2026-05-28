@@ -1,4 +1,3 @@
-import "server-only";
 // lib/mail/categorize.ts
 // Smart email categorization: heuristics first, optional Claude API enrichment.
 // Uses Claude Haiku for speed + low cost. Prompt-cached system prompt.
