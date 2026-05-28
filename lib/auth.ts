@@ -10,6 +10,8 @@ export type SessionUser = {
   id: string;
   email: string;
   name: string | null;
+  twoFactorEnabled: boolean;
+  isHostcariClient?: boolean;
 };
 
 export async function createSession(userId: string): Promise<string> {
@@ -43,7 +45,7 @@ export async function getSession(): Promise<SessionUser | null> {
 
     const session = await db.session.findUnique({
       where: { token },
-      include: { user: { select: { id: true, email: true, name: true } } },
+      include: { user: { select: { id: true, email: true, name: true, twoFactorEnabled: true } } },
     });
 
     if (!session || session.expiresAt < new Date()) {

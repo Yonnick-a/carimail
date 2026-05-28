@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  AlertCircle, Archive, Check, ChevronLeft, ChevronRight,
-  Bell, Clock, Copy, Download, Eye, EyeOff, Forward, Inbox,
+  AlertCircle, Archive, Calendar, Check, ChevronLeft, ChevronRight,
+  Bell, Clock, Copy, Download, ExternalLink, Eye, EyeOff, Forward, Inbox,
   Loader2, Mail, MailOpen, MailX, MoveRight, Paperclip,
   Printer, RefreshCw, Reply, ReplyAll, Send,
-  Star, StarOff, Tag, Trash2, X, ZoomIn, ZoomOut,
+  Star, StarOff, Tag, Trash2, Video, X, ZoomIn, ZoomOut,
 } from "lucide-react";
+import { extractMeetingLinksFromHtml, buildGoogleCalendarLink, formatEventDate, type MeetingLink } from "@/lib/mail/calendar";
 import Link from "next/link";
 
 type Message = {
@@ -117,6 +118,60 @@ function CopyBtn({ text }: { text: string }) {
       className="flex h-5 w-5 items-center justify-center rounded opacity-50 hover:opacity-100 transition" style={{ color: "var(--cm-text2)" }}>
       {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
     </button>
+  );
+}
+
+const MEETING_ICON: Record<string, typeof Video> = { zoom: Video, meet: Video, teams: Video, webex: Video };
+
+function CalendarCard({ msg }: { msg: MessageFull }) {
+  const hasIcs = msg.attachments.some(a =>
+    a.contentType.includes("calendar") || a.contentType.includes("ics") ||
+    a.filename.toLowerCase().endsWith(".ics")
+  );
+  const links = msg.bodyHtml ? extractMeetingLinksFromHtml(msg.bodyHtml) : [];
+
+  if (!hasIcs && links.length === 0) return null;
+
+  return (
+    <div className="mb-5 overflow-hidden rounded-2xl border"
+      style={{ borderColor: "rgba(59,130,246,0.25)", background: "rgba(59,130,246,0.05)" }}>
+      <div className="flex items-center gap-2.5 border-b px-4 py-3"
+        style={{ borderColor: "rgba(59,130,246,0.15)" }}>
+        <Calendar className="h-4 w-4 shrink-0" style={{ color: "#3b82f6" }} />
+        <span className="text-[13px] font-[700]" style={{ color: "var(--cm-text)" }}>
+          {hasIcs ? "Calendar invite" : "Meeting link detected"}
+        </span>
+        {hasIcs && (
+          <span className="rounded-full px-2 py-0.5 text-[10px] font-[700]"
+            style={{ background: "rgba(59,130,246,0.12)", color: "#3b82f6" }}>
+            .ics attached
+          </span>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-2 px-4 py-3">
+        {links.map((link, i) => {
+          const Icon = MEETING_ICON[link.type] ?? ExternalLink;
+          return (
+            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[12.5px] font-[700] transition hover:-translate-y-0.5"
+              style={{ borderColor: "rgba(59,130,246,0.30)", background: "var(--cm-surface)", color: "#3b82f6",
+                       boxShadow: "0 2px 8px rgba(59,130,246,0.10)" }}>
+              <Icon className="h-3.5 w-3.5" />
+              {link.label}
+            </a>
+          );
+        })}
+        {/* Google Calendar deep-link if we have ICS */}
+        {hasIcs && (
+          <a href={`https://calendar.google.com`} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-[12.5px] font-[700] transition hover:-translate-y-0.5"
+            style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
+            <Calendar className="h-3.5 w-3.5" />
+            Open Google Calendar
+          </a>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -897,6 +952,8 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                 </div>
 
                 <div className="my-5 h-px" style={{ background: "var(--cm-border)" }} />
+
+                <CalendarCard msg={selected} />
 
                 {viewSource ? (
                   <pre className="overflow-x-auto rounded-xl border p-4 text-[12px] leading-relaxed font-mono"

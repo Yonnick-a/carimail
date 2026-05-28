@@ -8,14 +8,17 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  passwordHash  String?
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  email             String    @unique
+  name              String?
+  passwordHash      String?
+  emailVerified     DateTime?
+  image             String?
+  twoFactorEnabled  Boolean   @default(false)
+  twoFactorSecret   String?   // AES-256-CBC encrypted TOTP secret
+  backupCodes       String    @default("[]") // JSON array of bcrypt-hashed backup codes
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   accounts      MailAccount[]
   sessions      Session[]

@@ -173,14 +173,37 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
 
   useEffect(() => {
     if (!currentAccountId) return;
-    const id = window.setInterval(() => {
+
+    // Fallback polling (keeps working if SSE is unavailable)
+    const poll = window.setInterval(() => {
       if (document.visibilityState === "visible") loadFolders(true);
-    }, 20000);
+    }, 30_000);
+
     const onMailboxChanged = () => loadFolders(true);
     window.addEventListener("carimail:mailbox-changed", onMailboxChanged);
+
+    // SSE real-time stream
+    let es: EventSource | null = null;
+    function connectSSE() {
+      if (!("EventSource" in window)) return;
+      es = new EventSource(`/api/mail/stream?accountId=${currentAccountId}`);
+
+      es.addEventListener("mail", () => {
+        if (document.visibilityState === "visible") loadFolders(true);
+      });
+
+      es.onerror = () => {
+        es?.close();
+        // Reconnect after 15s on error
+        setTimeout(connectSSE, 15_000);
+      };
+    }
+    connectSSE();
+
     return () => {
-      window.clearInterval(id);
+      window.clearInterval(poll);
       window.removeEventListener("carimail:mailbox-changed", onMailboxChanged);
+      es?.close();
     };
   }, [currentAccountId, loadFolders]);
 

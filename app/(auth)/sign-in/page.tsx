@@ -24,6 +24,7 @@ export default function SignInPage() {
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "Sign in failed.");
+      if (data.requiresTwoFactor) { router.push("/verify-2fa"); return; }
       router.push("/inbox"); router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign in failed.");
