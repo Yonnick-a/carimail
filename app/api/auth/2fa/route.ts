@@ -186,6 +186,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
-// Export challenge cookie name so signin route can set it
-export { CHALLENGE_COOKIE };
