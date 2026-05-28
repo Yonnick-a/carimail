@@ -96,3 +96,38 @@ export type MailReminder = Prisma.MailReminderModel
  * 
  */
 export type MailSignature = Prisma.MailSignatureModel
+/**
+ * Model EmailTrackingPixel
+ * 
+ */
+export type EmailTrackingPixel = Prisma.EmailTrackingPixelModel
+/**
+ * Model EmailTrackEvent
+ * 
+ */
+export type EmailTrackEvent = Prisma.EmailTrackEventModel
+/**
+ * Model MessageCategory
+ * 
+ */
+export type MessageCategory = Prisma.MessageCategoryModel
+/**
+ * Model Team
+ * 
+ */
+export type Team = Prisma.TeamModel
+/**
+ * Model TeamMember
+ * 
+ */
+export type TeamMember = Prisma.TeamMemberModel
+/**
+ * Model TeamInvite
+ * 
+ */
+export type TeamInvite = Prisma.TeamInviteModel
+/**
+ * Model TeamMailAccount
+ * 
+ */
+export type TeamMailAccount = Prisma.TeamMailAccountModel

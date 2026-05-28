@@ -23,6 +23,7 @@ model User {
   accounts      MailAccount[]
   sessions      Session[]
   resetTokens   PasswordResetToken[]
+  teamMemberships TeamMember[]
 
   @@index([email])
 }
@@ -84,6 +85,9 @@ model MailAccount {
   snoozes           MailSnooze[]
   reminders         MailReminder[]
   signatures        MailSignature[]
+  trackingPixels    EmailTrackingPixel[]
+  messageCategories MessageCategory[]
+  teamShares        TeamMailAccount[]
 
   @@index([userId])
   @@index([emailAddress])
@@ -218,4 +222,112 @@ model MailSignature {
   account   MailAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@index([accountId, isDefault])
+}
+
+// ── Email tracking ─────────────────────────────────────────────────────────
+
+model EmailTrackingPixel {
+  id          String    @id @default(cuid())
+  accountId   String
+  to          String
+  subject     String
+  opens       Int       @default(0)
+  lastOpenAt  DateTime?
+  clicks      Int       @default(0)
+  lastClickAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  events  EmailTrackEvent[]
+  account MailAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+model EmailTrackEvent {
+  id        String   @id @default(cuid())
+  pixelId   String
+  type      String   // "open" | "click"
+  url       String?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  pixel     EmailTrackingPixel @relation(fields: [pixelId], references: [id], onDelete: Cascade)
+
+  @@index([pixelId, type])
+}
+
+// ── AI message categories ──────────────────────────────────────────────────
+
+model MessageCategory {
+  id        String   @id @default(cuid())
+  accountId String
+  folder    String
+  uid       Int
+  category  String   // primary|updates|promotions|social|finance|security|notifications
+  source    String   @default("heuristic") // heuristic | ai
+  createdAt DateTime @default(now())
+
+  account   MailAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, folder, uid])
+  @@index([accountId, folder])
+}
+
+// ── Teams ──────────────────────────────────────────────────────────────────
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members        TeamMember[]
+  invites        TeamInvite[]
+  sharedAccounts TeamMailAccount[]
+
+  @@index([ownerId])
+}
+
+model TeamMember {
+  id       String   @id @default(cuid())
+  teamId   String
+  userId   String
+  role     String   @default("member") // owner | admin | member
+  joinedAt DateTime @default(now())
+
+  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+}
+
+model TeamInvite {
+  id        String    @id @default(cuid())
+  teamId    String
+  email     String
+  token     String    @unique
+  role      String    @default("member")
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  team      Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([email])
+}
+
+model TeamMailAccount {
+  id        String      @id @default(cuid())
+  teamId    String
+  accountId String
+  addedAt   DateTime    @default(now())
+
+  team      Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  account   MailAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, accountId])
 }

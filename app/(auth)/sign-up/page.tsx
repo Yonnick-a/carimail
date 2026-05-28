@@ -1,9 +1,50 @@
 "use client";
-// app/(auth)/sign-up/page.tsx
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Eye, EyeOff, Loader2, Lock, Mail, Sparkles, User } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2, Sparkles } from "lucide-react";
+
+const inputBase =
+  "w-full rounded-2xl border bg-transparent py-3.5 text-[14px] outline-none transition-all duration-150";
+
+function InputField({
+  type = "text", value, onChange, placeholder, autoComplete, autoFocus, required,
+  icon, right, minLength,
+}: {
+  type?: string; value: string; onChange: (v: string) => void; placeholder: string;
+  autoComplete?: string; autoFocus?: boolean; required?: boolean;
+  icon?: React.ReactNode; right?: React.ReactNode; minLength?: number;
+}) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div className="relative">
+      {icon && (
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: focused ? "var(--cm-accent)" : "var(--cm-text3)", transition: "color 0.15s" }}>
+          {icon}
+        </span>
+      )}
+      <input
+        type={type} value={value} onChange={e => onChange(e.target.value)}
+        placeholder={placeholder} autoComplete={autoComplete} autoFocus={autoFocus}
+        required={required} minLength={minLength}
+        className={`${inputBase} ${icon ? "pl-10" : "pl-4"} ${right ? "pr-11" : "pr-4"}`}
+        style={{
+          borderColor: focused ? "var(--cm-accent)" : "var(--cm-border2)",
+          background: focused ? "var(--cm-surface)" : "var(--cm-surface2)",
+          color: "var(--cm-text)",
+          boxShadow: focused ? "0 0 0 3px var(--cm-accent-dim)" : "none",
+        }}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+      />
+      {right && <span className="absolute right-3.5 top-1/2 -translate-y-1/2">{right}</span>}
+    </div>
+  );
+}
+
+const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"];
+const strengthColor = ["", "#EF4444", "#F59E0B", "#0044BC", "#10B981"];
+const strengthWidth = ["0%","25%","50%","75%","100%"];
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -14,13 +55,18 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  const strength =
+    password.length === 0 ? 0 :
+    password.length < 8   ? 1 :
+    password.length < 12  ? 2 :
+    /[A-Z]/.test(password) && /[0-9]/.test(password) ? 4 : 3;
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(""); setLoading(true);
     try {
       const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
       const data = await res.json();
@@ -32,140 +78,113 @@ export default function SignUpPage() {
     }
   }
 
-  const strength = password.length === 0 ? 0
-    : password.length < 8 ? 1
-    : password.length < 12 ? 2
-    : /[A-Z]/.test(password) && /[0-9]/.test(password) ? 4 : 3;
-  const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"];
-  const strengthColor = ["", "#EF4444", "#F59E0B", "#0044BC", "#10B981"];
-
-  const fieldStyle = {
-    borderColor: "var(--cm-input-border)",
-    background: "var(--cm-input-bg)",
-    color: "var(--cm-text)",
-  };
-  function onFocus(e: React.FocusEvent<HTMLInputElement>) {
-    e.target.style.borderColor = "var(--cm-accent)";
-    e.target.style.background = "var(--cm-surface)";
-    e.target.style.boxShadow = "0 0 0 3px var(--cm-accent-dim)";
-  }
-  function onBlur(e: React.FocusEvent<HTMLInputElement>) {
-    e.target.style.borderColor = "var(--cm-input-border)";
-    e.target.style.background = "var(--cm-input-bg)";
-    e.target.style.boxShadow = "none";
-  }
+  const MailIcon = () => <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>;
+  const LockIcon  = () => <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>;
+  const UserIcon  = () => <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>;
 
   return (
     <div className="animate-fade-up">
-      <div className="flex items-center gap-2.5 mb-1">
-        <h1 className="text-[22px] font-[800] tracking-tight" style={{ color: "var(--cm-text)" }}>Create account</h1>
-        <span className="animate-spark text-[20px] select-none" role="img" aria-label="sparkles">✨</span>
-      </div>
-      <p className="text-[13px] mb-5" style={{ color: "var(--cm-text2)" }}>Get started with Carimail for free</p>
+      <h1 className="text-[26px] font-[900] tracking-tight" style={{ color: "var(--cm-text)" }}>
+        Create account
+        <span className="ml-2 animate-spark inline-block select-none" role="img" aria-label="sparkles">✨</span>
+      </h1>
+      <p className="mt-1.5 text-[13.5px]" style={{ color: "var(--cm-text3)" }}>
+        Get started with Carimail for free
+      </p>
 
-      {/* Feature pills */}
-      <div className="flex flex-wrap gap-1.5 mb-6">
-        {["Any IMAP provider", "Encrypted storage", "Free to start"].map(feat => (
-          <span key={feat} className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10.5px] font-[600]"
-            style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text3)" }}>
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--cm-blue)" }} />{feat}
-          </span>
-        ))}
-      </div>
-
-      {/* Hostcari client callout */}
-      <div className="mb-5 flex items-start gap-3 rounded-xl border px-3.5 py-3"
+      {/* Hostcari callout */}
+      <div className="mt-6 flex items-start gap-3 rounded-2xl border px-4 py-3.5"
         style={{ borderColor: "var(--cm-accent-b)", background: "var(--cm-accent-dim)" }}>
         <Sparkles className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "var(--cm-accent)" }} />
         <div>
-          <p className="text-[11.5px] font-[700]" style={{ color: "var(--cm-accent)" }}>Hostcari client?</p>
-          <p className="text-[11px] leading-relaxed mt-0.5" style={{ color: "var(--cm-text2)" }}>
-            Sign up with your Hostcari mailbox address to unlock your client badge and priority features.
+          <p className="text-[12.5px] font-[800]" style={{ color: "var(--cm-accent)" }}>Hostcari client?</p>
+          <p className="mt-0.5 text-[12px] leading-relaxed" style={{ color: "var(--cm-text2)" }}>
+            Sign up with your Hostcari email to unlock your client badge and priority features.
           </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="mt-5 space-y-3.5">
         {error && (
-          <div className="flex items-center gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[12.5px] text-red-700">
+          <div className="flex items-center gap-2.5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700 animate-fade-in">
             <AlertCircle className="h-4 w-4 shrink-0" />{error}
           </div>
         )}
 
-        {/* Name */}
-        <div className="space-y-1.5">
-          <label className="block text-[11.5px] font-[600]" style={{ color: "var(--cm-text2)" }}>Full name</label>
-          <div className="relative">
-            <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--cm-text3)" }} />
-            <input type="text" value={name} onChange={e => setName(e.target.value)}
-              placeholder="Alex Johnson" required autoComplete="name" autoFocus
-              className="w-full rounded-xl border py-3 pl-10 pr-4 text-[13px] outline-none transition"
-              style={fieldStyle} onFocus={onFocus} onBlur={onBlur} />
-          </div>
+        <div className="space-y-1">
+          <label className="block text-[12px] font-[700]" style={{ color: "var(--cm-text2)" }}>Full name</label>
+          <InputField type="text" value={name} onChange={setName} placeholder="Alex Johnson"
+            autoComplete="name" autoFocus required icon={<UserIcon />} />
         </div>
 
-        {/* Email */}
-        <div className="space-y-1.5">
-          <label className="block text-[11.5px] font-[600]" style={{ color: "var(--cm-text2)" }}>Email address</label>
-          <div className="relative">
-            <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--cm-text3)" }} />
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="you@example.com" required autoComplete="email"
-              className="w-full rounded-xl border py-3 pl-10 pr-4 text-[13px] outline-none transition"
-              style={fieldStyle} onFocus={onFocus} onBlur={onBlur} />
-          </div>
+        <div className="space-y-1">
+          <label className="block text-[12px] font-[700]" style={{ color: "var(--cm-text2)" }}>Email address</label>
+          <InputField type="email" value={email} onChange={setEmail} placeholder="you@example.com"
+            autoComplete="email" required icon={<MailIcon />} />
         </div>
 
-        {/* Password */}
-        <div className="space-y-1.5">
-          <label className="block text-[11.5px] font-[600]" style={{ color: "var(--cm-text2)" }}>Password</label>
-          <div className="relative">
-            <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--cm-text3)" }} />
-            <input type={showPass ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="8+ characters" required autoComplete="new-password" minLength={8}
-              className="w-full rounded-xl border py-3 pl-10 pr-11 text-[13px] outline-none transition"
-              style={fieldStyle} onFocus={onFocus} onBlur={onBlur} />
-            <button type="button" onClick={() => setShowPass(v => !v)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 transition" style={{ color: "var(--cm-text3)" }}>
-              {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
+        <div className="space-y-1">
+          <label className="block text-[12px] font-[700]" style={{ color: "var(--cm-text2)" }}>Password</label>
+          <InputField
+            type={showPass ? "text" : "password"} value={password} onChange={setPassword}
+            placeholder="8+ characters" autoComplete="new-password" required minLength={8}
+            icon={<LockIcon />}
+            right={
+              <button type="button" onClick={() => setShowPass(v => !v)} style={{ color: "var(--cm-text3)" }}>
+                {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
+          />
+          {/* Strength bar */}
           {password && (
-            <div className="space-y-1.5">
-              <div className="flex gap-1">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="h-1 flex-1 rounded-full transition-all duration-300"
-                    style={{ background: i <= strength ? strengthColor[strength] : "var(--cm-border2)" }} />
-                ))}
+            <div className="mt-2 space-y-1">
+              <div className="h-1 w-full overflow-hidden rounded-full" style={{ background: "var(--cm-border2)" }}>
+                <div className="h-full rounded-full transition-all duration-400"
+                  style={{ width: strengthWidth[strength], background: strengthColor[strength] }} />
               </div>
-              <p className="text-[11px] font-[600]" style={{ color: strengthColor[strength] }}>
+              <p className="text-[11.5px] font-[700]" style={{ color: strengthColor[strength] }}>
                 {strengthLabel[strength]}
               </p>
             </div>
           )}
         </div>
 
-        <button type="submit" disabled={loading}
-          className="group relative mt-2 inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl py-3.5 text-[13.5px] font-[700] text-white transition active:scale-[0.99] disabled:opacity-60"
-          style={{ background: "linear-gradient(135deg, var(--cm-accent), var(--cm-accent2))", boxShadow: "0 8px 24px var(--cm-accent-b)" }}>
+        <button
+          type="submit"
+          disabled={loading}
+          className="group relative mt-2 inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl py-4 text-[14px] font-[800] text-white transition-all duration-200 active:scale-[0.99] disabled:opacity-60 hover:-translate-y-0.5"
+          style={{
+            background: "linear-gradient(135deg, var(--cm-accent), var(--cm-accent2))",
+            boxShadow: "0 8px 28px var(--cm-accent-b)",
+          }}
+        >
           <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           {loading ? "Creating account…" : "Create account"}
         </button>
       </form>
 
-      <p className="mt-4 text-center text-[10.5px]" style={{ color: "var(--cm-text3)" }}>
+      <p className="mt-5 text-center text-[11px]" style={{ color: "var(--cm-text3)" }}>
         By signing up you agree to our{" "}
         <Link href="/terms" className="hover:underline" style={{ color: "var(--cm-text2)" }}>Terms</Link>
-        {" "}&{" "}
+        {" "}&amp;{" "}
         <Link href="/privacy" className="hover:underline" style={{ color: "var(--cm-text2)" }}>Privacy Policy</Link>.
       </p>
 
-      <p className="mt-5 text-center text-[12.5px]" style={{ color: "var(--cm-text2)" }}>
-        Already have an account?{" "}
-        <Link href="/sign-in" className="font-[700] hover:underline" style={{ color: "var(--cm-blue)" }}>Sign in</Link>
-      </p>
+      {/* Feature pills */}
+      <div className="mt-5 flex flex-wrap justify-center gap-2">
+        {["Any IMAP provider", "Encrypted storage", "Free to start"].map(f => (
+          <span key={f} className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-[600]"
+            style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text3)" }}>
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--cm-blue)" }} />{f}
+          </span>
+        ))}
+      </div>
 
+      <p className="mt-5 text-center text-[13px]" style={{ color: "var(--cm-text2)" }}>
+        Already have an account?{" "}
+        <Link href="/sign-in" className="font-[800] hover:underline" style={{ color: "var(--cm-blue)" }}>Sign in</Link>
+      </p>
     </div>
   );
 }

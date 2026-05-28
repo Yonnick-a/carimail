@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mail, Shield, User } from "lucide-react";
+import { Mail, Shield, User, Users } from "lucide-react";
 
 const nav = [
   { href: "/settings/accounts", label: "Accounts", icon: Mail },
   { href: "/settings/profile", label: "Profile", icon: User },
   { href: "/settings/security", label: "Security", icon: Shield },
+  { href: "/settings/teams", label: "Teams", icon: Users },
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {

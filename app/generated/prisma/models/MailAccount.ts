@@ -356,6 +356,9 @@ export type MailAccountWhereInput = {
   snoozes?: Prisma.MailSnoozeListRelationFilter
   reminders?: Prisma.MailReminderListRelationFilter
   signatures?: Prisma.MailSignatureListRelationFilter
+  trackingPixels?: Prisma.EmailTrackingPixelListRelationFilter
+  messageCategories?: Prisma.MessageCategoryListRelationFilter
+  teamShares?: Prisma.TeamMailAccountListRelationFilter
 }
 
 export type MailAccountOrderByWithRelationInput = {
@@ -388,6 +391,9 @@ export type MailAccountOrderByWithRelationInput = {
   snoozes?: Prisma.MailSnoozeOrderByRelationAggregateInput
   reminders?: Prisma.MailReminderOrderByRelationAggregateInput
   signatures?: Prisma.MailSignatureOrderByRelationAggregateInput
+  trackingPixels?: Prisma.EmailTrackingPixelOrderByRelationAggregateInput
+  messageCategories?: Prisma.MessageCategoryOrderByRelationAggregateInput
+  teamShares?: Prisma.TeamMailAccountOrderByRelationAggregateInput
 }
 
 export type MailAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -424,6 +430,9 @@ export type MailAccountWhereUniqueInput = Prisma.AtLeast<{
   snoozes?: Prisma.MailSnoozeListRelationFilter
   reminders?: Prisma.MailReminderListRelationFilter
   signatures?: Prisma.MailSignatureListRelationFilter
+  trackingPixels?: Prisma.EmailTrackingPixelListRelationFilter
+  messageCategories?: Prisma.MessageCategoryListRelationFilter
+  teamShares?: Prisma.TeamMailAccountListRelationFilter
 }, "id" | "userId_emailAddress">
 
 export type MailAccountOrderByWithAggregationInput = {
@@ -511,6 +520,9 @@ export type MailAccountCreateInput = {
   snoozes?: Prisma.MailSnoozeCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUncheckedCreateInput = {
@@ -542,6 +554,9 @@ export type MailAccountUncheckedCreateInput = {
   snoozes?: Prisma.MailSnoozeUncheckedCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderUncheckedCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureUncheckedCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryUncheckedCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUpdateInput = {
@@ -573,6 +588,9 @@ export type MailAccountUpdateInput = {
   snoozes?: Prisma.MailSnoozeUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateInput = {
@@ -604,6 +622,9 @@ export type MailAccountUncheckedUpdateInput = {
   snoozes?: Prisma.MailSnoozeUncheckedUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUncheckedUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUncheckedUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUncheckedUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountCreateManyInput = {
@@ -927,6 +948,48 @@ export type MailAccountUpdateOneRequiredWithoutSignaturesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MailAccountUpdateToOneWithWhereWithoutSignaturesInput, Prisma.MailAccountUpdateWithoutSignaturesInput>, Prisma.MailAccountUncheckedUpdateWithoutSignaturesInput>
 }
 
+export type MailAccountCreateNestedOneWithoutTrackingPixelsInput = {
+  create?: Prisma.XOR<Prisma.MailAccountCreateWithoutTrackingPixelsInput, Prisma.MailAccountUncheckedCreateWithoutTrackingPixelsInput>
+  connectOrCreate?: Prisma.MailAccountCreateOrConnectWithoutTrackingPixelsInput
+  connect?: Prisma.MailAccountWhereUniqueInput
+}
+
+export type MailAccountUpdateOneRequiredWithoutTrackingPixelsNestedInput = {
+  create?: Prisma.XOR<Prisma.MailAccountCreateWithoutTrackingPixelsInput, Prisma.MailAccountUncheckedCreateWithoutTrackingPixelsInput>
+  connectOrCreate?: Prisma.MailAccountCreateOrConnectWithoutTrackingPixelsInput
+  upsert?: Prisma.MailAccountUpsertWithoutTrackingPixelsInput
+  connect?: Prisma.MailAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MailAccountUpdateToOneWithWhereWithoutTrackingPixelsInput, Prisma.MailAccountUpdateWithoutTrackingPixelsInput>, Prisma.MailAccountUncheckedUpdateWithoutTrackingPixelsInput>
+}
+
+export type MailAccountCreateNestedOneWithoutMessageCategoriesInput = {
+  create?: Prisma.XOR<Prisma.MailAccountCreateWithoutMessageCategoriesInput, Prisma.MailAccountUncheckedCreateWithoutMessageCategoriesInput>
+  connectOrCreate?: Prisma.MailAccountCreateOrConnectWithoutMessageCategoriesInput
+  connect?: Prisma.MailAccountWhereUniqueInput
+}
+
+export type MailAccountUpdateOneRequiredWithoutMessageCategoriesNestedInput = {
+  create?: Prisma.XOR<Prisma.MailAccountCreateWithoutMessageCategoriesInput, Prisma.MailAccountUncheckedCreateWithoutMessageCategoriesInput>
+  connectOrCreate?: Prisma.MailAccountCreateOrConnectWithoutMessageCategoriesInput
+  upsert?: Prisma.MailAccountUpsertWithoutMessageCategoriesInput
+  connect?: Prisma.MailAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MailAccountUpdateToOneWithWhereWithoutMessageCategoriesInput, Prisma.MailAccountUpdateWithoutMessageCategoriesInput>, Prisma.MailAccountUncheckedUpdateWithoutMessageCategoriesInput>
+}
+
+export type MailAccountCreateNestedOneWithoutTeamSharesInput = {
+  create?: Prisma.XOR<Prisma.MailAccountCreateWithoutTeamSharesInput, Prisma.MailAccountUncheckedCreateWithoutTeamSharesInput>
+  connectOrCreate?: Prisma.MailAccountCreateOrConnectWithoutTeamSharesInput
+  connect?: Prisma.MailAccountWhereUniqueInput
+}
+
+export type MailAccountUpdateOneRequiredWithoutTeamSharesNestedInput = {
+  create?: Prisma.XOR<Prisma.MailAccountCreateWithoutTeamSharesInput, Prisma.MailAccountUncheckedCreateWithoutTeamSharesInput>
+  connectOrCreate?: Prisma.MailAccountCreateOrConnectWithoutTeamSharesInput
+  upsert?: Prisma.MailAccountUpsertWithoutTeamSharesInput
+  connect?: Prisma.MailAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MailAccountUpdateToOneWithWhereWithoutTeamSharesInput, Prisma.MailAccountUpdateWithoutTeamSharesInput>, Prisma.MailAccountUncheckedUpdateWithoutTeamSharesInput>
+}
+
 export type MailAccountCreateWithoutUserInput = {
   id?: string
   label?: string | null
@@ -955,6 +1018,9 @@ export type MailAccountCreateWithoutUserInput = {
   snoozes?: Prisma.MailSnoozeCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUncheckedCreateWithoutUserInput = {
@@ -985,6 +1051,9 @@ export type MailAccountUncheckedCreateWithoutUserInput = {
   snoozes?: Prisma.MailSnoozeUncheckedCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderUncheckedCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureUncheckedCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryUncheckedCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountCreateOrConnectWithoutUserInput = {
@@ -1068,6 +1137,9 @@ export type MailAccountCreateWithoutConversationsInput = {
   snoozes?: Prisma.MailSnoozeCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUncheckedCreateWithoutConversationsInput = {
@@ -1098,6 +1170,9 @@ export type MailAccountUncheckedCreateWithoutConversationsInput = {
   snoozes?: Prisma.MailSnoozeUncheckedCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderUncheckedCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureUncheckedCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryUncheckedCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountCreateOrConnectWithoutConversationsInput = {
@@ -1144,6 +1219,9 @@ export type MailAccountUpdateWithoutConversationsInput = {
   snoozes?: Prisma.MailSnoozeUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateWithoutConversationsInput = {
@@ -1174,6 +1252,9 @@ export type MailAccountUncheckedUpdateWithoutConversationsInput = {
   snoozes?: Prisma.MailSnoozeUncheckedUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUncheckedUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUncheckedUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUncheckedUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountCreateWithoutMessagesInput = {
@@ -1204,6 +1285,9 @@ export type MailAccountCreateWithoutMessagesInput = {
   snoozes?: Prisma.MailSnoozeCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUncheckedCreateWithoutMessagesInput = {
@@ -1234,6 +1318,9 @@ export type MailAccountUncheckedCreateWithoutMessagesInput = {
   snoozes?: Prisma.MailSnoozeUncheckedCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderUncheckedCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureUncheckedCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryUncheckedCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountCreateOrConnectWithoutMessagesInput = {
@@ -1280,6 +1367,9 @@ export type MailAccountUpdateWithoutMessagesInput = {
   snoozes?: Prisma.MailSnoozeUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateWithoutMessagesInput = {
@@ -1310,6 +1400,9 @@ export type MailAccountUncheckedUpdateWithoutMessagesInput = {
   snoozes?: Prisma.MailSnoozeUncheckedUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUncheckedUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUncheckedUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUncheckedUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountCreateWithoutRulesInput = {
@@ -1340,6 +1433,9 @@ export type MailAccountCreateWithoutRulesInput = {
   snoozes?: Prisma.MailSnoozeCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUncheckedCreateWithoutRulesInput = {
@@ -1370,6 +1466,9 @@ export type MailAccountUncheckedCreateWithoutRulesInput = {
   snoozes?: Prisma.MailSnoozeUncheckedCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderUncheckedCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureUncheckedCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryUncheckedCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountCreateOrConnectWithoutRulesInput = {
@@ -1416,6 +1515,9 @@ export type MailAccountUpdateWithoutRulesInput = {
   snoozes?: Prisma.MailSnoozeUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateWithoutRulesInput = {
@@ -1446,6 +1548,9 @@ export type MailAccountUncheckedUpdateWithoutRulesInput = {
   snoozes?: Prisma.MailSnoozeUncheckedUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUncheckedUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUncheckedUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUncheckedUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountCreateWithoutScheduledEmailsInput = {
@@ -1476,6 +1581,9 @@ export type MailAccountCreateWithoutScheduledEmailsInput = {
   snoozes?: Prisma.MailSnoozeCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUncheckedCreateWithoutScheduledEmailsInput = {
@@ -1506,6 +1614,9 @@ export type MailAccountUncheckedCreateWithoutScheduledEmailsInput = {
   snoozes?: Prisma.MailSnoozeUncheckedCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderUncheckedCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureUncheckedCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryUncheckedCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountCreateOrConnectWithoutScheduledEmailsInput = {
@@ -1552,6 +1663,9 @@ export type MailAccountUpdateWithoutScheduledEmailsInput = {
   snoozes?: Prisma.MailSnoozeUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateWithoutScheduledEmailsInput = {
@@ -1582,6 +1696,9 @@ export type MailAccountUncheckedUpdateWithoutScheduledEmailsInput = {
   snoozes?: Prisma.MailSnoozeUncheckedUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUncheckedUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUncheckedUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUncheckedUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountCreateWithoutSnoozesInput = {
@@ -1612,6 +1729,9 @@ export type MailAccountCreateWithoutSnoozesInput = {
   scheduledEmails?: Prisma.ScheduledEmailCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUncheckedCreateWithoutSnoozesInput = {
@@ -1642,6 +1762,9 @@ export type MailAccountUncheckedCreateWithoutSnoozesInput = {
   scheduledEmails?: Prisma.ScheduledEmailUncheckedCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderUncheckedCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureUncheckedCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryUncheckedCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountCreateOrConnectWithoutSnoozesInput = {
@@ -1688,6 +1811,9 @@ export type MailAccountUpdateWithoutSnoozesInput = {
   scheduledEmails?: Prisma.ScheduledEmailUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateWithoutSnoozesInput = {
@@ -1718,6 +1844,9 @@ export type MailAccountUncheckedUpdateWithoutSnoozesInput = {
   scheduledEmails?: Prisma.ScheduledEmailUncheckedUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUncheckedUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUncheckedUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUncheckedUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountCreateWithoutRemindersInput = {
@@ -1748,6 +1877,9 @@ export type MailAccountCreateWithoutRemindersInput = {
   scheduledEmails?: Prisma.ScheduledEmailCreateNestedManyWithoutAccountInput
   snoozes?: Prisma.MailSnoozeCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUncheckedCreateWithoutRemindersInput = {
@@ -1778,6 +1910,9 @@ export type MailAccountUncheckedCreateWithoutRemindersInput = {
   scheduledEmails?: Prisma.ScheduledEmailUncheckedCreateNestedManyWithoutAccountInput
   snoozes?: Prisma.MailSnoozeUncheckedCreateNestedManyWithoutAccountInput
   signatures?: Prisma.MailSignatureUncheckedCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryUncheckedCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountCreateOrConnectWithoutRemindersInput = {
@@ -1824,6 +1959,9 @@ export type MailAccountUpdateWithoutRemindersInput = {
   scheduledEmails?: Prisma.ScheduledEmailUpdateManyWithoutAccountNestedInput
   snoozes?: Prisma.MailSnoozeUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateWithoutRemindersInput = {
@@ -1854,6 +1992,9 @@ export type MailAccountUncheckedUpdateWithoutRemindersInput = {
   scheduledEmails?: Prisma.ScheduledEmailUncheckedUpdateManyWithoutAccountNestedInput
   snoozes?: Prisma.MailSnoozeUncheckedUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUncheckedUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUncheckedUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountCreateWithoutSignaturesInput = {
@@ -1884,6 +2025,9 @@ export type MailAccountCreateWithoutSignaturesInput = {
   scheduledEmails?: Prisma.ScheduledEmailCreateNestedManyWithoutAccountInput
   snoozes?: Prisma.MailSnoozeCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountUncheckedCreateWithoutSignaturesInput = {
@@ -1914,6 +2058,9 @@ export type MailAccountUncheckedCreateWithoutSignaturesInput = {
   scheduledEmails?: Prisma.ScheduledEmailUncheckedCreateNestedManyWithoutAccountInput
   snoozes?: Prisma.MailSnoozeUncheckedCreateNestedManyWithoutAccountInput
   reminders?: Prisma.MailReminderUncheckedCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryUncheckedCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type MailAccountCreateOrConnectWithoutSignaturesInput = {
@@ -1960,6 +2107,9 @@ export type MailAccountUpdateWithoutSignaturesInput = {
   scheduledEmails?: Prisma.ScheduledEmailUpdateManyWithoutAccountNestedInput
   snoozes?: Prisma.MailSnoozeUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateWithoutSignaturesInput = {
@@ -1990,6 +2140,453 @@ export type MailAccountUncheckedUpdateWithoutSignaturesInput = {
   scheduledEmails?: Prisma.ScheduledEmailUncheckedUpdateManyWithoutAccountNestedInput
   snoozes?: Prisma.MailSnoozeUncheckedUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUncheckedUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUncheckedUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUncheckedUpdateManyWithoutAccountNestedInput
+}
+
+export type MailAccountCreateWithoutTrackingPixelsInput = {
+  id?: string
+  label?: string | null
+  emailAddress: string
+  imapHost: string
+  imapPort?: number
+  imapSecure?: boolean
+  smtpHost: string
+  smtpPort?: number
+  smtpSecure?: boolean
+  encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
+  isPrimary?: boolean
+  isActive?: boolean
+  lastSyncedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutAccountsInput
+  messages?: Prisma.MailMessageCreateNestedManyWithoutAccountInput
+  conversations?: Prisma.MailConversationCreateNestedManyWithoutAccountInput
+  rules?: Prisma.MailRuleCreateNestedManyWithoutAccountInput
+  scheduledEmails?: Prisma.ScheduledEmailCreateNestedManyWithoutAccountInput
+  snoozes?: Prisma.MailSnoozeCreateNestedManyWithoutAccountInput
+  reminders?: Prisma.MailReminderCreateNestedManyWithoutAccountInput
+  signatures?: Prisma.MailSignatureCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountCreateNestedManyWithoutAccountInput
+}
+
+export type MailAccountUncheckedCreateWithoutTrackingPixelsInput = {
+  id?: string
+  userId: string
+  label?: string | null
+  emailAddress: string
+  imapHost: string
+  imapPort?: number
+  imapSecure?: boolean
+  smtpHost: string
+  smtpPort?: number
+  smtpSecure?: boolean
+  encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
+  isPrimary?: boolean
+  isActive?: boolean
+  lastSyncedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  messages?: Prisma.MailMessageUncheckedCreateNestedManyWithoutAccountInput
+  conversations?: Prisma.MailConversationUncheckedCreateNestedManyWithoutAccountInput
+  rules?: Prisma.MailRuleUncheckedCreateNestedManyWithoutAccountInput
+  scheduledEmails?: Prisma.ScheduledEmailUncheckedCreateNestedManyWithoutAccountInput
+  snoozes?: Prisma.MailSnoozeUncheckedCreateNestedManyWithoutAccountInput
+  reminders?: Prisma.MailReminderUncheckedCreateNestedManyWithoutAccountInput
+  signatures?: Prisma.MailSignatureUncheckedCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryUncheckedCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountUncheckedCreateNestedManyWithoutAccountInput
+}
+
+export type MailAccountCreateOrConnectWithoutTrackingPixelsInput = {
+  where: Prisma.MailAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.MailAccountCreateWithoutTrackingPixelsInput, Prisma.MailAccountUncheckedCreateWithoutTrackingPixelsInput>
+}
+
+export type MailAccountUpsertWithoutTrackingPixelsInput = {
+  update: Prisma.XOR<Prisma.MailAccountUpdateWithoutTrackingPixelsInput, Prisma.MailAccountUncheckedUpdateWithoutTrackingPixelsInput>
+  create: Prisma.XOR<Prisma.MailAccountCreateWithoutTrackingPixelsInput, Prisma.MailAccountUncheckedCreateWithoutTrackingPixelsInput>
+  where?: Prisma.MailAccountWhereInput
+}
+
+export type MailAccountUpdateToOneWithWhereWithoutTrackingPixelsInput = {
+  where?: Prisma.MailAccountWhereInput
+  data: Prisma.XOR<Prisma.MailAccountUpdateWithoutTrackingPixelsInput, Prisma.MailAccountUncheckedUpdateWithoutTrackingPixelsInput>
+}
+
+export type MailAccountUpdateWithoutTrackingPixelsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  imapHost?: Prisma.StringFieldUpdateOperationsInput | string
+  imapPort?: Prisma.IntFieldUpdateOperationsInput | number
+  imapSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.StringFieldUpdateOperationsInput | string
+  smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutAccountsNestedInput
+  messages?: Prisma.MailMessageUpdateManyWithoutAccountNestedInput
+  conversations?: Prisma.MailConversationUpdateManyWithoutAccountNestedInput
+  rules?: Prisma.MailRuleUpdateManyWithoutAccountNestedInput
+  scheduledEmails?: Prisma.ScheduledEmailUpdateManyWithoutAccountNestedInput
+  snoozes?: Prisma.MailSnoozeUpdateManyWithoutAccountNestedInput
+  reminders?: Prisma.MailReminderUpdateManyWithoutAccountNestedInput
+  signatures?: Prisma.MailSignatureUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUpdateManyWithoutAccountNestedInput
+}
+
+export type MailAccountUncheckedUpdateWithoutTrackingPixelsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  imapHost?: Prisma.StringFieldUpdateOperationsInput | string
+  imapPort?: Prisma.IntFieldUpdateOperationsInput | number
+  imapSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.StringFieldUpdateOperationsInput | string
+  smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.MailMessageUncheckedUpdateManyWithoutAccountNestedInput
+  conversations?: Prisma.MailConversationUncheckedUpdateManyWithoutAccountNestedInput
+  rules?: Prisma.MailRuleUncheckedUpdateManyWithoutAccountNestedInput
+  scheduledEmails?: Prisma.ScheduledEmailUncheckedUpdateManyWithoutAccountNestedInput
+  snoozes?: Prisma.MailSnoozeUncheckedUpdateManyWithoutAccountNestedInput
+  reminders?: Prisma.MailReminderUncheckedUpdateManyWithoutAccountNestedInput
+  signatures?: Prisma.MailSignatureUncheckedUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUncheckedUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUncheckedUpdateManyWithoutAccountNestedInput
+}
+
+export type MailAccountCreateWithoutMessageCategoriesInput = {
+  id?: string
+  label?: string | null
+  emailAddress: string
+  imapHost: string
+  imapPort?: number
+  imapSecure?: boolean
+  smtpHost: string
+  smtpPort?: number
+  smtpSecure?: boolean
+  encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
+  isPrimary?: boolean
+  isActive?: boolean
+  lastSyncedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutAccountsInput
+  messages?: Prisma.MailMessageCreateNestedManyWithoutAccountInput
+  conversations?: Prisma.MailConversationCreateNestedManyWithoutAccountInput
+  rules?: Prisma.MailRuleCreateNestedManyWithoutAccountInput
+  scheduledEmails?: Prisma.ScheduledEmailCreateNestedManyWithoutAccountInput
+  snoozes?: Prisma.MailSnoozeCreateNestedManyWithoutAccountInput
+  reminders?: Prisma.MailReminderCreateNestedManyWithoutAccountInput
+  signatures?: Prisma.MailSignatureCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountCreateNestedManyWithoutAccountInput
+}
+
+export type MailAccountUncheckedCreateWithoutMessageCategoriesInput = {
+  id?: string
+  userId: string
+  label?: string | null
+  emailAddress: string
+  imapHost: string
+  imapPort?: number
+  imapSecure?: boolean
+  smtpHost: string
+  smtpPort?: number
+  smtpSecure?: boolean
+  encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
+  isPrimary?: boolean
+  isActive?: boolean
+  lastSyncedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  messages?: Prisma.MailMessageUncheckedCreateNestedManyWithoutAccountInput
+  conversations?: Prisma.MailConversationUncheckedCreateNestedManyWithoutAccountInput
+  rules?: Prisma.MailRuleUncheckedCreateNestedManyWithoutAccountInput
+  scheduledEmails?: Prisma.ScheduledEmailUncheckedCreateNestedManyWithoutAccountInput
+  snoozes?: Prisma.MailSnoozeUncheckedCreateNestedManyWithoutAccountInput
+  reminders?: Prisma.MailReminderUncheckedCreateNestedManyWithoutAccountInput
+  signatures?: Prisma.MailSignatureUncheckedCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedCreateNestedManyWithoutAccountInput
+  teamShares?: Prisma.TeamMailAccountUncheckedCreateNestedManyWithoutAccountInput
+}
+
+export type MailAccountCreateOrConnectWithoutMessageCategoriesInput = {
+  where: Prisma.MailAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.MailAccountCreateWithoutMessageCategoriesInput, Prisma.MailAccountUncheckedCreateWithoutMessageCategoriesInput>
+}
+
+export type MailAccountUpsertWithoutMessageCategoriesInput = {
+  update: Prisma.XOR<Prisma.MailAccountUpdateWithoutMessageCategoriesInput, Prisma.MailAccountUncheckedUpdateWithoutMessageCategoriesInput>
+  create: Prisma.XOR<Prisma.MailAccountCreateWithoutMessageCategoriesInput, Prisma.MailAccountUncheckedCreateWithoutMessageCategoriesInput>
+  where?: Prisma.MailAccountWhereInput
+}
+
+export type MailAccountUpdateToOneWithWhereWithoutMessageCategoriesInput = {
+  where?: Prisma.MailAccountWhereInput
+  data: Prisma.XOR<Prisma.MailAccountUpdateWithoutMessageCategoriesInput, Prisma.MailAccountUncheckedUpdateWithoutMessageCategoriesInput>
+}
+
+export type MailAccountUpdateWithoutMessageCategoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  imapHost?: Prisma.StringFieldUpdateOperationsInput | string
+  imapPort?: Prisma.IntFieldUpdateOperationsInput | number
+  imapSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.StringFieldUpdateOperationsInput | string
+  smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutAccountsNestedInput
+  messages?: Prisma.MailMessageUpdateManyWithoutAccountNestedInput
+  conversations?: Prisma.MailConversationUpdateManyWithoutAccountNestedInput
+  rules?: Prisma.MailRuleUpdateManyWithoutAccountNestedInput
+  scheduledEmails?: Prisma.ScheduledEmailUpdateManyWithoutAccountNestedInput
+  snoozes?: Prisma.MailSnoozeUpdateManyWithoutAccountNestedInput
+  reminders?: Prisma.MailReminderUpdateManyWithoutAccountNestedInput
+  signatures?: Prisma.MailSignatureUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUpdateManyWithoutAccountNestedInput
+}
+
+export type MailAccountUncheckedUpdateWithoutMessageCategoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  imapHost?: Prisma.StringFieldUpdateOperationsInput | string
+  imapPort?: Prisma.IntFieldUpdateOperationsInput | number
+  imapSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.StringFieldUpdateOperationsInput | string
+  smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.MailMessageUncheckedUpdateManyWithoutAccountNestedInput
+  conversations?: Prisma.MailConversationUncheckedUpdateManyWithoutAccountNestedInput
+  rules?: Prisma.MailRuleUncheckedUpdateManyWithoutAccountNestedInput
+  scheduledEmails?: Prisma.ScheduledEmailUncheckedUpdateManyWithoutAccountNestedInput
+  snoozes?: Prisma.MailSnoozeUncheckedUpdateManyWithoutAccountNestedInput
+  reminders?: Prisma.MailReminderUncheckedUpdateManyWithoutAccountNestedInput
+  signatures?: Prisma.MailSignatureUncheckedUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUncheckedUpdateManyWithoutAccountNestedInput
+}
+
+export type MailAccountCreateWithoutTeamSharesInput = {
+  id?: string
+  label?: string | null
+  emailAddress: string
+  imapHost: string
+  imapPort?: number
+  imapSecure?: boolean
+  smtpHost: string
+  smtpPort?: number
+  smtpSecure?: boolean
+  encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
+  isPrimary?: boolean
+  isActive?: boolean
+  lastSyncedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutAccountsInput
+  messages?: Prisma.MailMessageCreateNestedManyWithoutAccountInput
+  conversations?: Prisma.MailConversationCreateNestedManyWithoutAccountInput
+  rules?: Prisma.MailRuleCreateNestedManyWithoutAccountInput
+  scheduledEmails?: Prisma.ScheduledEmailCreateNestedManyWithoutAccountInput
+  snoozes?: Prisma.MailSnoozeCreateNestedManyWithoutAccountInput
+  reminders?: Prisma.MailReminderCreateNestedManyWithoutAccountInput
+  signatures?: Prisma.MailSignatureCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryCreateNestedManyWithoutAccountInput
+}
+
+export type MailAccountUncheckedCreateWithoutTeamSharesInput = {
+  id?: string
+  userId: string
+  label?: string | null
+  emailAddress: string
+  imapHost: string
+  imapPort?: number
+  imapSecure?: boolean
+  smtpHost: string
+  smtpPort?: number
+  smtpSecure?: boolean
+  encryptedPassword: string
+  authType?: string
+  oauthProvider?: string | null
+  encryptedAccessToken?: string | null
+  encryptedRefreshToken?: string | null
+  oauthExpiresAt?: Date | string | null
+  isPrimary?: boolean
+  isActive?: boolean
+  lastSyncedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  messages?: Prisma.MailMessageUncheckedCreateNestedManyWithoutAccountInput
+  conversations?: Prisma.MailConversationUncheckedCreateNestedManyWithoutAccountInput
+  rules?: Prisma.MailRuleUncheckedCreateNestedManyWithoutAccountInput
+  scheduledEmails?: Prisma.ScheduledEmailUncheckedCreateNestedManyWithoutAccountInput
+  snoozes?: Prisma.MailSnoozeUncheckedCreateNestedManyWithoutAccountInput
+  reminders?: Prisma.MailReminderUncheckedCreateNestedManyWithoutAccountInput
+  signatures?: Prisma.MailSignatureUncheckedCreateNestedManyWithoutAccountInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedCreateNestedManyWithoutAccountInput
+  messageCategories?: Prisma.MessageCategoryUncheckedCreateNestedManyWithoutAccountInput
+}
+
+export type MailAccountCreateOrConnectWithoutTeamSharesInput = {
+  where: Prisma.MailAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.MailAccountCreateWithoutTeamSharesInput, Prisma.MailAccountUncheckedCreateWithoutTeamSharesInput>
+}
+
+export type MailAccountUpsertWithoutTeamSharesInput = {
+  update: Prisma.XOR<Prisma.MailAccountUpdateWithoutTeamSharesInput, Prisma.MailAccountUncheckedUpdateWithoutTeamSharesInput>
+  create: Prisma.XOR<Prisma.MailAccountCreateWithoutTeamSharesInput, Prisma.MailAccountUncheckedCreateWithoutTeamSharesInput>
+  where?: Prisma.MailAccountWhereInput
+}
+
+export type MailAccountUpdateToOneWithWhereWithoutTeamSharesInput = {
+  where?: Prisma.MailAccountWhereInput
+  data: Prisma.XOR<Prisma.MailAccountUpdateWithoutTeamSharesInput, Prisma.MailAccountUncheckedUpdateWithoutTeamSharesInput>
+}
+
+export type MailAccountUpdateWithoutTeamSharesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  imapHost?: Prisma.StringFieldUpdateOperationsInput | string
+  imapPort?: Prisma.IntFieldUpdateOperationsInput | number
+  imapSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.StringFieldUpdateOperationsInput | string
+  smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutAccountsNestedInput
+  messages?: Prisma.MailMessageUpdateManyWithoutAccountNestedInput
+  conversations?: Prisma.MailConversationUpdateManyWithoutAccountNestedInput
+  rules?: Prisma.MailRuleUpdateManyWithoutAccountNestedInput
+  scheduledEmails?: Prisma.ScheduledEmailUpdateManyWithoutAccountNestedInput
+  snoozes?: Prisma.MailSnoozeUpdateManyWithoutAccountNestedInput
+  reminders?: Prisma.MailReminderUpdateManyWithoutAccountNestedInput
+  signatures?: Prisma.MailSignatureUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUpdateManyWithoutAccountNestedInput
+}
+
+export type MailAccountUncheckedUpdateWithoutTeamSharesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  imapHost?: Prisma.StringFieldUpdateOperationsInput | string
+  imapPort?: Prisma.IntFieldUpdateOperationsInput | number
+  imapSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.StringFieldUpdateOperationsInput | string
+  smtpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  authType?: Prisma.StringFieldUpdateOperationsInput | string
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedRefreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.MailMessageUncheckedUpdateManyWithoutAccountNestedInput
+  conversations?: Prisma.MailConversationUncheckedUpdateManyWithoutAccountNestedInput
+  rules?: Prisma.MailRuleUncheckedUpdateManyWithoutAccountNestedInput
+  scheduledEmails?: Prisma.ScheduledEmailUncheckedUpdateManyWithoutAccountNestedInput
+  snoozes?: Prisma.MailSnoozeUncheckedUpdateManyWithoutAccountNestedInput
+  reminders?: Prisma.MailReminderUncheckedUpdateManyWithoutAccountNestedInput
+  signatures?: Prisma.MailSignatureUncheckedUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountCreateManyUserInput = {
@@ -2043,6 +2640,9 @@ export type MailAccountUpdateWithoutUserInput = {
   snoozes?: Prisma.MailSnoozeUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateWithoutUserInput = {
@@ -2073,6 +2673,9 @@ export type MailAccountUncheckedUpdateWithoutUserInput = {
   snoozes?: Prisma.MailSnoozeUncheckedUpdateManyWithoutAccountNestedInput
   reminders?: Prisma.MailReminderUncheckedUpdateManyWithoutAccountNestedInput
   signatures?: Prisma.MailSignatureUncheckedUpdateManyWithoutAccountNestedInput
+  trackingPixels?: Prisma.EmailTrackingPixelUncheckedUpdateManyWithoutAccountNestedInput
+  messageCategories?: Prisma.MessageCategoryUncheckedUpdateManyWithoutAccountNestedInput
+  teamShares?: Prisma.TeamMailAccountUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type MailAccountUncheckedUpdateManyWithoutUserInput = {
@@ -2111,6 +2714,9 @@ export type MailAccountCountOutputType = {
   snoozes: number
   reminders: number
   signatures: number
+  trackingPixels: number
+  messageCategories: number
+  teamShares: number
 }
 
 export type MailAccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2121,6 +2727,9 @@ export type MailAccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Exten
   snoozes?: boolean | MailAccountCountOutputTypeCountSnoozesArgs
   reminders?: boolean | MailAccountCountOutputTypeCountRemindersArgs
   signatures?: boolean | MailAccountCountOutputTypeCountSignaturesArgs
+  trackingPixels?: boolean | MailAccountCountOutputTypeCountTrackingPixelsArgs
+  messageCategories?: boolean | MailAccountCountOutputTypeCountMessageCategoriesArgs
+  teamShares?: boolean | MailAccountCountOutputTypeCountTeamSharesArgs
 }
 
 /**
@@ -2182,6 +2791,27 @@ export type MailAccountCountOutputTypeCountSignaturesArgs<ExtArgs extends runtim
   where?: Prisma.MailSignatureWhereInput
 }
 
+/**
+ * MailAccountCountOutputType without action
+ */
+export type MailAccountCountOutputTypeCountTrackingPixelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EmailTrackingPixelWhereInput
+}
+
+/**
+ * MailAccountCountOutputType without action
+ */
+export type MailAccountCountOutputTypeCountMessageCategoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MessageCategoryWhereInput
+}
+
+/**
+ * MailAccountCountOutputType without action
+ */
+export type MailAccountCountOutputTypeCountTeamSharesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TeamMailAccountWhereInput
+}
+
 
 export type MailAccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2213,6 +2843,9 @@ export type MailAccountSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   snoozes?: boolean | Prisma.MailAccount$snoozesArgs<ExtArgs>
   reminders?: boolean | Prisma.MailAccount$remindersArgs<ExtArgs>
   signatures?: boolean | Prisma.MailAccount$signaturesArgs<ExtArgs>
+  trackingPixels?: boolean | Prisma.MailAccount$trackingPixelsArgs<ExtArgs>
+  messageCategories?: boolean | Prisma.MailAccount$messageCategoriesArgs<ExtArgs>
+  teamShares?: boolean | Prisma.MailAccount$teamSharesArgs<ExtArgs>
   _count?: boolean | Prisma.MailAccountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mailAccount"]>
 
@@ -2300,6 +2933,9 @@ export type MailAccountInclude<ExtArgs extends runtime.Types.Extensions.Internal
   snoozes?: boolean | Prisma.MailAccount$snoozesArgs<ExtArgs>
   reminders?: boolean | Prisma.MailAccount$remindersArgs<ExtArgs>
   signatures?: boolean | Prisma.MailAccount$signaturesArgs<ExtArgs>
+  trackingPixels?: boolean | Prisma.MailAccount$trackingPixelsArgs<ExtArgs>
+  messageCategories?: boolean | Prisma.MailAccount$messageCategoriesArgs<ExtArgs>
+  teamShares?: boolean | Prisma.MailAccount$teamSharesArgs<ExtArgs>
   _count?: boolean | Prisma.MailAccountCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MailAccountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2320,6 +2956,9 @@ export type $MailAccountPayload<ExtArgs extends runtime.Types.Extensions.Interna
     snoozes: Prisma.$MailSnoozePayload<ExtArgs>[]
     reminders: Prisma.$MailReminderPayload<ExtArgs>[]
     signatures: Prisma.$MailSignaturePayload<ExtArgs>[]
+    trackingPixels: Prisma.$EmailTrackingPixelPayload<ExtArgs>[]
+    messageCategories: Prisma.$MessageCategoryPayload<ExtArgs>[]
+    teamShares: Prisma.$TeamMailAccountPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2745,6 +3384,9 @@ export interface Prisma__MailAccountClient<T, Null = never, ExtArgs extends runt
   snoozes<T extends Prisma.MailAccount$snoozesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MailAccount$snoozesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MailSnoozePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reminders<T extends Prisma.MailAccount$remindersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MailAccount$remindersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MailReminderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   signatures<T extends Prisma.MailAccount$signaturesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MailAccount$signaturesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MailSignaturePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  trackingPixels<T extends Prisma.MailAccount$trackingPixelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MailAccount$trackingPixelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailTrackingPixelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  messageCategories<T extends Prisma.MailAccount$messageCategoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MailAccount$messageCategoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessageCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  teamShares<T extends Prisma.MailAccount$teamSharesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MailAccount$teamSharesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamMailAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3361,6 +4003,78 @@ export type MailAccount$signaturesArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.MailSignatureScalarFieldEnum | Prisma.MailSignatureScalarFieldEnum[]
+}
+
+/**
+ * MailAccount.trackingPixels
+ */
+export type MailAccount$trackingPixelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EmailTrackingPixel
+   */
+  select?: Prisma.EmailTrackingPixelSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EmailTrackingPixel
+   */
+  omit?: Prisma.EmailTrackingPixelOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailTrackingPixelInclude<ExtArgs> | null
+  where?: Prisma.EmailTrackingPixelWhereInput
+  orderBy?: Prisma.EmailTrackingPixelOrderByWithRelationInput | Prisma.EmailTrackingPixelOrderByWithRelationInput[]
+  cursor?: Prisma.EmailTrackingPixelWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EmailTrackingPixelScalarFieldEnum | Prisma.EmailTrackingPixelScalarFieldEnum[]
+}
+
+/**
+ * MailAccount.messageCategories
+ */
+export type MailAccount$messageCategoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MessageCategory
+   */
+  select?: Prisma.MessageCategorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MessageCategory
+   */
+  omit?: Prisma.MessageCategoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MessageCategoryInclude<ExtArgs> | null
+  where?: Prisma.MessageCategoryWhereInput
+  orderBy?: Prisma.MessageCategoryOrderByWithRelationInput | Prisma.MessageCategoryOrderByWithRelationInput[]
+  cursor?: Prisma.MessageCategoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MessageCategoryScalarFieldEnum | Prisma.MessageCategoryScalarFieldEnum[]
+}
+
+/**
+ * MailAccount.teamShares
+ */
+export type MailAccount$teamSharesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TeamMailAccount
+   */
+  select?: Prisma.TeamMailAccountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TeamMailAccount
+   */
+  omit?: Prisma.TeamMailAccountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TeamMailAccountInclude<ExtArgs> | null
+  where?: Prisma.TeamMailAccountWhereInput
+  orderBy?: Prisma.TeamMailAccountOrderByWithRelationInput | Prisma.TeamMailAccountOrderByWithRelationInput[]
+  cursor?: Prisma.TeamMailAccountWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TeamMailAccountScalarFieldEnum | Prisma.TeamMailAccountScalarFieldEnum[]
 }
 
 /**

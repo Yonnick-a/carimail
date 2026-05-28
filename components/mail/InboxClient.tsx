@@ -9,7 +9,8 @@ import {
   Printer, RefreshCw, Reply, ReplyAll, Send,
   Star, StarOff, Tag, Trash2, Video, X, ZoomIn, ZoomOut,
 } from "lucide-react";
-import { extractMeetingLinksFromHtml, buildGoogleCalendarLink, formatEventDate, type MeetingLink } from "@/lib/mail/calendar";
+import { extractMeetingLinksFromHtml, type MeetingLink } from "@/lib/mail/calendar";
+import { CATEGORY_LABELS, type Category } from "@/lib/mail/categorize";
 import Link from "next/link";
 
 type Message = {
@@ -206,6 +207,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
   const [previewAttachment, setPreviewAttachment] = useState<{ filename: string; url: string; contentType: string } | null>(null);
   const [snoozeOpen, setSnoozeOpen] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
+  const [categories, setCategories] = useState<Record<number, Category>>({});
   const [featureDate, setFeatureDate] = useState("");
   const [featureNote, setFeatureNote] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
@@ -257,6 +259,33 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
       setMessages(msgs);
       setTotal(data.total || msgs.length);
       indexContacts(msgs);
+      // Kick off async categorisation (fire and forget)
+      if (msgs.length > 0 && accountId) {
+        fetch("/api/mail/categorize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accountId,
+            folder,
+            messages: msgs.slice(0, 30).map(m => ({
+              uid: m.uid, subject: m.subject, from: m.from, snippet: m.snippet ?? "",
+            })),
+          }),
+        })
+          .then(r => r.json())
+          .then(d => {
+            if (d.ok && d.categories) {
+              setCategories(prev => {
+                const next = { ...prev };
+                for (const [uid, cat] of Object.entries(d.categories)) {
+                  next[Number(uid)] = cat as Category;
+                }
+                return next;
+              });
+            }
+          })
+          .catch(() => {});
+      }
       // Browser notifications for new unseen messages during silent refresh
       if (silent && "Notification" in window && Notification.permission === "granted") {
         const unseen = msgs.filter(m => !m.seen).slice(0, 3);
@@ -747,6 +776,13 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                           {smartTags(msg).map(tag => (
                             <span key={tag} className="rounded-full px-1.5 py-0.5 text-[9px] font-[700]" style={{ background: "var(--cm-surface3)", color: "var(--cm-text3)" }}>{tag}</span>
                           ))}
+                          {categories[msg.uid] && categories[msg.uid] !== "primary" && (() => {
+                            const c = CATEGORY_LABELS[categories[msg.uid]];
+                            return (
+                              <span className="rounded-full px-1.5 py-0.5 text-[9px] font-[700]"
+                                style={{ background: c.bg, color: c.color }}>{c.label}</span>
+                            );
+                          })()}
                         </div>
                       )}
                       <div className="mt-1 flex items-center gap-1.5">

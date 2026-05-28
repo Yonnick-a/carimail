@@ -250,6 +250,12 @@ body {
   background: transparent;
 }
 
+/* ── Logo carousel ── */
+@keyframes logoScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 /* ── Theme transitions (only on color props) ── */
 *, *::before, *::after {
   transition-property: background-color, border-color, color;

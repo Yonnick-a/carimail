@@ -61,7 +61,14 @@ export const ModelName = {
   ScheduledEmail: 'ScheduledEmail',
   MailSnooze: 'MailSnooze',
   MailReminder: 'MailReminder',
-  MailSignature: 'MailSignature'
+  MailSignature: 'MailSignature',
+  EmailTrackingPixel: 'EmailTrackingPixel',
+  EmailTrackEvent: 'EmailTrackEvent',
+  MessageCategory: 'MessageCategory',
+  Team: 'Team',
+  TeamMember: 'TeamMember',
+  TeamInvite: 'TeamInvite',
+  TeamMailAccount: 'TeamMailAccount'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -259,6 +266,93 @@ export const MailSignatureScalarFieldEnum = {
 } as const
 
 export type MailSignatureScalarFieldEnum = (typeof MailSignatureScalarFieldEnum)[keyof typeof MailSignatureScalarFieldEnum]
+
+
+export const EmailTrackingPixelScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  to: 'to',
+  subject: 'subject',
+  opens: 'opens',
+  lastOpenAt: 'lastOpenAt',
+  clicks: 'clicks',
+  lastClickAt: 'lastClickAt',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailTrackingPixelScalarFieldEnum = (typeof EmailTrackingPixelScalarFieldEnum)[keyof typeof EmailTrackingPixelScalarFieldEnum]
+
+
+export const EmailTrackEventScalarFieldEnum = {
+  id: 'id',
+  pixelId: 'pixelId',
+  type: 'type',
+  url: 'url',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailTrackEventScalarFieldEnum = (typeof EmailTrackEventScalarFieldEnum)[keyof typeof EmailTrackEventScalarFieldEnum]
+
+
+export const MessageCategoryScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  folder: 'folder',
+  uid: 'uid',
+  category: 'category',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type MessageCategoryScalarFieldEnum = (typeof MessageCategoryScalarFieldEnum)[keyof typeof MessageCategoryScalarFieldEnum]
+
+
+export const TeamScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  ownerId: 'ownerId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeamScalarFieldEnum = (typeof TeamScalarFieldEnum)[keyof typeof TeamScalarFieldEnum]
+
+
+export const TeamMemberScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  role: 'role',
+  joinedAt: 'joinedAt'
+} as const
+
+export type TeamMemberScalarFieldEnum = (typeof TeamMemberScalarFieldEnum)[keyof typeof TeamMemberScalarFieldEnum]
+
+
+export const TeamInviteScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  email: 'email',
+  token: 'token',
+  role: 'role',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamInviteScalarFieldEnum = (typeof TeamInviteScalarFieldEnum)[keyof typeof TeamInviteScalarFieldEnum]
+
+
+export const TeamMailAccountScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  accountId: 'accountId',
+  addedAt: 'addedAt'
+} as const
+
+export type TeamMailAccountScalarFieldEnum = (typeof TeamMailAccountScalarFieldEnum)[keyof typeof TeamMailAccountScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -394,7 +394,14 @@ export const ModelName = {
   ScheduledEmail: 'ScheduledEmail',
   MailSnooze: 'MailSnooze',
   MailReminder: 'MailReminder',
-  MailSignature: 'MailSignature'
+  MailSignature: 'MailSignature',
+  EmailTrackingPixel: 'EmailTrackingPixel',
+  EmailTrackEvent: 'EmailTrackEvent',
+  MessageCategory: 'MessageCategory',
+  Team: 'Team',
+  TeamMember: 'TeamMember',
+  TeamInvite: 'TeamInvite',
+  TeamMailAccount: 'TeamMailAccount'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -410,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "passwordResetToken" | "mailAccount" | "mailConversation" | "mailMessage" | "mailRule" | "scheduledEmail" | "mailSnooze" | "mailReminder" | "mailSignature"
+    modelProps: "user" | "session" | "passwordResetToken" | "mailAccount" | "mailConversation" | "mailMessage" | "mailRule" | "scheduledEmail" | "mailSnooze" | "mailReminder" | "mailSignature" | "emailTrackingPixel" | "emailTrackEvent" | "messageCategory" | "team" | "teamMember" | "teamInvite" | "teamMailAccount"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1228,6 +1235,524 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EmailTrackingPixel: {
+      payload: Prisma.$EmailTrackingPixelPayload<ExtArgs>
+      fields: Prisma.EmailTrackingPixelFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmailTrackingPixelFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackingPixelPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmailTrackingPixelFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackingPixelPayload>
+        }
+        findFirst: {
+          args: Prisma.EmailTrackingPixelFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackingPixelPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmailTrackingPixelFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackingPixelPayload>
+        }
+        findMany: {
+          args: Prisma.EmailTrackingPixelFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackingPixelPayload>[]
+        }
+        create: {
+          args: Prisma.EmailTrackingPixelCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackingPixelPayload>
+        }
+        createMany: {
+          args: Prisma.EmailTrackingPixelCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmailTrackingPixelCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackingPixelPayload>[]
+        }
+        delete: {
+          args: Prisma.EmailTrackingPixelDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackingPixelPayload>
+        }
+        update: {
+          args: Prisma.EmailTrackingPixelUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackingPixelPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmailTrackingPixelDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmailTrackingPixelUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmailTrackingPixelUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackingPixelPayload>[]
+        }
+        upsert: {
+          args: Prisma.EmailTrackingPixelUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackingPixelPayload>
+        }
+        aggregate: {
+          args: Prisma.EmailTrackingPixelAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmailTrackingPixel>
+        }
+        groupBy: {
+          args: Prisma.EmailTrackingPixelGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailTrackingPixelGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmailTrackingPixelCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailTrackingPixelCountAggregateOutputType> | number
+        }
+      }
+    }
+    EmailTrackEvent: {
+      payload: Prisma.$EmailTrackEventPayload<ExtArgs>
+      fields: Prisma.EmailTrackEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmailTrackEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmailTrackEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackEventPayload>
+        }
+        findFirst: {
+          args: Prisma.EmailTrackEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmailTrackEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackEventPayload>
+        }
+        findMany: {
+          args: Prisma.EmailTrackEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackEventPayload>[]
+        }
+        create: {
+          args: Prisma.EmailTrackEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackEventPayload>
+        }
+        createMany: {
+          args: Prisma.EmailTrackEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmailTrackEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackEventPayload>[]
+        }
+        delete: {
+          args: Prisma.EmailTrackEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackEventPayload>
+        }
+        update: {
+          args: Prisma.EmailTrackEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmailTrackEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmailTrackEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmailTrackEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.EmailTrackEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailTrackEventPayload>
+        }
+        aggregate: {
+          args: Prisma.EmailTrackEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmailTrackEvent>
+        }
+        groupBy: {
+          args: Prisma.EmailTrackEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailTrackEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmailTrackEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailTrackEventCountAggregateOutputType> | number
+        }
+      }
+    }
+    MessageCategory: {
+      payload: Prisma.$MessageCategoryPayload<ExtArgs>
+      fields: Prisma.MessageCategoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MessageCategoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageCategoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MessageCategoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageCategoryPayload>
+        }
+        findFirst: {
+          args: Prisma.MessageCategoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageCategoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MessageCategoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageCategoryPayload>
+        }
+        findMany: {
+          args: Prisma.MessageCategoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageCategoryPayload>[]
+        }
+        create: {
+          args: Prisma.MessageCategoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageCategoryPayload>
+        }
+        createMany: {
+          args: Prisma.MessageCategoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MessageCategoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageCategoryPayload>[]
+        }
+        delete: {
+          args: Prisma.MessageCategoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageCategoryPayload>
+        }
+        update: {
+          args: Prisma.MessageCategoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageCategoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.MessageCategoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MessageCategoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MessageCategoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageCategoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.MessageCategoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageCategoryPayload>
+        }
+        aggregate: {
+          args: Prisma.MessageCategoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMessageCategory>
+        }
+        groupBy: {
+          args: Prisma.MessageCategoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MessageCategoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MessageCategoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MessageCategoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    Team: {
+      payload: Prisma.$TeamPayload<ExtArgs>
+      fields: Prisma.TeamFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeamFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeamFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamPayload>
+        }
+        findFirst: {
+          args: Prisma.TeamFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeamFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamPayload>
+        }
+        findMany: {
+          args: Prisma.TeamFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamPayload>[]
+        }
+        create: {
+          args: Prisma.TeamCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamPayload>
+        }
+        createMany: {
+          args: Prisma.TeamCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeamCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamPayload>[]
+        }
+        delete: {
+          args: Prisma.TeamDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamPayload>
+        }
+        update: {
+          args: Prisma.TeamUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamPayload>
+        }
+        deleteMany: {
+          args: Prisma.TeamDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeamUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeamUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamPayload>[]
+        }
+        upsert: {
+          args: Prisma.TeamUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamPayload>
+        }
+        aggregate: {
+          args: Prisma.TeamAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeam>
+        }
+        groupBy: {
+          args: Prisma.TeamGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeamGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeamCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeamCountAggregateOutputType> | number
+        }
+      }
+    }
+    TeamMember: {
+      payload: Prisma.$TeamMemberPayload<ExtArgs>
+      fields: Prisma.TeamMemberFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeamMemberFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeamMemberFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+        }
+        findFirst: {
+          args: Prisma.TeamMemberFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeamMemberFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+        }
+        findMany: {
+          args: Prisma.TeamMemberFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberPayload>[]
+        }
+        create: {
+          args: Prisma.TeamMemberCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+        }
+        createMany: {
+          args: Prisma.TeamMemberCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeamMemberCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberPayload>[]
+        }
+        delete: {
+          args: Prisma.TeamMemberDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+        }
+        update: {
+          args: Prisma.TeamMemberUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+        }
+        deleteMany: {
+          args: Prisma.TeamMemberDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeamMemberUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeamMemberUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberPayload>[]
+        }
+        upsert: {
+          args: Prisma.TeamMemberUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberPayload>
+        }
+        aggregate: {
+          args: Prisma.TeamMemberAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeamMember>
+        }
+        groupBy: {
+          args: Prisma.TeamMemberGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeamMemberGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeamMemberCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeamMemberCountAggregateOutputType> | number
+        }
+      }
+    }
+    TeamInvite: {
+      payload: Prisma.$TeamInvitePayload<ExtArgs>
+      fields: Prisma.TeamInviteFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeamInviteFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamInvitePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeamInviteFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamInvitePayload>
+        }
+        findFirst: {
+          args: Prisma.TeamInviteFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamInvitePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeamInviteFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamInvitePayload>
+        }
+        findMany: {
+          args: Prisma.TeamInviteFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamInvitePayload>[]
+        }
+        create: {
+          args: Prisma.TeamInviteCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamInvitePayload>
+        }
+        createMany: {
+          args: Prisma.TeamInviteCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeamInviteCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamInvitePayload>[]
+        }
+        delete: {
+          args: Prisma.TeamInviteDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamInvitePayload>
+        }
+        update: {
+          args: Prisma.TeamInviteUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamInvitePayload>
+        }
+        deleteMany: {
+          args: Prisma.TeamInviteDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeamInviteUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeamInviteUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamInvitePayload>[]
+        }
+        upsert: {
+          args: Prisma.TeamInviteUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamInvitePayload>
+        }
+        aggregate: {
+          args: Prisma.TeamInviteAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeamInvite>
+        }
+        groupBy: {
+          args: Prisma.TeamInviteGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeamInviteGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeamInviteCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeamInviteCountAggregateOutputType> | number
+        }
+      }
+    }
+    TeamMailAccount: {
+      payload: Prisma.$TeamMailAccountPayload<ExtArgs>
+      fields: Prisma.TeamMailAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeamMailAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMailAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeamMailAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMailAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.TeamMailAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMailAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeamMailAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMailAccountPayload>
+        }
+        findMany: {
+          args: Prisma.TeamMailAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMailAccountPayload>[]
+        }
+        create: {
+          args: Prisma.TeamMailAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMailAccountPayload>
+        }
+        createMany: {
+          args: Prisma.TeamMailAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeamMailAccountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMailAccountPayload>[]
+        }
+        delete: {
+          args: Prisma.TeamMailAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMailAccountPayload>
+        }
+        update: {
+          args: Prisma.TeamMailAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMailAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.TeamMailAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeamMailAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeamMailAccountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMailAccountPayload>[]
+        }
+        upsert: {
+          args: Prisma.TeamMailAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMailAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.TeamMailAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeamMailAccount>
+        }
+        groupBy: {
+          args: Prisma.TeamMailAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeamMailAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeamMailAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeamMailAccountCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1446,6 +1971,93 @@ export const MailSignatureScalarFieldEnum = {
 } as const
 
 export type MailSignatureScalarFieldEnum = (typeof MailSignatureScalarFieldEnum)[keyof typeof MailSignatureScalarFieldEnum]
+
+
+export const EmailTrackingPixelScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  to: 'to',
+  subject: 'subject',
+  opens: 'opens',
+  lastOpenAt: 'lastOpenAt',
+  clicks: 'clicks',
+  lastClickAt: 'lastClickAt',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailTrackingPixelScalarFieldEnum = (typeof EmailTrackingPixelScalarFieldEnum)[keyof typeof EmailTrackingPixelScalarFieldEnum]
+
+
+export const EmailTrackEventScalarFieldEnum = {
+  id: 'id',
+  pixelId: 'pixelId',
+  type: 'type',
+  url: 'url',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailTrackEventScalarFieldEnum = (typeof EmailTrackEventScalarFieldEnum)[keyof typeof EmailTrackEventScalarFieldEnum]
+
+
+export const MessageCategoryScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  folder: 'folder',
+  uid: 'uid',
+  category: 'category',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type MessageCategoryScalarFieldEnum = (typeof MessageCategoryScalarFieldEnum)[keyof typeof MessageCategoryScalarFieldEnum]
+
+
+export const TeamScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  ownerId: 'ownerId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeamScalarFieldEnum = (typeof TeamScalarFieldEnum)[keyof typeof TeamScalarFieldEnum]
+
+
+export const TeamMemberScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  role: 'role',
+  joinedAt: 'joinedAt'
+} as const
+
+export type TeamMemberScalarFieldEnum = (typeof TeamMemberScalarFieldEnum)[keyof typeof TeamMemberScalarFieldEnum]
+
+
+export const TeamInviteScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  email: 'email',
+  token: 'token',
+  role: 'role',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamInviteScalarFieldEnum = (typeof TeamInviteScalarFieldEnum)[keyof typeof TeamInviteScalarFieldEnum]
+
+
+export const TeamMailAccountScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  accountId: 'accountId',
+  addedAt: 'addedAt'
+} as const
+
+export type TeamMailAccountScalarFieldEnum = (typeof TeamMailAccountScalarFieldEnum)[keyof typeof TeamMailAccountScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1676,6 +2288,13 @@ export type GlobalOmitConfig = {
   mailSnooze?: Prisma.MailSnoozeOmit
   mailReminder?: Prisma.MailReminderOmit
   mailSignature?: Prisma.MailSignatureOmit
+  emailTrackingPixel?: Prisma.EmailTrackingPixelOmit
+  emailTrackEvent?: Prisma.EmailTrackEventOmit
+  messageCategory?: Prisma.MessageCategoryOmit
+  team?: Prisma.TeamOmit
+  teamMember?: Prisma.TeamMemberOmit
+  teamInvite?: Prisma.TeamInviteOmit
+  teamMailAccount?: Prisma.TeamMailAccountOmit
 }
 
 /* Types for Logging */

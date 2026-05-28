@@ -1,0 +1,44 @@
+{
+  "name": "Carimail — Email by Hostcari",
+  "short_name": "Carimail",
+  "description": "A polished, privacy-first email client that works with any IMAP/SMTP provider.",
+  "start_url": "/inbox",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F5F7FB",
+  "theme_color": "#F97316",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/logo.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Inbox",
+      "short_name": "Inbox",
+      "description": "Open your inbox",
+      "url": "/inbox",
+      "icons": [{ "src": "/logo.webp", "sizes": "96x96" }]
+    },
+    {
+      "name": "Compose",
+      "short_name": "Compose",
+      "description": "Write a new email",
+      "url": "/inbox?compose=1",
+      "icons": [{ "src": "/logo.webp", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}

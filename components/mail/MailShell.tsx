@@ -150,6 +150,8 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
   const [searchFocused, setSearchFocused] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | null>(null);
+  // health: null=unknown, true=ok, false=error
+  const [accountHealth, setAccountHealth] = useState<Record<string, boolean | null>>({});
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const { theme, toggle: toggleTheme } = useTheme();
@@ -220,6 +222,20 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
       setNotifPermission(Notification.permission);
     }
   }, []);
+
+  useEffect(() => {
+    if (!currentAccountId) return;
+    function checkHealth(id: string) {
+      fetch(`/api/mail/health?accountId=${id}`)
+        .then(r => r.json())
+        .then(d => setAccountHealth(prev => ({ ...prev, [id]: !!d.ok })))
+        .catch(() => setAccountHealth(prev => ({ ...prev, [id]: false })));
+    }
+    // Delay initial check to not block first render
+    const t = window.setTimeout(() => checkHealth(currentAccountId), 3_000);
+    const interval = window.setInterval(() => checkHealth(currentAccountId), 5 * 60_000);
+    return () => { window.clearTimeout(t); window.clearInterval(interval); };
+  }, [currentAccountId]);
 
   useEffect(() => {
     function handler(e: KeyboardEvent) {
@@ -329,8 +345,16 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
             style={{ background: "var(--cm-surface2)", border: `1px solid var(--cm-border)` }}>
             <Avatar name={user.name} email={currentAccount?.emailAddress || user.email} size="xs" />
             <div className="min-w-0 flex-1 text-left">
-              <div className="truncate text-[11.5px] font-[600]" style={{ color: "var(--cm-text)" }}>
-                {currentAccount?.emailAddress || user.email}
+              <div className="flex items-center gap-1.5">
+                <span className="truncate text-[11.5px] font-[600]" style={{ color: "var(--cm-text)" }}>
+                  {currentAccount?.emailAddress || user.email}
+                </span>
+                {accountHealth[currentAccountId] === true && (
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" title="Connected" />
+                )}
+                {accountHealth[currentAccountId] === false && (
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" title="Connection error" />
+                )}
               </div>
               {currentAccount?.label && <div className="text-[9.5px]" style={{ color: "var(--cm-text3)" }}>{currentAccount.label}</div>}
             </div>
