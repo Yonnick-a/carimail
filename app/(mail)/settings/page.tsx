@@ -302,7 +302,14 @@ export default function SettingsPage() {
                       <p className="text-[12px] font-[800]" style={{ color: "var(--cm-text)" }}>{sig.name}{sig.isDefault ? " · Default" : ""}</p>
                       <button type="button" onClick={() => deleteFeature("signature", sig.id)} className="text-[10px] font-[800]" style={{ color: "#dc2626" }}>Delete</button>
                     </div>
-                    <div className="mt-1 text-[11px]" style={{ color: "var(--cm-text2)" }} dangerouslySetInnerHTML={{ __html: sig.html }} />
+                    <div className="mt-1 overflow-hidden rounded-lg" style={{ maxHeight: 60 }}>
+                      <iframe
+                        sandbox="allow-same-origin"
+                        srcDoc={`<!DOCTYPE html><html><head><style>body{margin:0;font-size:11px;font-family:system-ui,sans-serif;color:#475569;overflow:hidden}*{max-width:100%}</style></head><body>${sig.html}</body></html>`}
+                        title={`Signature: ${sig.name}`}
+                        style={{ width: "100%", height: 60, border: "none", display: "block" }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>

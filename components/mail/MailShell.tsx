@@ -5,12 +5,87 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Archive, Bold, ChevronDown, Flag, Inbox,
-  Italic, Link as LinkIcon, List, ListOrdered,
+  Archive, Bell, Bold, ChevronDown, Flag, HelpCircle, Inbox,
+  Italic, Keyboard, Link as LinkIcon, List, ListOrdered,
   Loader2, LogOut, Mail, Maximize2, Menu,
   Minimize2, Moon, Paperclip, Pencil, Plus, RefreshCw,
   Send, Settings, Star, Sun, Trash2, Underline, X,
 } from "lucide-react";
+
+// ── Keyboard shortcuts modal ─────────────────────────────────────────
+const SHORTCUT_GROUPS = [
+  {
+    label: "Navigation",
+    shortcuts: [
+      { keys: ["/"], desc: "Focus search" },
+      { keys: ["C"], desc: "Compose new message" },
+      { keys: ["?"], desc: "Show this help" },
+      { keys: ["Esc"], desc: "Close / go back" },
+    ],
+  },
+  {
+    label: "Messages",
+    shortcuts: [
+      { keys: ["R"], desc: "Reply" },
+      { keys: ["A"], desc: "Reply all" },
+      { keys: ["F"], desc: "Forward" },
+      { keys: ["S"], desc: "Star / unstar" },
+      { keys: ["Del"], desc: "Delete message" },
+    ],
+  },
+  {
+    label: "Compose",
+    shortcuts: [
+      { keys: ["Ctrl", "↵"], desc: "Send message" },
+      { keys: ["Esc"], desc: "Discard / close" },
+    ],
+  },
+];
+
+function KeyboardShortcutsModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl border shadow-2xl animate-scale-in"
+        style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}
+        onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b px-5 py-4" style={{ borderColor: "var(--cm-border)" }}>
+          <div className="flex items-center gap-2.5">
+            <Keyboard className="h-4 w-4" style={{ color: "var(--cm-accent)" }} />
+            <p className="text-[15px] font-[900]" style={{ color: "var(--cm-text)" }}>Keyboard shortcuts</p>
+          </div>
+          <button type="button" onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg transition" style={{ color: "var(--cm-text3)" }}>
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="grid gap-5 p-5 sm:grid-cols-3">
+          {SHORTCUT_GROUPS.map(group => (
+            <div key={group.label}>
+              <p className="mb-2.5 text-[10px] font-[800] uppercase tracking-[0.20em]" style={{ color: "var(--cm-text3)" }}>{group.label}</p>
+              <div className="space-y-2">
+                {group.shortcuts.map(s => (
+                  <div key={s.desc} className="flex items-center justify-between gap-3">
+                    <span className="text-[12.5px]" style={{ color: "var(--cm-text2)" }}>{s.desc}</span>
+                    <span className="flex shrink-0 items-center gap-1">
+                      {s.keys.map(k => (
+                        <kbd key={k} className="rounded border px-1.5 py-0.5 text-[10px] font-[700]"
+                          style={{ borderColor: "var(--cm-border2)", background: "var(--cm-surface2)", color: "var(--cm-text2)" }}>
+                          {k}
+                        </kbd>
+                      ))}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="border-t px-5 py-3 text-center text-[11.5px]" style={{ borderColor: "var(--cm-border)", color: "var(--cm-text3)" }}>
+          Press <kbd className="rounded border px-1.5 py-0.5 text-[10px]" style={{ borderColor: "var(--cm-border2)", background: "var(--cm-surface2)" }}>?</kbd> anywhere to toggle this panel
+        </div>
+      </div>
+    </div>
+  );
+}
 
 type Account = { id: string; emailAddress: string; label: string | null; isPrimary: boolean; imapHost: string; smtpHost: string };
 type SessionUser = { id: string; email: string; name: string | null; isHostcariClient?: boolean };
@@ -73,6 +148,8 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
   const [composing, setComposing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission | null>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const { theme, toggle: toggleTheme } = useTheme();
@@ -116,12 +193,19 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
   }, []);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotifPermission(Notification.permission);
+    }
+  }, []);
+
+  useEffect(() => {
     function handler(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.contentEditable === "true") return;
       if (e.key === "c" && !e.metaKey && !e.ctrlKey) setComposing(true);
       if (e.key === "/" && !e.metaKey) { e.preventDefault(); searchRef.current?.focus(); }
-      if (e.key === "Escape") { setMobileSidebarOpen(false); setAccountMenuOpen(false); }
+      if (e.key === "?") setShortcutsOpen(v => !v);
+      if (e.key === "Escape") { setMobileSidebarOpen(false); setAccountMenuOpen(false); setShortcutsOpen(false); }
     }
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
@@ -365,8 +449,15 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
     </div>
   );
 
+  async function requestNotifications() {
+    if (!("Notification" in window)) return;
+    const perm = await Notification.requestPermission();
+    setNotifPermission(perm);
+  }
+
   return (
     <div data-cm-readable className="flex h-screen overflow-hidden" style={{ background: "var(--cm-bg)" }}>
+      {shortcutsOpen && <KeyboardShortcutsModal onClose={() => setShortcutsOpen(false)} />}
       {/* Desktop sidebar */}
       <aside className={`hidden lg:flex flex-col border-r shrink-0 transition-[width] duration-250 ease-out overflow-hidden ${sidebarOpen ? "w-[232px]" : "w-[60px]"}`}
         style={{ borderColor: "var(--cm-sidebar-border)", background: "var(--cm-sidebar-bg)" }}>
@@ -377,7 +468,7 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 backdrop-blur-sm" style={{ background: "rgba(0,0,0,0.45)" }} onClick={() => setMobileSidebarOpen(false)} />
-          <aside className="absolute left-0 top-0 h-full w-[240px] border-r animate-slide-up"
+          <aside className="absolute left-0 top-0 h-full w-[260px] border-r animate-slide-in-left"
             style={{ borderColor: "var(--cm-sidebar-border)", background: "var(--cm-sidebar-bg)" }}>
             <SidebarContent />
           </aside>
@@ -434,9 +525,23 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--cm-text2)"; }}>
               <RefreshCw className="h-4 w-4" />
             </button>
+            {notifPermission === "default" && (
+              <button type="button" onClick={requestNotifications} title="Enable notifications"
+                className="hidden items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-[600] transition sm:flex"
+                style={{ borderColor: "var(--cm-accent-b)", background: "var(--cm-accent-dim)", color: "var(--cm-accent)" }}>
+                <Bell className="h-3.5 w-3.5" />Enable notifications
+              </button>
+            )}
+            <button type="button" onClick={() => setShortcutsOpen(true)} title="Keyboard shortcuts (?)"
+              className="hidden h-8 w-8 items-center justify-center rounded-lg transition lg:flex"
+              style={{ color: "var(--cm-text3)" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "var(--cm-hover-bg)"; e.currentTarget.style.color = "var(--cm-text2)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--cm-text3)"; }}>
+              <HelpCircle className="h-4 w-4" />
+            </button>
             <div className="hidden items-center gap-1 rounded-lg border px-2 py-1 text-[10px] lg:flex"
               style={{ borderColor: "var(--cm-border)", color: "var(--cm-text3)", background: "var(--cm-surface2)" }}>
-              <kbd>C</kbd> compose <span className="mx-0.5 opacity-40">·</span> <kbd>/</kbd> search
+              <kbd>C</kbd> compose <span className="mx-0.5 opacity-40">·</span> <kbd>/</kbd> search <span className="mx-0.5 opacity-40">·</span> <kbd>?</kbd> help
             </div>
             <div className="hidden items-center gap-2 rounded-xl border px-2.5 py-1.5 sm:flex"
               style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
@@ -544,9 +649,20 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
   const [attachments, setAttachments] = useState<{ filename: string; contentType?: string; content: string; size: number }[]>([]);
   const [scheduledAt, setScheduledAt] = useState("");
   const [signatureHtml, setSignatureHtml] = useState("");
+  const [undoCountdown, setUndoCountdown] = useState<number | null>(null);
+  const [contacts, setContacts] = useState<{ email: string; name: string }[]>([]);
+  const [toSuggestions, setToSuggestions] = useState<{ email: string; name: string }[]>([]);
+  const undoCancelRef = useRef(false);
   const editorRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLInputElement>(null);
   const draftKey = `carimail-compose-draft:${accountId}`;
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("carimail-contacts");
+      if (raw) setContacts(JSON.parse(raw));
+    } catch {}
+  }, []);
 
   useEffect(() => {
     const raw = localStorage.getItem(draftKey);
@@ -594,14 +710,36 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
   }, [accountId, replyTo]);
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); doSend(); }
-    if (e.key === "Escape" && !fullscreen) onClose();
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); initiateUndoSend(); }
+    if (e.key === "Escape" && !fullscreen) {
+      if (undoCountdown !== null) { undoCancelRef.current = true; setUndoCountdown(null); }
+      else onClose();
+    }
   }
 
-  async function doSend() {
-    const html = `${editorRef.current?.innerHTML || ""}${signatureHtml ? `<br>${signatureHtml}` : ""}`;
+  function initiateUndoSend() {
     const text = editorRef.current?.innerText || "";
     if (!to || !subject || !text.trim()) return;
+    if (scheduledAt) { void doActualSend(); return; }
+    undoCancelRef.current = false;
+    setUndoCountdown(5);
+    let count = 5;
+    const interval = window.setInterval(() => {
+      count -= 1;
+      if (undoCancelRef.current) { window.clearInterval(interval); setUndoCountdown(null); return; }
+      setUndoCountdown(count);
+      if (count <= 0) { window.clearInterval(interval); void doActualSend(); }
+    }, 1000);
+  }
+
+  function undoSend() {
+    undoCancelRef.current = true;
+    setUndoCountdown(null);
+  }
+
+  async function doActualSend() {
+    const html = `${editorRef.current?.innerHTML || ""}${signatureHtml ? `<br>${signatureHtml}` : ""}`;
+    if (!to || !subject) return;
     setSending(true); setError("");
     try {
       if (scheduledAt) {
@@ -630,8 +768,29 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
       localStorage.removeItem(draftKey);
       window.dispatchEvent(new Event("carimail:mailbox-changed"));
       setSent(true); setTimeout(onClose, 1400);
-    } catch (err) { setError(err instanceof Error ? err.message : "Send failed."); setSending(false); }
+    } catch (err) { setError(err instanceof Error ? err.message : "Send failed."); setSending(false); setUndoCountdown(null); }
   }
+
+  function handleToInput(value: string) {
+    setTo(value);
+    const query = value.split(/[,;]\s*/).pop()?.toLowerCase() ?? "";
+    if (query.length >= 1) {
+      setToSuggestions(contacts.filter(c => c.email.toLowerCase().includes(query) || c.name.toLowerCase().includes(query)).slice(0, 6));
+    } else {
+      setToSuggestions([]);
+    }
+  }
+
+  function selectSuggestion(contact: { email: string; name: string }) {
+    const parts = to.split(/[,;]\s*/);
+    parts[parts.length - 1] = contact.name ? `${contact.name} <${contact.email}>` : contact.email;
+    setTo(parts.join(", ") + ", ");
+    setToSuggestions([]);
+    toRef.current?.focus();
+  }
+
+  // alias for form submit
+  function doSend() { initiateUndoSend(); }
 
   function fileToBase64(file: File) {
     return new Promise<{ filename: string; contentType?: string; content: string; size: number }>((resolve, reject) => {
@@ -681,6 +840,19 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
         </div>
       </div>
 
+      {undoCountdown !== null && (
+        <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3"
+          style={{ background: "var(--cm-text)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="flex items-center gap-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 text-[11px] font-[900] text-white" style={{ borderColor: "rgba(249,115,22,0.6)" }}>{undoCountdown}</div>
+            <span className="text-[12.5px] font-[600] text-white">Sending in {undoCountdown}s…</span>
+          </div>
+          <button type="button" onClick={undoSend} className="rounded-xl border px-3 py-1.5 text-[12px] font-[800] transition hover:bg-white/10"
+            style={{ borderColor: "rgba(249,115,22,0.50)", color: "#FB923C" }}>
+            Undo
+          </button>
+        </div>
+      )}
       {sent ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-500"><Send className="h-6 w-6" /></div>
@@ -697,9 +869,32 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
             <span className="w-12 shrink-0 text-[11px] font-[600]" style={{ color: "var(--cm-text3)" }}>From</span>
             <span className="text-[13px]" style={{ color: "var(--cm-text2)" }}>{fromAddress}</span>
           </div>
-          <div className={fieldCls} style={{ borderColor: "var(--cm-border)" }}>
+          <div className={`${fieldCls} relative`} style={{ borderColor: "var(--cm-border)" }}>
             <span className="w-12 shrink-0 text-[11px] font-[600]" style={{ color: "var(--cm-text3)" }}>To</span>
-            <input ref={toRef} value={to} onChange={e => setTo(e.target.value)} required className="flex-1 bg-transparent text-[13px] outline-none placeholder:opacity-40" style={{ color: "var(--cm-text)" }} placeholder="recipient@example.com" />
+            <input ref={toRef} value={to} onChange={e => handleToInput(e.target.value)} required
+              className="flex-1 bg-transparent text-[13px] outline-none placeholder:opacity-40" style={{ color: "var(--cm-text)" }}
+              placeholder="recipient@example.com"
+              onBlur={() => setTimeout(() => setToSuggestions([]), 150)} />
+            {toSuggestions.length > 0 && (
+              <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border shadow-xl"
+                style={{ background: "var(--cm-surface)", borderColor: "var(--cm-border)" }}>
+                {toSuggestions.map(c => (
+                  <button key={c.email} type="button" onMouseDown={() => selectSuggestion(c)}
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition"
+                    style={{ color: "var(--cm-text)" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#F97316] to-[#0044BC] text-[9px] font-[700] text-white">
+                      {(c.name || c.email).charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="truncate text-[12.5px] font-[600]">{c.name || c.email}</div>
+                      {c.name && <div className="truncate text-[11px]" style={{ color: "var(--cm-text3)" }}>{c.email}</div>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex items-center gap-1">
               <button type="button" onClick={() => setShowCc(!showCc)} className="rounded px-1.5 py-0.5 text-[10px] font-[600] transition" style={{ color: showCc ? "var(--cm-blue)" : "var(--cm-text3)", background: showCc ? "var(--cm-blue-light)" : "transparent" }}>Cc</button>
               <button type="button" onClick={() => setShowBcc(!showBcc)} className="rounded px-1.5 py-0.5 text-[10px] font-[600] transition" style={{ color: showBcc ? "var(--cm-blue)" : "var(--cm-text3)", background: showBcc ? "var(--cm-blue-light)" : "transparent" }}>Bcc</button>
@@ -744,8 +939,14 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
             className={`min-h-0 flex-1 overflow-y-auto px-4 py-3 text-[13.5px] leading-relaxed outline-none ${fullscreen ? "min-h-[240px]" : "min-h-[160px]"}`}
             style={{ color: "var(--cm-text)" }} />
           {signatureHtml && (
-            <div className="border-t px-4 py-2 text-[12px]" style={{ borderColor: "var(--cm-border)", color: "var(--cm-text3)" }}
-              dangerouslySetInnerHTML={{ __html: signatureHtml }} />
+            <div className="border-t" style={{ borderColor: "var(--cm-border)" }}>
+              <iframe
+                sandbox="allow-same-origin"
+                srcDoc={`<!DOCTYPE html><html><head><style>body{margin:8px 16px;font-size:12px;font-family:system-ui,sans-serif;color:#64748b;overflow:hidden}*{max-width:100%}</style></head><body>${signatureHtml}</body></html>`}
+                title="Email signature"
+                style={{ width: "100%", height: 56, border: "none", display: "block" }}
+              />
+            </div>
           )}
           <div className="flex shrink-0 items-center justify-between border-t px-4 py-3" style={{ borderColor: "var(--cm-border)" }}>
             <div className="flex items-center gap-3">
@@ -754,11 +955,11 @@ function ComposeModal({ accountId, fromAddress, onClose, replyTo }: {
                 <span className="hidden sm:inline">Attach</span>
                 <input type="file" multiple className="hidden" onChange={e => addAttachments(e.target.files)} />
               </label>
-              <button type="submit" disabled={sending}
+              <button type="submit" disabled={sending || undoCountdown !== null}
                 className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-[700] text-white transition active:scale-[0.97] disabled:opacity-60"
                 style={{ background: "linear-gradient(135deg, var(--cm-accent), var(--cm-accent2))", boxShadow: "0 4px 12px var(--cm-accent-b)" }}>
                 {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                {sending ? "Sending…" : "Send"}
+                {sending ? "Sending…" : undoCountdown !== null ? `Sending in ${undoCountdown}s` : "Send"}
               </button>
               <span className="hidden text-[10px] sm:block" style={{ color: "var(--cm-text3)" }}>⌘↵</span>
             </div>

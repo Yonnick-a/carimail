@@ -138,12 +138,6 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         &copy; {new Date().getFullYear()} Hostcari — Carimail
       </p>
 
-      <style>{`
-        @keyframes orbFloat1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(40px,30px) scale(1.05)} 66%{transform:translate(-20px,50px) scale(0.97)} }
-        @keyframes orbFloat2 { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(-50px,-35px) scale(1.06)} 70%{transform:translate(30px,-20px) scale(0.95)} }
-        @keyframes orbFloat3 { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-28px)} }
-        @keyframes floatUp { 0%,100%{transform:translateY(0px) rotate(0deg)} 25%{transform:translateY(-12px) rotate(3deg)} 75%{transform:translateY(-6px) rotate(-2deg)} }
-      `}</style>
     </div>
   );
 }

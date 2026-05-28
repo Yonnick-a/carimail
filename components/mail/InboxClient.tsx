@@ -29,6 +29,49 @@ type WorkspaceMode = "split" | "focus" | "compact";
 type MailFilter = "all" | "unread" | "starred" | "attachments" | "billing" | "security" | "support";
 type FolderOption = { path: string; name: string };
 
+function buildSrcDoc(html: string, fontSize: number, showImages: boolean): string {
+  let body = html;
+  if (!showImages) {
+    body = body.replace(
+      /<img\b[^>]*>/gi,
+      `<span style="display:inline-flex;align-items:center;gap:4px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:3px 8px;font-size:11px;color:#94a3b8">[image hidden]</span>`
+    );
+  }
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+    *{box-sizing:border-box;max-width:100%}
+    body{margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;font-size:${fontSize}px;line-height:1.7;color:#1e293b;word-break:break-word;overflow-x:hidden}
+    a{color:#0044bc;text-decoration:underline}
+    img{height:auto;border-radius:4px}
+    pre{white-space:pre-wrap;word-break:break-word;background:#f8fafc;padding:12px;border-radius:8px;font-size:13px;overflow-x:auto}
+    blockquote{border-left:3px solid #cbd5e1;padding-left:12px;margin:8px 0;color:#64748b}
+    table{border-collapse:collapse;max-width:100%}
+    td,th{border:1px solid #e2e8f0;padding:6px 10px}
+  </style></head><body>${body}</body></html>`;
+}
+
+function EmailIframe({ html, fontSize, showImages }: { html: string; fontSize: number; showImages: boolean }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const srcDoc = buildSrcDoc(html, fontSize, showImages);
+
+  function resize() {
+    const iframe = iframeRef.current;
+    if (!iframe?.contentDocument) return;
+    const h = iframe.contentDocument.documentElement.scrollHeight;
+    iframe.style.height = `${Math.max(120, h)}px`;
+  }
+
+  return (
+    <iframe
+      ref={iframeRef}
+      sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin"
+      srcDoc={srcDoc}
+      title="Email content"
+      className="email-iframe"
+      onLoad={resize}
+    />
+  );
+}
+
 const PAGE_SIZE = 30;
 
 function formatDate(iso: string) {
@@ -129,6 +172,21 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
     localStorage.setItem("carimail-workspace-mode", mode);
   }
 
+  function indexContacts(msgs: Message[]) {
+    try {
+      const raw = localStorage.getItem("carimail-contacts");
+      const existing: Record<string, { email: string; name: string }> = {};
+      if (raw) {
+        (JSON.parse(raw) as { email: string; name: string }[]).forEach(c => { existing[c.email] = c; });
+      }
+      msgs.forEach(m => {
+        if (m.from && !existing[m.from]) existing[m.from] = { email: m.from, name: m.fromName || "" };
+      });
+      const list = Object.values(existing).slice(0, 500);
+      localStorage.setItem("carimail-contacts", JSON.stringify(list));
+    } catch {}
+  }
+
   const load = useCallback(async (p: number, silent = false) => {
     if (!accountId) return;
     if (!silent) setLoading(true);
@@ -140,8 +198,24 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
       const res = await fetch(url, { cache: "no-store" });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "Failed to load.");
-      setMessages(data.messages || []);
-      setTotal(data.total || data.messages?.length || 0);
+      const msgs: Message[] = data.messages || [];
+      setMessages(msgs);
+      setTotal(data.total || msgs.length);
+      indexContacts(msgs);
+      // Browser notifications for new unseen messages during silent refresh
+      if (silent && "Notification" in window && Notification.permission === "granted") {
+        const unseen = msgs.filter(m => !m.seen).slice(0, 3);
+        unseen.forEach(m => {
+          try {
+            new Notification(`New mail: ${m.fromName || m.from}`, {
+              body: m.subject,
+              icon: "/logo.webp",
+              tag: `carimail-${accountId}-${m.uid}`,
+              silent: false,
+            });
+          } catch {}
+        });
+      }
     } catch (err) { setError(err instanceof Error ? err.message : "Failed to load messages."); }
     finally { if (!silent) setLoading(false); }
   }, [accountId, folder, searchQ]);
@@ -572,6 +646,24 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                 <div key={msg.uid} className={`msg-item group relative border-b ${isActive ? "active" : ""}`}
                   style={{ borderColor: "var(--cm-divider)" }} onClick={() => isActive ? setSelected(null) : openMessage(msg)}>
                   {!msg.seen && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full" style={{ background: "var(--cm-unread-dot)" }} />}
+                  {/* Quick hover actions */}
+                  <div className="absolute right-2 top-1/2 hidden -translate-y-1/2 items-center gap-0.5 group-hover:flex" onClick={e => e.stopPropagation()}>
+                    <button type="button" title={msg.flagged ? "Unstar" : "Star"} onClick={() => doAction(msg.flagged ? "unflag" : "flag", msg.uid)}
+                      className="flex h-7 w-7 items-center justify-center rounded-lg transition hover:scale-110 no-transition"
+                      style={{ color: msg.flagged ? "var(--cm-starred)" : "var(--cm-text3)", background: "var(--cm-surface)" }}>
+                      <Star className="h-3.5 w-3.5" />
+                    </button>
+                    <button type="button" title="Archive" onClick={() => doAction("archive", msg.uid)}
+                      className="flex h-7 w-7 items-center justify-center rounded-lg transition hover:scale-110 no-transition"
+                      style={{ color: "var(--cm-text3)", background: "var(--cm-surface)" }}>
+                      <Archive className="h-3.5 w-3.5" />
+                    </button>
+                    <button type="button" title="Delete" onClick={() => doAction("trash", msg.uid)}
+                      className="flex h-7 w-7 items-center justify-center rounded-lg transition hover:scale-110 no-transition"
+                      style={{ color: "#ef4444", background: "var(--cm-surface)" }}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                   <div className={`flex items-start gap-2.5 ${listRowPadding}`}>
                     <div className="flex shrink-0 items-center pt-0.5" onClick={e => { e.stopPropagation(); setSelectedUids(prev => { const next = new Set(prev); if (next.has(msg.uid)) next.delete(msg.uid); else next.add(msg.uid); return next; }); }}>
                       <input type="checkbox" checked={isChecked} onChange={() => {}} className="rounded border cursor-pointer"
@@ -812,14 +904,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                     {selected.bodyHtml || selected.bodyText || "(empty)"}
                   </pre>
                 ) : selected.bodyHtml ? (
-                  <div className="email-body" style={{ fontSize: `${fontSize}px`, lineHeight: 1.7 }}
-                    dangerouslySetInnerHTML={{
-                      __html: (() => {
-                        let html = selected.bodyHtml.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "").replace(/javascript:/gi, "");
-                        if (!showImages) html = html.replace(/<img\b[^>]*>/gi, `<div style="display:inline-flex;align-items:center;gap:4px;background:var(--cm-surface2);border:1px solid var(--cm-border);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--cm-text3)">[image hidden]</div>`);
-                        return html;
-                      })(),
-                    }} />
+                  <EmailIframe html={selected.bodyHtml} fontSize={fontSize} showImages={showImages} />
                 ) : (
                   <pre className="whitespace-pre-wrap font-sans leading-relaxed" style={{ fontSize: `${fontSize}px`, color: "var(--cm-text2)" }}>{selected.bodyText || "(empty message)"}</pre>
                 )}
@@ -933,7 +1018,8 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
             {/* Reply panel */}
             {replyOpen && (
               <div className="shrink-0 border-t" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
-                <form onSubmit={handleReply} className="px-5 py-4 space-y-3">
+                <form onSubmit={handleReply} className="px-5 py-4 space-y-3"
+                  onKeyDown={e => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); handleReply(e as unknown as React.FormEvent); } }}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[11.5px] font-[700]" style={{ color: "var(--cm-text)" }}>

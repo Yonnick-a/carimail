@@ -1,86 +1,3 @@
-/* app/globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --orange: #FF914D;
-  --orange-light: #FFB37D;
-  --orange-pale: #FFF6EE;
-  --blue: #0044BC;
-  --blue-light: #EEF4FF;
-  --navy: #0F172A;
-  --slate: #334155;
-  --muted: #64748B;
-  --subtle: #94A3B8;
-  --border: rgba(15,23,42,0.08);
-  --bg: #F4F7FB;
-  --surface: rgba(255,255,255,0.90);
-}
-
-* { box-sizing: border-box; }
-
-html, body {
-  height: 100%;
-  margin: 0;
-}
-
-body {
-  background: var(--bg);
-  color: var(--navy);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Scrollbars */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.12); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(15,23,42,0.20); }
-
-/* Selection */
-::selection { background: rgba(0,68,188,0.15); color: var(--navy); }
-
-/* Focus visible */
-:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; border-radius: 6px; }
-
-/* Prose reset for email HTML */
-.email-body * { max-width: 100%; }
-.email-body img { height: auto; }
-.email-body a { color: var(--blue); }
-.email-body pre { white-space: pre-wrap; word-break: break-word; }
-
-/* Gradient mesh background */
-.mesh-bg {
-  background:
-    radial-gradient(ellipse 900px 600px at 0% 0%, rgba(255,145,77,0.12), transparent 55%),
-    radial-gradient(ellipse 700px 500px at 100% 10%, rgba(0,68,188,0.09), transparent 50%),
-    radial-gradient(ellipse 600px 400px at 50% 100%, rgba(15,23,42,0.04), transparent 55%),
-    #F4F7FB;
-}
-
-/* Card surface */
-.card {
-  background: var(--surface);
-  border: 1px solid rgba(255,255,255,0.70);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-/* Animate in */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-up { animation: fadeUp 0.22s ease-out both; }
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-.animate-fade-in { animation: fadeIn 0.18s ease-out both; }
-
-
 /* app/globals.css — Carimail
    Token system mirrors Hostcari portal --hcp-* tokens.
    Light mode default; dark via data-theme="dark" on <html>.
@@ -170,27 +87,28 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-[data-cm-readable] [class*="text-[9px]"] { font-size: 11px !important; }
-[data-cm-readable] [class*="text-[9.5px]"] { font-size: 11.5px !important; }
-[data-cm-readable] [class*="text-[10px]"] { font-size: 12px !important; }
+/* ── Readable mode — bump up tiny font sizes ── */
+[data-cm-readable] [class*="text-[9px]"]    { font-size: 11px !important; }
+[data-cm-readable] [class*="text-[9.5px]"]  { font-size: 11.5px !important; }
+[data-cm-readable] [class*="text-[10px]"]   { font-size: 12px !important; }
 [data-cm-readable] [class*="text-[10.5px]"] { font-size: 12.5px !important; }
-[data-cm-readable] [class*="text-[11px]"] { font-size: 13px !important; }
+[data-cm-readable] [class*="text-[11px]"]   { font-size: 13px !important; }
 [data-cm-readable] [class*="text-[11.5px]"] { font-size: 13.5px !important; }
-[data-cm-readable] [class*="text-[12px]"] { font-size: 14px !important; }
+[data-cm-readable] [class*="text-[12px]"]   { font-size: 14px !important; }
 [data-cm-readable] [class*="text-[12.5px]"] { font-size: 14.5px !important; }
-[data-cm-readable] [class*="text-[13px]"] { font-size: 15px !important; }
+[data-cm-readable] [class*="text-[13px]"]   { font-size: 15px !important; }
 [data-cm-readable] [class*="text-[13.5px]"] { font-size: 15.5px !important; }
 
-/* Scrollbars */
+/* ── Scrollbars ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--cm-border2); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--cm-text3); }
 
-/* Selection */
+/* ── Selection ── */
 ::selection { background: var(--cm-blue-dim); color: var(--cm-text); }
 
-/* Focus */
+/* ── Focus ── */
 :focus-visible { outline: 2px solid var(--cm-accent); outline-offset: 2px; border-radius: 6px; }
 
 /* ── Email body ── */
@@ -206,6 +124,15 @@ body {
 .dot-grid {
   background-image: radial-gradient(circle, var(--cm-border2) 1px, transparent 1px);
   background-size: 28px 28px;
+}
+
+/* ── Mesh gradient (landing/auth bg) ── */
+.mesh-bg {
+  background:
+    radial-gradient(ellipse 900px 600px at 0% 0%, rgba(249,115,22,0.10), transparent 55%),
+    radial-gradient(ellipse 700px 500px at 100% 10%, rgba(0,68,188,0.08), transparent 50%),
+    radial-gradient(ellipse 600px 400px at 50% 100%, rgba(15,23,42,0.04), transparent 55%),
+    var(--cm-bg);
 }
 
 /* ── Hostcari client badge ── */
@@ -256,17 +183,71 @@ body {
 }
 .animate-slide-up { animation: slideUp 0.28s cubic-bezier(0.16,1,0.3,1) both; }
 
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-left { animation: slideInLeft 0.26s cubic-bezier(0.16,1,0.3,1) both; }
+
 @keyframes scaleIn {
   from { opacity: 0; transform: scale(0.95); }
   to   { opacity: 1; transform: scale(1); }
 }
 .animate-scale-in { animation: scaleIn 0.20s cubic-bezier(0.16,1,0.3,1) both; }
 
+@keyframes wave {
+  0%,100%{ transform: rotate(0deg) }
+  10%{ transform: rotate(14deg) }
+  20%{ transform: rotate(-8deg) }
+  30%{ transform: rotate(14deg) }
+  40%{ transform: rotate(-4deg) }
+  50%{ transform: rotate(10deg) }
+  60%{ transform: rotate(0deg) }
+}
+.animate-wave { animation: wave 2.4s ease-in-out infinite; }
+
+@keyframes sparkSpin {
+  0%,100%{ transform: scale(1) rotate(0deg); opacity:1 }
+  25%{ transform: scale(1.2) rotate(15deg); opacity:.8 }
+  50%{ transform: scale(.9) rotate(-10deg); opacity:1 }
+  75%{ transform: scale(1.15) rotate(5deg); opacity:.9 }
+}
+.animate-spark { animation: sparkSpin 3s ease-in-out infinite; }
+
+@keyframes orbFloat1 {
+  0%,100%{ transform:translate(0,0) scale(1) }
+  33%{ transform:translate(40px,30px) scale(1.05) }
+  66%{ transform:translate(-20px,50px) scale(0.97) }
+}
+@keyframes orbFloat2 {
+  0%,100%{ transform:translate(0,0) scale(1) }
+  40%{ transform:translate(-50px,-35px) scale(1.06) }
+  70%{ transform:translate(30px,-20px) scale(0.95) }
+}
+@keyframes orbFloat3 {
+  0%,100%{ transform:translateX(-50%) translateY(0) }
+  50%{ transform:translateX(-50%) translateY(-28px) }
+}
+@keyframes floatUp {
+  0%,100%{ transform:translateY(0px) rotate(0deg) }
+  25%{ transform:translateY(-12px) rotate(3deg) }
+  75%{ transform:translateY(-6px) rotate(-2deg) }
+}
+
 /* ── Composable content-editable placeholder ── */
 [contenteditable]:empty:before {
   content: attr(data-placeholder);
   color: var(--cm-text3);
   pointer-events: none;
+}
+
+/* ── Email iframe ── */
+.email-iframe {
+  width: 100%;
+  border: none;
+  display: block;
+  min-height: 200px;
+  background: transparent;
 }
 
 /* ── Theme transitions (only on color props) ── */

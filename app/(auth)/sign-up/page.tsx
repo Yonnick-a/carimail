@@ -59,7 +59,7 @@ export default function SignUpPage() {
     <div className="animate-fade-up">
       <div className="flex items-center gap-2.5 mb-1">
         <h1 className="text-[22px] font-[800] tracking-tight" style={{ color: "var(--cm-text)" }}>Create account</h1>
-        <span className="text-[20px] select-none" style={{ animation: "sparkSpin 3s ease-in-out infinite" }} role="img">✨</span>
+        <span className="animate-spark text-[20px] select-none" role="img" aria-label="sparkles">✨</span>
       </div>
       <p className="text-[13px] mb-5" style={{ color: "var(--cm-text2)" }}>Get started with Carimail for free</p>
 
@@ -166,14 +166,6 @@ export default function SignUpPage() {
         <Link href="/sign-in" className="font-[700] hover:underline" style={{ color: "var(--cm-blue)" }}>Sign in</Link>
       </p>
 
-      <style>{`
-        @keyframes sparkSpin {
-          0%,100%{ transform: scale(1) rotate(0deg); opacity:1 }
-          25%{ transform: scale(1.2) rotate(15deg); opacity:.8 }
-          50%{ transform: scale(.9) rotate(-10deg); opacity:1 }
-          75%{ transform: scale(1.15) rotate(5deg); opacity:.9 }
-        }
-      `}</style>
     </div>
   );
 }

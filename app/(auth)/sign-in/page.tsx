@@ -35,7 +35,7 @@ export default function SignInPage() {
     <div className="animate-fade-up">
       <div className="flex items-center gap-2.5 mb-1">
         <h1 className="text-[22px] font-[800] tracking-tight" style={{ color: "var(--cm-text)" }}>Welcome back</h1>
-        <span className="text-[22px] select-none" style={{ animation: "wave 2.4s ease-in-out infinite" }} role="img" aria-label="wave">👋</span>
+        <span className="animate-wave text-[22px] select-none" role="img" aria-label="wave">👋</span>
       </div>
       <p className="text-[13px] mb-7" style={{ color: "var(--cm-text2)" }}>Sign in to your Carimail inbox</p>
 
@@ -124,14 +124,6 @@ export default function SignInPage() {
         <Link href="/sign-up" className="font-[700] hover:underline" style={{ color: "var(--cm-blue)" }}>Create one</Link>
       </p>
 
-      <style>{`
-        @keyframes wave {
-          0%,100%{ transform: rotate(0deg) } 10%{ transform: rotate(14deg) }
-          20%{ transform: rotate(-8deg) } 30%{ transform: rotate(14deg) }
-          40%{ transform: rotate(-4deg) } 50%{ transform: rotate(10deg) }
-          60%{ transform: rotate(0deg) }
-        }
-      `}</style>
     </div>
   );
 }

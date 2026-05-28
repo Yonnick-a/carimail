@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/crypto";
 import { createSession, setSessionCookie } from "@/lib/auth";
+import { rateLimit } from "@/lib/rateLimit";
 
 const schema = z.object({
   name: z.string().min(1).max(100),
@@ -13,6 +14,11 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? req.headers.get("x-real-ip") ?? "unknown";
+    if (!rateLimit(`signup:${ip}`, 5, 10 * 60 * 1000)) {
+      return NextResponse.json({ ok: false, error: "Too many sign-up attempts. Please wait a few minutes." }, { status: 429 });
+    }
+
     const body = await req.json();
     const { name, email, password } = schema.parse(body);
 
