@@ -171,16 +171,6 @@ export default function SignUpPage() {
         <Link href="/privacy" className="hover:underline" style={{ color: "var(--cm-text2)" }}>Privacy Policy</Link>.
       </p>
 
-      {/* Feature pills */}
-      <div className="mt-5 flex flex-wrap justify-center gap-2">
-        {["Any IMAP provider", "Encrypted storage", "Free to start"].map(f => (
-          <span key={f} className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-[600]"
-            style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text3)" }}>
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--cm-blue)" }} />{f}
-          </span>
-        ))}
-      </div>
-
       <p className="mt-5 text-center text-[13px]" style={{ color: "var(--cm-text2)" }}>
         Already have an account?{" "}
         <Link href="/sign-in" className="font-[800] hover:underline" style={{ color: "var(--cm-blue)" }}>Sign in</Link>

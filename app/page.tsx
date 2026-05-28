@@ -8,6 +8,7 @@ import { FaqAccordion } from "@/components/landing/FaqAccordion";
 import { LogoCarousel } from "@/components/landing/LogoCarousel";
 import { AnimateIn } from "@/components/landing/AnimateIn";
 import { TiltCard } from "@/components/landing/TiltCard";
+import { ScrollFeatures } from "@/components/landing/ScrollFeatures";
 
 export default async function RootPage() {
   const user = await getSession();
@@ -203,9 +204,10 @@ export default async function RootPage() {
       </section>
 
       {/* ─────────────────────── FEATURES ─────────────────────── */}
-      <section id="features" className="py-28">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
-          <AnimateIn className="mb-20 text-center">
+      <section id="features">
+        {/* Section header */}
+        <div className="mx-auto max-w-6xl px-5 pb-16 pt-28 sm:px-8">
+          <AnimateIn className="text-center">
             <h2 className="text-[36px] font-[900] tracking-[-0.025em] sm:text-[48px]" style={{ color: "var(--cm-text)" }}>
               Everything you need.
               <br />
@@ -215,142 +217,26 @@ export default async function RootPage() {
               We studied the email clients you love — and cut everything that slows you down.
             </p>
           </AnimateIn>
+        </div>
 
-          {/* Spotlight features */}
-          {[
-            {
-              title: "All your accounts, one view.",
-              desc: "Connect Gmail, Outlook, Hostcari, or any IMAP mailbox. Switch accounts instantly, or view everything in a unified stream. No more tab juggling.",
-              side: "left" as const,
-              visual: (
-                <div className="flex h-[280px] items-center justify-center">
-                  <div className="relative">
-                    <div className="absolute inset-0 rounded-full blur-3xl" style={{ background: "rgba(0,68,188,0.12)" }} />
-                    <div className="relative flex flex-col gap-2.5">
-                      {["you@gmail.com","work@outlook.com","you@hostcari.com"].map((e, i) => (
-                        <div key={e} className="flex items-center gap-3 rounded-2xl border px-4 py-3"
-                          style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", boxShadow: "var(--cm-shadow)",
-                            transform: `translateX(${i === 1 ? "12px" : i === 2 ? "24px" : "0"})`, opacity: 1 - i * 0.12 }}>
-                          <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[#F97316] to-[#0044BC] text-[9px] font-[700] text-white flex items-center justify-center">
-                            {e.charAt(0).toUpperCase()}
-                          </div>
-                          <span className="text-[12.5px] font-[600]" style={{ color: "var(--cm-text)" }}>{e}</span>
-                          {i === 0 && <span className="ml-auto rounded-full px-2 py-0.5 text-[9px] font-[700]" style={{ background: "var(--cm-blue-light)", color: "var(--cm-blue)" }}>Primary</span>}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ),
-              points: ["Multiple account support","Account switcher in sidebar","Primary account routing","Per-account labels"],
-              color: "var(--cm-blue)",
-              bg: "var(--cm-blue-light)",
-            },
-            {
-              title: "Threads that actually make sense.",
-              desc: "Carimail groups messages by conversation automatically. You always know who said what — no re-reading chain emails.",
-              side: "right" as const,
-              visual: (
-                <div className="flex h-[280px] items-center justify-center">
-                  <div className="relative w-full max-w-xs">
-                    <div className="absolute inset-0 rounded-full blur-3xl" style={{ background: "rgba(124,58,237,0.10)" }} />
-                    {[
-                      { name: "Sarah K.", time: "10:24 AM", active: true },
-                      { name: "You", time: "10:31 AM", active: false },
-                      { name: "Sarah K.", time: "10:45 AM", active: false },
-                    ].map((m, i) => (
-                      <div key={i} className={`relative mb-2 flex gap-2.5 rounded-2xl border px-3.5 py-3 ${m.active ? "" : ""}`}
-                        style={{ borderColor: m.active ? "rgba(124,58,237,0.3)" : "var(--cm-border)", background: m.active ? "rgba(124,58,237,0.06)" : "var(--cm-surface)", boxShadow: "var(--cm-shadow)", marginLeft: m.name === "You" ? "auto" : "0", maxWidth: "90%" }}>
-                        <div className="h-7 w-7 shrink-0 rounded-full" style={{ background: m.name === "You" ? "linear-gradient(135deg,#F97316,#EA580C)" : "linear-gradient(135deg,#7C3AED,#6D28D9)" }} />
-                        <div className="flex-1">
-                          <div className="mb-1 flex items-center gap-2">
-                            <span className="text-[11.5px] font-[700]" style={{ color: "var(--cm-text)" }}>{m.name}</span>
-                            <span className="text-[10px]" style={{ color: "var(--cm-text3)" }}>{m.time}</span>
-                          </div>
-                          <div className="h-2 rounded-full" style={{ width: "85%", background: "var(--cm-border2)" }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ),
-              points: ["Auto-grouped threads","Inline reply panel","Full thread history","Jump to any message"],
-              color: "#7C3AED",
-              bg: "rgba(124,58,237,0.10)",
-            },
-            {
-              title: "Snooze, remind, schedule — stay ahead.",
-              desc: "Snooze emails to bring them back when you're ready. Set reminders so you never forget to follow up. Schedule sends for the perfect moment.",
-              side: "left" as const,
-              visual: (
-                <div className="flex h-[280px] items-center justify-center">
-                  <div className="relative">
-                    <div className="absolute inset-0 rounded-full blur-3xl" style={{ background: "rgba(217,119,6,0.12)" }} />
-                    <div className="relative space-y-3">
-                      {[
-                        { icon: "⏰", label: "Snooze", sub: "Return tomorrow at 9am", color: "#D97706" },
-                        { icon: "🔔", label: "Remind me", sub: "Follow up in 3 days", color: "#7C3AED" },
-                        { icon: "📅", label: "Schedule send", sub: "Send Monday morning", color: "var(--cm-blue)" },
-                      ].map(a => (
-                        <div key={a.label} className="flex items-center gap-4 rounded-2xl border px-4 py-3.5"
-                          style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", boxShadow: "var(--cm-shadow)", minWidth: 240 }}>
-                          <span className="text-xl">{a.icon}</span>
-                          <div>
-                            <div className="text-[13px] font-[700]" style={{ color: a.color }}>{a.label}</div>
-                            <div className="text-[11px]" style={{ color: "var(--cm-text3)" }}>{a.sub}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ),
-              points: ["Snooze to any time","Follow-up reminders","Scheduled send","Rules & automation"],
-              color: "#D97706",
-              bg: "rgba(217,119,6,0.10)",
-            },
-          ].map((f, idx) => (
-            <AnimateIn key={f.title} direction={f.side === "left" ? "left" : "right"} delay={0.05}>
-              <div className={`mb-24 flex flex-col items-center gap-12 lg:flex-row ${f.side === "right" ? "lg:flex-row-reverse" : ""}`}>
-                {/* Visual */}
-                <div className="w-full lg:w-[52%]">
-                  <div className="overflow-hidden rounded-[32px] border"
-                    style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", boxShadow: "0 8px 40px rgba(15,23,42,0.08)" }}>
-                    {f.visual}
-                  </div>
-                </div>
-                {/* Copy */}
-                <div className="w-full lg:w-[48%]">
-                  <h3 className="text-[28px] font-[900] leading-tight tracking-tight sm:text-[34px]"
-                    style={{ color: "var(--cm-text)" }}>{f.title}</h3>
-                  <p className="mt-4 text-[16px] leading-[1.75]" style={{ color: "var(--cm-text2)" }}>{f.desc}</p>
-                  <ul className="mt-6 space-y-3">
-                    {f.points.map(p => (
-                      <li key={p} className="flex items-center gap-3 text-[14px] font-[600]" style={{ color: "var(--cm-text2)" }}>
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-                          style={{ background: f.bg, color: f.color }}>
-                          <Check className="h-3 w-3" strokeWidth={3} />
-                        </span>
-                        {p}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </AnimateIn>
-          ))}
+        {/* Sticky scroll spotlight features */}
+        <ScrollFeatures />
 
-          {/* Feature grid */}
+        {/* Feature grid */}
+        <div className="mx-auto max-w-6xl px-5 pb-28 pt-24 sm:px-8">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { icon: "🔒", title: "AES-256 encrypted", desc: "Your credentials are encrypted before storage. Never logged, never exposed." },
               { icon: "🌙", title: "Dark & light mode", desc: "Carefully tuned themes for any hour. Respects your system preference automatically." },
-              { icon: "⚡", title: "Lightning fast search", desc: "Full-text search across all your mail. Results appear instantly from local cache." },
+              { icon: "⚡", title: "Live search", desc: "Real-time search across all your mail as you type. Instant results, no waiting." },
               { icon: "📎", title: "Inline attachment viewer", desc: "Preview PDFs, images, and documents inline — without leaving the app." },
               { icon: "⌨", title: "Keyboard-first design", desc: "Every action has a shortcut. Press ? to see the full list. Stay in the flow." },
+              { icon: "🤖", title: "AI categorisation", desc: "Emails are automatically sorted into Primary, Updates, Finance, Security, and more." },
+              { icon: "👥", title: "Team collaboration", desc: "Share mailboxes with your team. Invite members, assign roles, manage access." },
+              { icon: "🔐", title: "Two-factor auth", desc: "Add an extra layer of protection with TOTP two-factor authentication and backup codes." },
               { icon: "🔓", title: "No lock-in", desc: "Works with any IMAP/SMTP server. Your data stays with your email provider." },
             ].map((f, i) => (
-              <AnimateIn key={f.title} direction="up" delay={i * 0.07}>
+              <AnimateIn key={f.title} direction="up" delay={i * 0.06}>
                 <div className="group h-full rounded-[24px] border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                   style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", boxShadow: "var(--cm-shadow)" }}>
                   <div className="mb-4 text-3xl">{f.icon}</div>
@@ -422,7 +308,7 @@ export default async function RootPage() {
                   Get started free
                 </Link>
                 <ul className="mt-8 space-y-3.5">
-                  {["Up to 2 email accounts","All core inbox features","Threaded conversations","Snooze & reminders","Schedule send","Full-text search","AES-256 encrypted storage","Dark & light mode","Keyboard shortcuts"].map(f => (
+                  {["Up to 2 email accounts","All core inbox features","Threaded conversations","Snooze & reminders","Schedule send","Live search","AI email categorisation","Two-factor authentication","AES-256 encrypted storage","Team collaboration","Dark & light mode","Keyboard shortcuts"].map(f => (
                     <li key={f} className="flex items-center gap-3 text-[14px]" style={{ color: "var(--cm-text2)" }}>
                       <Check className="h-4 w-4 shrink-0 text-emerald-500" strokeWidth={3} />
                       {f}
@@ -451,7 +337,7 @@ export default async function RootPage() {
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                   </Link>
                   <ul className="mt-8 space-y-3.5">
-                    {["Everything in Free","Unlimited email accounts","HC badge & verified identity","Priority support","Early access to new features","Advanced rule automation","Exclusive Hostcari integrations"].map((f, i) => (
+                    {["Everything in Free","Unlimited email accounts","Unlimited team members","HC badge & verified identity","Priority support","Early access to new features","Advanced rule automation","Exclusive Hostcari integrations"].map((f, i) => (
                       <li key={f} className="flex items-center gap-3 text-[14px]" style={{ color: "var(--cm-text2)" }}>
                         <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
                           style={{ background: i === 0 ? "rgba(16,185,129,0.15)" : "var(--cm-accent-dim)", color: i === 0 ? "#10B981" : "var(--cm-accent)" }}>

@@ -1,5 +1,5 @@
 import "server-only";
-import nodemailer from "nodemailer";
+import { createTransport, type SendMailOptions } from "nodemailer";
 
 export type SmtpConfig = {
   host: string;
@@ -11,7 +11,7 @@ export type SmtpConfig = {
 };
 
 function makeTransport(config: SmtpConfig) {
-  return nodemailer.createTransport({
+  return createTransport({
     host: config.host,
     port: config.port,
     secure: config.secure,
@@ -45,7 +45,7 @@ export async function sendEmail(
   const transport = makeTransport(config);
   const messageId = `<${Date.now()}.${Math.random().toString(36).slice(2)}@carimail.local>`;
 
-  const mail: nodemailer.SendMailOptions = {
+  const mail: SendMailOptions = {
     from: opts.from,
     to: opts.to,
     subject: opts.subject,

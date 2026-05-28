@@ -39,15 +39,16 @@ function buildSrcDoc(html: string, fontSize: number, showImages: boolean): strin
       `<span style="display:inline-flex;align-items:center;gap:4px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:3px 8px;font-size:11px;color:#94a3b8">[image hidden]</span>`
     );
   }
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><style>
     *{box-sizing:border-box;max-width:100%}
     body{margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;font-size:${fontSize}px;line-height:1.7;color:#1e293b;word-break:break-word;overflow-x:hidden}
     a{color:#0044bc;text-decoration:underline}
-    img{height:auto;border-radius:4px}
+    img{height:auto;max-width:100%;display:inline-block}
     pre{white-space:pre-wrap;word-break:break-word;background:#f8fafc;padding:12px;border-radius:8px;font-size:13px;overflow-x:auto}
     blockquote{border-left:3px solid #cbd5e1;padding-left:12px;margin:8px 0;color:#64748b}
     table{border-collapse:collapse;max-width:100%}
-    td,th{border:1px solid #e2e8f0;padding:6px 10px}
+    td,th{padding:4px 8px;vertical-align:top}
+    hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0}
   </style></head><body>${body}</body></html>`;
 }
 

@@ -18,6 +18,9 @@ export async function GET() {
           members: {
             include: { user: { select: { id: true, name: true, email: true } } },
           },
+          invites: {
+            where: { usedAt: null, expiresAt: { gt: new Date() } },
+          },
           sharedAccounts: {
             include: { account: { select: { id: true, emailAddress: true, label: true } } },
           },

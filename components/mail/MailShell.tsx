@@ -161,6 +161,20 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
     setSearchQuery(currentSearch);
   }, [currentSearch]);
 
+  // Live search: navigate after 350ms of no typing
+  useEffect(() => {
+    if (searchQuery === currentSearch) return;
+    const t = window.setTimeout(() => {
+      const p = new URLSearchParams();
+      if (currentAccountId) p.set("accountId", currentAccountId);
+      p.set("folder", currentFolder);
+      if (searchQuery.trim()) p.set("q", searchQuery.trim());
+      router.push(`/inbox?${p}`);
+    }, 350);
+    return () => window.clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
+
   const loadFolders = useCallback((silent = false) => {
     if (!currentAccountId) return;
     if (!silent) setLoadingFolders(true);

@@ -18,7 +18,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/crypto";
 import { createHmac, randomBytes } from "crypto";
-import nodemailer from "nodemailer";
+import { createTransport } from "nodemailer";
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
@@ -37,7 +37,7 @@ async function sendResetEmail(email: string, resetUrl: string) {
     return;
   }
 
-  const transporter = nodemailer.createTransport(smtpUrl);
+  const transporter = createTransport(smtpUrl);
 
   await transporter.sendMail({
     from: process.env.EMAIL_FROM || "Carimail <noreply@hostcari.com>",
