@@ -1,5 +1,5 @@
+"use client";
 // app/(mail)/settings/page.tsx
-"use client"
 
 import Link from "next/link";
 import { Mail, User, Shield, ChevronRight, ExternalLink, Download, Upload } from "lucide-react";
