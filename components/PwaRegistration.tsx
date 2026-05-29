@@ -48,7 +48,7 @@ export function PwaRegistration() {
 
   return (
     <div
-      className="fixed bottom-4 left-1/2 z-[100] w-[min(380px,calc(100vw-1.5rem))] -translate-x-1/2 animate-slide-up overflow-hidden rounded-2xl border shadow-2xl"
+      className="fixed bottom-4 left-2 right-2 z-[100] animate-slide-up overflow-hidden rounded-2xl border shadow-2xl sm:left-1/2 sm:right-auto sm:w-[380px] sm:-translate-x-1/2"
       style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}
     >
       {kind === "ios" ? (

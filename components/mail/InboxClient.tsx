@@ -199,6 +199,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
   const [selectAll, setSelectAll] = useState(false);
   const [viewSource, setViewSource] = useState(false);
   const [showImages, setShowImages] = useState(true);
+  const [threadOpen, setThreadOpen] = useState(false);
   const [fontSize, setFontSize] = useState(14);
   const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
   const [listWidth, setListWidth] = useState(380);
@@ -216,6 +217,13 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
   const replyRef = useRef<HTMLTextAreaElement>(null);
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const { focusMode, setFocusMode } = useMailFocus();
+
+  // Update browser tab title with unread count
+  useEffect(() => {
+    const unread = messages.filter(m => !m.seen).length;
+    document.title = unread > 0 ? `(${unread}) Inbox — Carimail` : "Inbox — Carimail";
+    return () => { document.title = "Carimail"; };
+  }, [messages]);
 
   function notify(msg: string, type: "ok" | "err" = "ok") {
     setToast({ msg, type });
@@ -367,7 +375,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
 
   async function openMessage(msg: Message) {
     if (!accountId) return;
-    setMsgLoading(true); setSelected(null); setReplyOpen(false);
+    setMsgLoading(true); setReplyOpen(false); setThreadOpen(false); // keep `selected` so reader doesn't blank
     try {
       const res = await fetch(`/api/mail/messages?accountId=${accountId}&action=message&folder=${encodeURIComponent(folder)}&uid=${msg.uid}${msg.conversationId ? `&conversationId=${encodeURIComponent(msg.conversationId)}` : ""}`, { cache: "no-store" });
       const data = await res.json();
@@ -633,7 +641,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
 
       {/* Message list */}
       <div
-        className={`flex flex-col border-r ${listClass}`}
+        className={`flex flex-col border-r overflow-x-hidden ${listClass}`}
         style={{
           borderColor: "var(--cm-border)",
           background: "var(--cm-surface)",
@@ -656,7 +664,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
             )}
           </div>
           <div className="flex items-center gap-1">
-            {selectedUids.size > 0 && (
+            {selectedUids.size > 0 ? (
               <>
                 <button type="button" onClick={() => bulkAction("read")} disabled={actionBusy} title="Mark as read"
                   className="rounded-lg p-1.5 transition" style={{ color: "var(--cm-text3)" }}
@@ -668,6 +676,16 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><Trash2 className="h-3.5 w-3.5" /></button>
                 <span className="text-[10px] font-[600] px-1" style={{ color: "var(--cm-text3)" }}>{selectedUids.size}</span>
               </>
+            ) : unread > 0 && (
+              <button type="button" onClick={() => bulkAction("read")} disabled={actionBusy}
+                title="Mark all as read"
+                className="hidden items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-[700] transition sm:flex"
+                style={{ color: "var(--cm-text3)" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--cm-hover-bg)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}>
+                <MailOpen className="h-3.5 w-3.5" />
+                <span>All read</span>
+              </button>
             )}
             <button type="button" onClick={() => load(page)} disabled={loading}
               className="rounded-lg p-1.5 transition" style={{ color: "var(--cm-text3)" }}
@@ -739,10 +757,27 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
         )}
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-x-hidden overflow-y-auto">
           {loading && messages.length === 0 ? (
-            <div className="flex items-center justify-center gap-2.5 py-20 text-[13px]" style={{ color: "var(--cm-text3)" }}>
-              <Loader2 className="h-5 w-5 animate-spin" />Loading…
+            // Skeleton rows — show realistic placeholders while loading
+            <div>
+              {Array.from({ length: 7 }).map((_, i) => (
+                <div key={i} className="flex items-start gap-2.5 border-b px-4 py-3.5"
+                  style={{ borderColor: "var(--cm-divider)", opacity: 1 - i * 0.1 }}>
+                  <div className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded"
+                    style={{ background: "var(--cm-border2)" }} />
+                  <div className="h-8 w-8 shrink-0 rounded-full"
+                    style={{ background: "var(--cm-border2)" }} />
+                  <div className="min-w-0 flex-1 space-y-2 pt-0.5">
+                    <div className="flex justify-between gap-4">
+                      <div className="h-2.5 rounded-full" style={{ width: `${45 + (i * 13) % 30}%`, background: "var(--cm-border2)" }} />
+                      <div className="h-2 w-9 shrink-0 rounded-full" style={{ background: "var(--cm-border2)" }} />
+                    </div>
+                    <div className="h-2 rounded-full" style={{ width: `${60 + (i * 7) % 25}%`, background: "var(--cm-border2)" }} />
+                    <div className="h-2 rounded-full" style={{ width: `${40 + (i * 11) % 20}%`, background: "var(--cm-border2)", opacity: 0.6 }} />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : visibleMessages.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 py-20 text-center px-6">
@@ -754,7 +789,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
               const isActive = selected?.uid === msg.uid;
               const isChecked = selectedUids.has(msg.uid);
               return (
-                <div key={msg.uid} className={`msg-item group relative border-b ${isActive ? "active" : ""}`}
+                <div key={msg.uid} className={`msg-item group relative overflow-hidden border-b ${isActive ? "active" : ""}`}
                   style={{ borderColor: "var(--cm-divider)" }} onClick={() => isActive ? setSelected(null) : openMessage(msg)}>
                   {!msg.seen && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full" style={{ background: "var(--cm-unread-dot)" }} />}
                   {/* Quick hover actions */}
@@ -951,7 +986,18 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
             </div>
           </div>
         ) : (
-          <div className="flex min-h-0 flex-1 flex-col">
+          <div className="relative flex min-h-0 flex-1 flex-col">
+            {/* Loading overlay — shown while fetching next email, keeps current visible */}
+            {msgLoading && (
+              <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center pt-16"
+                style={{ background: "rgba(var(--cm-surface-rgb,255,255,255),0.65)", backdropFilter: "blur(2px)" }}>
+                <div className="flex items-center gap-2.5 rounded-2xl border px-4 py-2.5 shadow-lg"
+                  style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text3)" }}>
+                  <Loader2 className="h-4 w-4 animate-spin" style={{ color: "var(--cm-accent)" }} />
+                  <span className="text-[12.5px] font-[600]">Loading message…</span>
+                </div>
+              </div>
+            )}
             {/* Toolbar — hidden in focus mode (HUD replaces it) */}
             <div className={`flex shrink-0 flex-wrap items-center gap-1.5 border-b px-4 py-2.5 ${focusMode ? "hidden" : ""}`}
               style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
@@ -1042,6 +1088,17 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
               </button>
 
               <div className="ml-auto flex items-center gap-1">
+                {/* Workspace mode — visible in reader toolbar so user can always switch */}
+                <div className="hidden rounded-xl border p-0.5 md:flex" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
+                  {(["split", "focus", "compact"] as const).map(mode => (
+                    <button key={mode} type="button" onClick={() => changeWorkspaceMode(mode)}
+                      className="rounded-lg px-2 py-1 text-[10.5px] font-[700] transition"
+                      style={{ background: workspaceMode === mode ? "var(--cm-blue)" : "transparent", color: workspaceMode === mode ? "#fff" : "var(--cm-text3)" }}>
+                      {mode === "focus" ? "Reader" : mode === "split" ? "Split" : "Compact"}
+                    </button>
+                  ))}
+                </div>
+                <div className="mx-1 hidden h-4 w-px md:block" style={{ background: "var(--cm-border)" }} />
                 {/* Focus Mode — the main entry point */}
                 <button
                   type="button"
@@ -1093,6 +1150,67 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
 
                 <div className="my-5 h-px" style={{ background: "var(--cm-border)" }} />
 
+                {/* Thread banner — prominent at top, before email body */}
+                {selected.threadMessages && selected.threadMessages.length > 1 && (
+                  <div className="mb-5">
+                    <button
+                      type="button"
+                      onClick={() => setThreadOpen(v => !v)}
+                      className="flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition"
+                      style={{
+                        borderColor: threadOpen ? "var(--cm-blue)" : "var(--cm-border)",
+                        background: threadOpen ? "var(--cm-blue-light)" : "var(--cm-surface2)",
+                      }}
+                    >
+                      <div className="flex -space-x-1.5">
+                        {selected.threadMessages.slice(0, 3).map((t, ti) => (
+                          <div key={ti} className={`flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br text-[8px] font-[800] text-white ring-2 ${AVATAR_COLORS[t.from.charCodeAt(0) % AVATAR_COLORS.length]}`}
+                            style={{ ringColor: threadOpen ? "var(--cm-blue-light)" : "var(--cm-surface2)" } as React.CSSProperties}>
+                            {(t.fromName || t.from).charAt(0).toUpperCase()}
+                          </div>
+                        ))}
+                      </div>
+                      <span className="flex-1 text-[12.5px] font-[700]" style={{ color: threadOpen ? "var(--cm-blue)" : "var(--cm-text)" }}>
+                        {selected.threadMessages.length} messages in this thread
+                      </span>
+                      <ChevronRight className={`h-4 w-4 shrink-0 transition-transform duration-200 ${threadOpen ? "rotate-90" : ""}`}
+                        style={{ color: "var(--cm-text3)" }} />
+                    </button>
+
+                    {threadOpen && (
+                      <div className="mt-2 space-y-1.5 pl-2 animate-fade-in">
+                        {selected.threadMessages.map((item, idx) => (
+                          <button
+                            key={`${item.uid}-${item.date}`}
+                            type="button"
+                            onClick={() => { if (item.uid !== selected.uid) openMessage(item); }}
+                            className="flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition"
+                            style={{
+                              borderColor: item.uid === selected.uid ? "var(--cm-blue)" : "var(--cm-border)",
+                              background: item.uid === selected.uid ? "var(--cm-blue-light)" : "var(--cm-surface)",
+                              cursor: item.uid === selected.uid ? "default" : "pointer",
+                            }}
+                          >
+                            <span className="shrink-0 w-4 text-center text-[10px] font-[700]" style={{ color: "var(--cm-text3)" }}>{idx + 1}</span>
+                            <Avatar name={item.fromName} email={item.from} size="sm" />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="truncate text-[12px] font-[700]" style={{ color: "var(--cm-text)" }}>{item.fromName || item.from}</span>
+                                <span className="shrink-0 text-[10px]" style={{ color: "var(--cm-text3)" }}>{formatDate(item.date)}</span>
+                              </div>
+                              <p className="truncate text-[11px]" style={{ color: "var(--cm-text3)" }}>{item.snippet || item.subject}</p>
+                            </div>
+                            {item.uid === selected.uid && (
+                              <span className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-[800]"
+                                style={{ background: "var(--cm-blue)", color: "#fff" }}>reading</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <CalendarCard msg={selected} />
 
                 {viewSource ? (
@@ -1127,36 +1245,6 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                   </div>
                 )}
 
-                {selected.threadMessages && selected.threadMessages.length > 1 && (
-                  <div className="mt-7 border-t pt-5" style={{ borderColor: "var(--cm-border)" }}>
-                    <p className="mb-3 text-[11.5px] font-[700] uppercase tracking-[0.12em]" style={{ color: "var(--cm-text3)" }}>
-                      Conversation
-                    </p>
-                    <div className="space-y-2">
-                      {selected.threadMessages.map(item => (
-                        <button
-                          key={`${item.uid}-${item.date}`}
-                          type="button"
-                          onClick={() => openMessage(item)}
-                          className="flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition hover:opacity-80"
-                          style={{
-                            borderColor: item.uid === selected.uid ? "var(--cm-blue)" : "var(--cm-border)",
-                            background: item.uid === selected.uid ? "var(--cm-blue-light)" : "var(--cm-surface)",
-                          }}
-                        >
-                          <Avatar name={item.fromName} email={item.from} size="sm" />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="truncate text-[12px] font-[700]" style={{ color: "var(--cm-text)" }}>{item.fromName || item.from}</span>
-                              <span className="shrink-0 text-[10px]" style={{ color: "var(--cm-text3)" }}>{formatDate(item.date)}</span>
-                            </div>
-                            <p className="truncate text-[11px]" style={{ color: "var(--cm-text3)" }}>{item.snippet || item.subject}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
                 </article>
 
                 {workspaceMode !== "compact" && (
