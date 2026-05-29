@@ -19,27 +19,31 @@ const SHORTCUT_GROUPS = [
   {
     label: "Navigation",
     shortcuts: [
-      { keys: ["/"], desc: "Focus search" },
-      { keys: ["C"], desc: "Compose new message" },
-      { keys: ["?"], desc: "Show this help" },
-      { keys: ["Esc"], desc: "Close / go back" },
+      { keys: ["/"],      desc: "Focus search"       },
+      { keys: ["C"],      desc: "Compose new message" },
+      { keys: ["⌘", "K"], desc: "Command palette"     },
+      { keys: ["?"],      desc: "Show this help"       },
+      { keys: ["Esc"],    desc: "Close / go back"      },
     ],
   },
   {
     label: "Messages",
     shortcuts: [
-      { keys: ["R"], desc: "Reply" },
-      { keys: ["A"], desc: "Reply all" },
-      { keys: ["F"], desc: "Forward" },
-      { keys: ["S"], desc: "Star / unstar" },
-      { keys: ["Del"], desc: "Delete message" },
+      { keys: ["R"],   desc: "Reply"              },
+      { keys: ["A"],   desc: "Reply all"           },
+      { keys: ["F"],   desc: "Forward"             },
+      { keys: ["S"],   desc: "Star / unstar"       },
+      { keys: ["J"],   desc: "Next message"        },
+      { keys: ["K"],   desc: "Previous message"    },
+      { keys: ["Z"],   desc: "Toggle focus mode"   },
+      { keys: ["Del"], desc: "Delete message"      },
     ],
   },
   {
     label: "Compose",
     shortcuts: [
-      { keys: ["Ctrl", "↵"], desc: "Send message" },
-      { keys: ["Esc"], desc: "Discard / close" },
+      { keys: ["Ctrl", "↵"], desc: "Send message"    },
+      { keys: ["Esc"],       desc: "Discard / close" },
     ],
   },
 ];

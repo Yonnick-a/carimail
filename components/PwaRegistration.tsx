@@ -1,24 +1,37 @@
 "use client";
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { Share, X } from "lucide-react";
+
+type BannerKind = "android" | "ios" | null;
 
 export function PwaRegistration() {
+  const [kind, setKind] = useState<BannerKind>(null);
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
-  const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
 
-    navigator.serviceWorker
-      .register("/sw.js", { scope: "/" })
-      .catch(() => {});
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as { standalone?: boolean }).standalone === true;
 
-    // Capture the browser install prompt
+    if (isStandalone) return; // already installed
+
+    const ua = navigator.userAgent.toLowerCase();
+    const isIos = /iphone|ipad|ipod/.test(ua) && !/crios/.test(ua); // iOS Safari only
+    const isMobile = window.innerWidth < 768;
+
+    if (isIos && isMobile) {
+      setKind("ios");
+      return;
+    }
+
+    // Android / Chrome desktop
     const handler = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e);
-      const dismissed = sessionStorage.getItem("cm-install-dismissed");
-      if (!dismissed) setShowBanner(true);
+      setKind("android");
     };
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
@@ -26,58 +39,65 @@ export function PwaRegistration() {
 
   async function install() {
     if (!installPrompt) return;
-    const event = installPrompt as any;
-    await event.prompt?.();
-    setShowBanner(false);
+    await (installPrompt as { prompt?: () => Promise<void> }).prompt?.();
+    setKind(null);
     setInstallPrompt(null);
   }
 
-  function dismiss() {
-    setShowBanner(false);
-    sessionStorage.setItem("cm-install-dismissed", "1");
-  }
-
-  if (!showBanner) return null;
+  if (!kind) return null;
 
   return (
     <div
-      className="fixed bottom-4 left-1/2 z-[100] w-[min(360px,calc(100vw-2rem))] -translate-x-1/2 animate-slide-up overflow-hidden rounded-2xl border shadow-xl"
+      className="fixed bottom-4 left-1/2 z-[100] w-[min(380px,calc(100vw-1.5rem))] -translate-x-1/2 animate-slide-up overflow-hidden rounded-2xl border shadow-2xl"
       style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}
     >
-      <div className="flex items-center gap-3 px-4 py-3.5">
-        <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-          style={{ background: "var(--cm-accent-dim)", color: "var(--cm-accent)" }}
-        >
-          <span className="text-lg">📬</span>
+      {kind === "ios" ? (
+        <div className="px-4 py-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg"
+                style={{ background: "var(--cm-accent-dim)" }}>📬</div>
+              <div>
+                <p className="text-[13px] font-[800]" style={{ color: "var(--cm-text)" }}>Add to Home Screen</p>
+                <p className="text-[11.5px]" style={{ color: "var(--cm-text3)" }}>Works offline · No app store</p>
+              </div>
+            </div>
+            <button type="button" onClick={() => setKind(null)}
+              className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ color: "var(--cm-text3)" }}>
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <div className="rounded-xl border px-3 py-2.5 text-[12px] leading-relaxed"
+            style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text2)" }}>
+            Tap{" "}
+            <span className="inline-flex items-center gap-1 font-[700]" style={{ color: "var(--cm-accent)" }}>
+              <Share className="h-3.5 w-3.5" /> Share
+            </span>
+            {" "}then{" "}
+            <span className="font-[700]" style={{ color: "var(--cm-accent)" }}>Add to Home Screen</span>
+          </div>
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-[700]" style={{ color: "var(--cm-text)" }}>
-            Add Carimail to home screen
-          </p>
-          <p className="text-[11.5px]" style={{ color: "var(--cm-text3)" }}>
-            Works offline · No app store needed
-          </p>
+      ) : (
+        <div className="flex items-center gap-3 px-4 py-3.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg"
+            style={{ background: "var(--cm-accent-dim)" }}>📬</div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-[700]" style={{ color: "var(--cm-text)" }}>Add Carimail to home screen</p>
+            <p className="text-[11.5px]" style={{ color: "var(--cm-text3)" }}>Works offline · No app store needed</p>
+          </div>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <button type="button" onClick={install}
+              className="rounded-xl px-3 py-1.5 text-[12px] font-[800] text-white transition"
+              style={{ background: "var(--cm-accent)" }}>
+              Install
+            </button>
+            <button type="button" onClick={() => setKind(null)}
+              className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ color: "var(--cm-text3)" }}>
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5">
-          <button
-            type="button"
-            onClick={install}
-            className="rounded-xl px-3 py-1.5 text-[12px] font-[800] text-white transition"
-            style={{ background: "var(--cm-accent)" }}
-          >
-            Install
-          </button>
-          <button
-            type="button"
-            onClick={dismiss}
-            className="flex h-7 w-7 items-center justify-center rounded-lg transition"
-            style={{ color: "var(--cm-text3)" }}
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

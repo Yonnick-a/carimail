@@ -9,6 +9,7 @@ import { LogoCarousel } from "@/components/landing/LogoCarousel";
 import { AnimateIn } from "@/components/landing/AnimateIn";
 import { TiltCard } from "@/components/landing/TiltCard";
 import { ScrollFeatures } from "@/components/landing/ScrollFeatures";
+import { HeroEmailDemo } from "@/components/landing/HeroEmailDemo";
 import { FeatureCard } from "@/components/landing/FeatureCard";
 import {
   EncryptAnimation,
@@ -129,78 +130,8 @@ export default async function RootPage() {
                 app.carimail.com/inbox
               </div>
             </div>
-            {/* App layout mock */}
-            <div className="flex" style={{ minHeight: 420, background: "var(--cm-surface)" }}>
-              {/* Sidebar */}
-              <div className="hidden w-52 shrink-0 border-r p-3 sm:block xl:w-56"
-                style={{ borderColor: "var(--cm-border)", background: "var(--cm-sidebar-bg)" }}>
-                <div className="mb-4 flex items-center gap-2 px-2">
-                  <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-[#F97316] to-[#0044BC]" />
-                  <div className="h-3 w-16 rounded-full" style={{ background: "var(--cm-border2)" }} />
-                </div>
-                <div className="mb-4 w-full rounded-2xl px-3 py-2.5 text-center text-[11px] font-[700] text-white"
-                  style={{ background: "linear-gradient(135deg, #F97316, #EA580C)" }}>✏ Compose</div>
-                {["Inbox","Drafts","Sent","Starred","Spam","Trash"].map((f, i) => (
-                  <div key={f} className="mb-0.5 flex items-center justify-between rounded-xl px-3 py-2"
-                    style={{ background: i === 0 ? "var(--cm-active-bg)" : "transparent" }}>
-                    <div className="h-2 rounded-full" style={{ width: `${f.length * 8}px`, background: i === 0 ? "var(--cm-text)" : "var(--cm-border2)" }} />
-                    {i === 0 && <span className="rounded-full px-1.5 py-0.5 text-[8px] font-[700] text-white" style={{ background: "var(--cm-unread-dot)" }}>12</span>}
-                  </div>
-                ))}
-              </div>
-              {/* Message list */}
-              <div className="w-60 shrink-0 border-r lg:w-72" style={{ borderColor: "var(--cm-border)" }}>
-                <div className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: "var(--cm-border)" }}>
-                  <div className="h-3 w-10 rounded-full" style={{ background: "var(--cm-text)", opacity: 0.15 }} />
-                  <div className="h-3 w-3 rounded" style={{ background: "var(--cm-border2)" }} />
-                </div>
-                {[
-                  { read: false, avatar: "from-[#F97316] to-[#EA580C]", w1: 65, w2: 80 },
-                  { read: false, avatar: "from-[#0044BC] to-[#003399]", w1: 78, w2: 60 },
-                  { read: true,  avatar: "from-[#7C3AED] to-[#6D28D9]", w1: 52, w2: 72 },
-                  { read: true,  avatar: "from-[#059669] to-[#047857]", w1: 85, w2: 55 },
-                  { read: true,  avatar: "from-[#0891B2] to-[#0E7490]", w1: 60, w2: 78 },
-                  { read: true,  avatar: "from-[#DC2626] to-[#B91C1C]", w1: 73, w2: 62 },
-                ].map((m, i) => (
-                  <div key={i} className="relative flex gap-2.5 border-b px-3 py-3"
-                    style={{ borderColor: "var(--cm-divider)", background: i === 0 ? "var(--cm-blue-light)" : "transparent" }}>
-                    {!m.read && <div className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full" style={{ background: "var(--cm-unread-dot)" }} />}
-                    <div className={`h-8 w-8 shrink-0 rounded-full bg-gradient-to-br ${m.avatar}`} />
-                    <div className="flex-1 min-w-0">
-                      <div className="mb-1.5 flex items-center gap-2">
-                        <div className="h-2 rounded-full" style={{ background: m.read ? "var(--cm-border2)" : "var(--cm-text2)", opacity: m.read ? 1 : 0.8, flex: 1, maxWidth: `${m.w1}%` }} />
-                        <div className="h-1.5 w-6 shrink-0 rounded-full" style={{ background: "var(--cm-border2)" }} />
-                      </div>
-                      <div className="h-1.5 rounded-full" style={{ width: `${m.w2}%`, background: "var(--cm-border2)" }} />
-                      <div className="mt-1.5 h-1.5 rounded-full opacity-50" style={{ width: "48%", background: "var(--cm-surface3)" }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* Reader */}
-              <div className="min-w-0 flex-1 p-7 lg:p-9">
-                <div className="mb-5 h-6 rounded-full opacity-10" style={{ width: "65%", background: "var(--cm-text)" }} />
-                <div className="mb-7 flex items-center gap-3">
-                  <div className="h-11 w-11 shrink-0 rounded-full bg-gradient-to-br from-[#F97316] to-[#EA580C]" />
-                  <div className="flex-1">
-                    <div className="mb-1.5 h-3 w-32 rounded-full opacity-20" style={{ background: "var(--cm-text)" }} />
-                    <div className="h-2.5 w-48 rounded-full" style={{ background: "var(--cm-border2)" }} />
-                  </div>
-                </div>
-                <div className="mb-5 h-px" style={{ background: "var(--cm-border)" }} />
-                <div className="space-y-3">
-                  {[92, 84, 96, 72, 88, 60, 78, 44].map((w, i) => (
-                    <div key={i} className="h-2.5 rounded-full" style={{ width: `${w}%`, background: "var(--cm-border2)" }} />
-                  ))}
-                </div>
-                <div className="mt-8 flex gap-2">
-                  {["Reply","Forward","Archive"].map(l => (
-                    <div key={l} className="rounded-xl border px-3 py-1.5 text-[10px] font-[700]"
-                      style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text3)" }}>{l}</div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            {/* Animated email demo */}
+            <HeroEmailDemo />
           </TiltCard>
         </div>
       </section>
@@ -402,6 +333,54 @@ export default async function RootPage() {
               </AnimateIn>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ──────────────────────── SUPPORT / DONATE ──────────────────────── */}
+      <section className="py-20" style={{ background: "var(--cm-surface)" }}>
+        <div className="mx-auto max-w-2xl px-5 sm:px-8">
+          <AnimateIn direction="scale">
+            <div className="relative overflow-hidden rounded-[28px] border px-8 py-10 text-center sm:px-12"
+              style={{ borderColor: "var(--cm-border)", background: "var(--cm-bg)", boxShadow: "var(--cm-shadow-lg)" }}>
+              {/* Background glow */}
+              <div className="pointer-events-none absolute -left-12 -top-12 h-40 w-40 rounded-full blur-3xl" style={{ background: "rgba(249,115,22,0.08)" }} />
+              <div className="pointer-events-none absolute -bottom-12 -right-12 h-40 w-40 rounded-full blur-3xl" style={{ background: "rgba(0,68,188,0.07)" }} />
+              <div className="relative">
+                <span className="text-3xl">☕</span>
+                <h2 className="mt-4 text-[22px] font-[900] tracking-tight sm:text-[26px]" style={{ color: "var(--cm-text)" }}>
+                  Carimail is free — and always will be.
+                </h2>
+                <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed" style={{ color: "var(--cm-text2)" }}>
+                  We don&apos;t charge for any features and we don&apos;t sell your data. If Carimail saves you time every day, a small contribution keeps the lights on.
+                </p>
+                <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+                  <a
+                    href="https://ko-fi.com/hostcari"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl px-7 py-3.5 text-[14px] font-[800] text-white transition hover:-translate-y-0.5 sm:w-auto"
+                    style={{ background: "linear-gradient(135deg, #F97316, #EA580C)", boxShadow: "0 8px 28px rgba(249,115,22,0.30)" }}
+                  >
+                    <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                    <span>☕</span> Buy us a coffee
+                  </a>
+                  <a
+                    href="https://github.com/hostcari/carimail"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border px-7 py-3.5 text-[14px] font-[700] transition hover:-translate-y-0.5 sm:w-auto"
+                    style={{ borderColor: "var(--cm-border2)", color: "var(--cm-text2)", background: "var(--cm-surface)" }}
+                  >
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    Star on GitHub
+                  </a>
+                </div>
+                <p className="mt-5 text-[11.5px]" style={{ color: "var(--cm-text3)" }}>
+                  100% of contributions go toward hosting and development. No subscriptions, no upsells.
+                </p>
+              </div>
+            </div>
+          </AnimateIn>
         </div>
       </section>
 

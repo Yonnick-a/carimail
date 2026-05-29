@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import {
   AlertCircle, Archive, Calendar, Check, ChevronLeft, ChevronRight,
   Bell, Clock, Copy, Download, ExternalLink, Eye, EyeOff, Forward, Inbox,
-  Loader2, Mail, MailOpen, MailX, MoveRight, Paperclip,
+  Loader2, Mail, MailOpen, MailX, Maximize2, MoveRight, Paperclip,
   Printer, RefreshCw, Reply, ReplyAll, Send,
   Star, StarOff, Tag, Trash2, Video, X, ZoomIn, ZoomOut,
 } from "lucide-react";
@@ -691,13 +691,13 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                   key={mode}
                   type="button"
                   onClick={() => changeWorkspaceMode(mode)}
-                  className="rounded-lg px-2.5 py-1 text-[10.5px] font-[700] capitalize transition"
+                  className="rounded-lg px-2.5 py-1 text-[10.5px] font-[700] transition"
                   style={{
                     background: workspaceMode === mode ? "var(--cm-blue)" : "transparent",
                     color: workspaceMode === mode ? "#fff" : "var(--cm-text3)",
                   }}
                 >
-                  {mode}
+                  {mode === "focus" ? "Reader" : mode === "split" ? "Split" : "Compact"}
                 </button>
               ))}
             </div>
@@ -976,7 +976,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                         color: active ? "var(--cm-accent)" : "var(--cm-text2)",
                       }}>
                       <Icon className="h-3.5 w-3.5" />
-                      <span className={mode === "reply" ? "" : "hidden sm:inline"}>{label}</span>
+                      <span className={mode === "reply" ? "hidden sm:inline" : "hidden sm:inline"}>{label}</span>
                     </button>
                   );
                 })}
@@ -1009,7 +1009,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                 <span className="hidden sm:inline">Delete</span>
               </button>
 
-              <label className={`${toolBtnBase} max-w-[160px]`} style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
+              <label className={`hidden sm:inline-flex ${toolBtnBase} max-w-[160px]`} style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
                 <MoveRight className="h-3.5 w-3.5" />
                 <select
                   value=""
@@ -1030,38 +1030,46 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
               </label>
 
               <button type="button" onClick={openSnoozeModal} disabled={actionBusy}
-                className={toolBtnBase} style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
+                className={`hidden sm:inline-flex ${toolBtnBase}`} style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
                 <Clock className="h-3.5 w-3.5" />
                 <span className="hidden lg:inline">Snooze</span>
               </button>
 
               <button type="button" onClick={openReminderModal} disabled={actionBusy}
-                className={toolBtnBase} style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
+                className={`hidden sm:inline-flex ${toolBtnBase}`} style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", color: "var(--cm-text2)" }}>
                 <Bell className="h-3.5 w-3.5" />
                 <span className="hidden lg:inline">Remind</span>
               </button>
 
               <div className="ml-auto flex items-center gap-1">
-                <div className="hidden rounded-xl border p-0.5 sm:flex" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
-                  {(["split", "focus", "compact"] as const).map(mode => (
-                    <button key={mode} type="button" onClick={() => changeWorkspaceMode(mode)} className="rounded-lg px-2.5 py-1 text-[11.5px] font-[800] capitalize transition" style={{ background: workspaceMode === mode ? "var(--cm-blue)" : "transparent", color: workspaceMode === mode ? "#fff" : "var(--cm-text3)" }}>
-                      {mode}
-                    </button>
-                  ))}
-                </div>
+                {/* Focus Mode — the main entry point */}
+                <button
+                  type="button"
+                  onClick={() => setFocusMode(true)}
+                  title="Focus mode (Z) — distraction-free reading"
+                  className="hidden items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[11.5px] font-[700] transition sm:flex"
+                  style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", color: "var(--cm-text2)" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--cm-accent-b)"; (e.currentTarget as HTMLElement).style.color = "var(--cm-accent)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--cm-border)"; (e.currentTarget as HTMLElement).style.color = "var(--cm-text2)"; }}
+                >
+                  <Maximize2 className="h-3.5 w-3.5" />
+                  <span className="hidden lg:inline">Focus</span>
+                  <kbd className="hidden rounded border px-1 py-0.5 text-[9px] lg:inline" style={{ borderColor: "var(--cm-border2)", background: "var(--cm-surface3)" }}>Z</kbd>
+                </button>
+                <div className="mx-1 hidden h-4 w-px sm:block" style={{ background: "var(--cm-border)" }} />
                 <button type="button" onClick={() => setFontSize(s => Math.max(11, s - 1))} title="Smaller" className="flex h-7 w-7 items-center justify-center rounded-lg transition" style={{ color: "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><ZoomOut className="h-3.5 w-3.5" /></button>
                 <button type="button" onClick={() => setFontSize(s => Math.min(22, s + 1))} title="Larger" className="flex h-7 w-7 items-center justify-center rounded-lg transition" style={{ color: "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><ZoomIn className="h-3.5 w-3.5" /></button>
                 <button type="button" onClick={() => setShowImages(v => !v)} title={showImages ? "Hide images" : "Show images"} className="flex h-7 w-7 items-center justify-center rounded-lg transition" style={{ color: "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>{showImages ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}</button>
-                <button type="button" onClick={() => window.print()} title="Print" className="flex h-7 w-7 items-center justify-center rounded-lg transition" style={{ color: "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><Printer className="h-3.5 w-3.5" /></button>
-                <button type="button" onClick={() => setViewSource(v => !v)} title="View source" className="flex h-7 w-7 items-center justify-center rounded-lg transition" style={{ color: viewSource ? "var(--cm-accent)" : "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><Tag className="h-3.5 w-3.5" /></button>
+                <button type="button" onClick={() => window.print()} title="Print" className="hidden h-7 w-7 items-center justify-center rounded-lg transition lg:flex" style={{ color: "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><Printer className="h-3.5 w-3.5" /></button>
+                <button type="button" onClick={() => setViewSource(v => !v)} title="View source" className="hidden h-7 w-7 items-center justify-center rounded-lg transition lg:flex" style={{ color: viewSource ? "var(--cm-accent)" : "var(--cm-text3)" }} onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}><Tag className="h-3.5 w-3.5" /></button>
               </div>
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto">
-              <div className={`mx-auto grid w-full gap-5 px-5 py-6 sm:px-8 sm:py-7 ${focusMode ? "max-w-3xl" : workspaceMode === "compact" ? "max-w-3xl" : "max-w-6xl xl:grid-cols-[minmax(0,1fr)_280px]"}`}>
-                <article className="min-w-0">
-                <h1 className="text-[20px] font-[800] leading-tight tracking-tight" style={{ color: "var(--cm-text)" }}>{selected.subject}</h1>
+            <div className="flex-1 overflow-x-hidden overflow-y-auto">
+              <div className={`mx-auto grid w-full gap-5 px-4 py-5 sm:px-8 sm:py-7 ${focusMode ? "max-w-3xl" : workspaceMode === "compact" ? "max-w-3xl" : "max-w-6xl xl:grid-cols-[minmax(0,1fr)_280px]"}`}>
+                <article className="min-w-0 overflow-hidden">
+                <h1 className="break-words text-[18px] font-[800] leading-tight tracking-tight sm:text-[20px]" style={{ color: "var(--cm-text)" }}>{selected.subject}</h1>
 
                 <div className="mt-5 flex items-start gap-3.5">
                   <Avatar name={selected.fromName} email={selected.from} size="lg" />
