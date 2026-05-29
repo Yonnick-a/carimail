@@ -140,9 +140,16 @@ export function SearchAnimation({ paused = false }: { paused?: boolean }) {
           <span style={{ borderRight: "1px solid currentColor", animation: "fcPulse 0.9s ease-in-out infinite", display: "inline-block", width: 1, height: "0.85em", verticalAlign: "middle", marginLeft: 1 }} />
         </span>
       </div>
-      {showResults && SEARCH_RESULTS.map((r, i) => (
+      {/* Always rendered — opacity transition prevents card height from changing */}
+      {SEARCH_RESULTS.map((r, i) => (
         <div key={r} className="flex items-center gap-2 rounded-xl px-3 py-2.5"
-          style={{ background: "var(--cm-surface2)", opacity: 0, animation: `fcSlideIn 0.28s cubic-bezier(0.16,1,0.3,1) ${i * 0.1}s forwards` }}>
+          style={{
+            background: "var(--cm-surface2)",
+            opacity: showResults ? 1 : 0,
+            transform: showResults ? "none" : "translateY(4px)",
+            transition: `opacity 0.24s cubic-bezier(0.16,1,0.3,1) ${showResults ? i * 0.09 : 0}s, transform 0.24s cubic-bezier(0.16,1,0.3,1) ${showResults ? i * 0.09 : 0}s`,
+            pointerEvents: showResults ? "auto" : "none",
+          }}>
           <span className="text-[11px]">📧</span>
           <span className="truncate text-[11.5px] font-[600]" style={{ color: "var(--cm-text2)" }}>{r}</span>
         </div>
@@ -192,14 +199,20 @@ export function AttachmentAnimation({ paused = false }: { paused?: boolean }) {
           </div>
         </div>
       </div>
-      {done && (
-        <div className="space-y-1.5 overflow-hidden rounded-xl border px-3 py-2.5"
-          style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", animation: "fcSlideIn 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
-          {[80, 62, 75, 48].map((w, i) => (
-            <div key={i} className="h-1.5 rounded-full" style={{ width: `${w}%`, background: "var(--cm-border2)" }} />
-          ))}
-        </div>
-      )}
+      {/* Always rendered — opacity transition prevents card height from changing */}
+      <div className="space-y-1.5 overflow-hidden rounded-xl border px-3 py-2.5"
+        style={{
+          borderColor: "var(--cm-border)",
+          background: "var(--cm-surface2)",
+          opacity: done ? 1 : 0,
+          transform: done ? "none" : "translateY(4px)",
+          transition: "opacity 0.3s cubic-bezier(0.16,1,0.3,1), transform 0.3s cubic-bezier(0.16,1,0.3,1)",
+          pointerEvents: done ? "auto" : "none",
+        }}>
+        {[80, 62, 75, 48].map((w, i) => (
+          <div key={i} className="h-1.5 rounded-full" style={{ width: `${w}%`, background: "var(--cm-border2)" }} />
+        ))}
+      </div>
     </div>
   );
 }

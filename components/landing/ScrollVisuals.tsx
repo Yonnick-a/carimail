@@ -101,8 +101,11 @@ export function ConversationsVisual() {
         </div>
       ))}
 
-      {phase === "typing" && (
-        <div className="flex gap-2.5" style={{ animation: "fcSlideIn 0.28s cubic-bezier(0.16,1,0.3,1) both" }}>
+      {/* Fixed-height slot — typing and new message overlap here, only one visible at a time */}
+      <div className="relative" style={{ height: 52 }}>
+        {/* Typing indicator */}
+        <div className="absolute inset-0 flex gap-2.5"
+          style={{ opacity: phase === "typing" ? 1 : 0, transition: "opacity 0.25s", pointerEvents: phase === "typing" ? "auto" : "none" }}>
           <div className="h-7 w-7 shrink-0 rounded-full" style={{ background: "linear-gradient(135deg,#7C3AED,#6D28D9)" }} />
           <div className="rounded-2xl border px-3.5 py-3" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
             <div className="flex items-end gap-1">
@@ -113,10 +116,9 @@ export function ConversationsVisual() {
             </div>
           </div>
         </div>
-      )}
-
-      {phase === "msg" && (
-        <div className="flex gap-2.5" style={{ animation: "fcSlideIn 0.32s cubic-bezier(0.16,1,0.3,1) both" }}>
+        {/* New message bubble */}
+        <div className="absolute inset-0 flex gap-2.5"
+          style={{ opacity: phase === "msg" ? 1 : 0, transition: "opacity 0.3s", pointerEvents: phase === "msg" ? "auto" : "none" }}>
           <div className="h-7 w-7 shrink-0 rounded-full" style={{ background: "linear-gradient(135deg,#7C3AED,#6D28D9)" }} />
           <div className="max-w-[75%] rounded-2xl border px-3.5 py-2.5"
             style={{ borderColor: "rgba(124,58,237,0.18)", background: "var(--cm-surface)", boxShadow: "0 2px 10px rgba(124,58,237,0.10)" }}>
@@ -127,7 +129,7 @@ export function ConversationsVisual() {
             <div className="h-2 rounded-full" style={{ width: "90%", background: "var(--cm-border2)" }} />
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
