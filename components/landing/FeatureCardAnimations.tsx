@@ -5,43 +5,37 @@ import { useEffect, useRef, useState } from "react";
 const HEX = "0123456789abcdef";
 const rh = (n: number) => Array.from({ length: n }, () => HEX[Math.floor(Math.random() * 16)]).join("");
 
-export function EncryptAnimation() {
+export function EncryptAnimation({ paused = false }: { paused?: boolean }) {
   const [rows, setRows] = useState(() => [rh(10), rh(10), rh(10)]);
   const [phase, setPhase] = useState<"plain" | "scrambling" | "locked">("plain");
 
   useEffect(() => {
+    if (paused) { setPhase("plain"); setRows([rh(10), rh(10), rh(10)]); return; }
     let t: ReturnType<typeof setTimeout>;
-    let scrambleInterval: ReturnType<typeof setInterval>;
-
+    let iv: ReturnType<typeof setInterval>;
     const cycle = () => {
       setPhase("plain");
       t = setTimeout(() => {
         setPhase("scrambling");
         let i = 0;
-        scrambleInterval = setInterval(() => {
+        iv = setInterval(() => {
           setRows([rh(10), rh(10), rh(10)]);
-          if (++i >= 7) {
-            clearInterval(scrambleInterval);
-            setPhase("locked");
-            t = setTimeout(cycle, 2400);
-          }
+          if (++i >= 7) { clearInterval(iv); setPhase("locked"); t = setTimeout(cycle, 2400); }
         }, 75);
       }, 1600);
     };
-
     cycle();
-    return () => { clearTimeout(t); clearInterval(scrambleInterval); };
-  }, []);
+    return () => { clearTimeout(t); clearInterval(iv); };
+  }, [paused]);
 
   const locked = phase === "locked";
-
   return (
     <div className="mt-4 overflow-hidden rounded-xl border"
       style={{ borderColor: locked ? "rgba(16,185,129,0.25)" : "var(--cm-border)", background: "var(--cm-surface2)", transition: "border-color 0.4s" }}>
-      <div className="px-3 py-2.5 space-y-1.5">
+      <div className="space-y-1.5 px-3 py-2.5">
         {rows.map((row, i) => (
           <div key={i} className="flex items-center gap-2">
-            <span className="text-[9px] w-3 shrink-0 tabular-nums font-mono" style={{ color: "var(--cm-text3)" }}>0{i}</span>
+            <span className="w-3 shrink-0 font-mono text-[9px] tabular-nums" style={{ color: "var(--cm-text3)" }}>0{i}</span>
             <code className="text-[11px] font-mono tracking-widest"
               style={{ color: locked ? "#10B981" : "var(--cm-text2)", transition: "color 0.3s" }}>
               {locked ? "·  ·  ·  ·  ·  ·  ·  ·  ·  ·" : row.split("").join("  ")}
@@ -49,8 +43,7 @@ export function EncryptAnimation() {
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-1.5 border-t px-3 py-1.5"
-        style={{ borderColor: "var(--cm-border)" }}>
+      <div className="flex items-center gap-1.5 border-t px-3 py-1.5" style={{ borderColor: "var(--cm-border)" }}>
         <div className="h-1.5 w-1.5 rounded-full transition-colors duration-300"
           style={{ background: locked ? "#10B981" : phase === "scrambling" ? "#F97316" : "var(--cm-text3)" }} />
         <span className="text-[10px] font-[600] transition-colors duration-300"
@@ -63,18 +56,18 @@ export function EncryptAnimation() {
 }
 
 // ─── Dark / Light Mode ────────────────────────────────────────────────────────
-export function ThemeAnimation() {
+export function ThemeAnimation({ paused = false }: { paused?: boolean }) {
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
+    if (paused) { setDark(false); return; }
     const id = setInterval(() => setDark(d => !d), 2600);
     return () => clearInterval(id);
-  }, []);
+  }, [paused]);
 
-  const bg = dark ? "#0F172A" : "#F8FAFC";
+  const bg     = dark ? "#0F172A" : "#F8FAFC";
   const border = dark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)";
-  const lineA = dark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.09)";
-  const lineB = dark ? "rgba(255,255,255,0.05)" : "rgba(15,23,42,0.06)";
+  const line   = dark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.09)";
   const textSub = dark ? "#475569" : "#94A3B8";
 
   return (
@@ -83,9 +76,8 @@ export function ThemeAnimation() {
       <div className="flex items-center justify-between border-b px-3 py-2"
         style={{ borderColor: border, transition: "border-color 0.7s" }}>
         <div className="flex items-center gap-1.5">
-          <div className="h-2 w-2 rounded-full transition-colors duration-700"
-            style={{ background: dark ? "#4B9EFF" : "#F97316" }} />
-          <div className="h-1.5 w-10 rounded-full" style={{ background: lineA, transition: "background 0.7s" }} />
+          <div className="h-2 w-2 rounded-full transition-colors duration-700" style={{ background: dark ? "#4B9EFF" : "#F97316" }} />
+          <div className="h-1.5 w-10 rounded-full" style={{ background: line, transition: "background 0.7s" }} />
         </div>
         <div className="flex items-center gap-1">
           <span className="text-[12px]">{dark ? "🌙" : "☀️"}</span>
@@ -96,7 +88,8 @@ export function ThemeAnimation() {
       </div>
       <div className="space-y-2 p-3">
         {[68, 82, 50, 74].map((w, i) => (
-          <div key={i} className="h-2 rounded-full" style={{ width: `${w}%`, background: i === 0 ? lineA : lineB, transition: "background 0.7s" }} />
+          <div key={i} className="h-2 rounded-full"
+            style={{ width: `${w}%`, background: i === 0 ? line : `${line.slice(0, -2)}0.05)`, transition: "background 0.7s" }} />
         ))}
       </div>
     </div>
@@ -107,22 +100,21 @@ export function ThemeAnimation() {
 const SEARCH_QUERY = "quarterly rep";
 const SEARCH_RESULTS = ["Q3 Report — Finance.pdf", "Quarterly Review Notes"];
 
-export function SearchAnimation() {
+export function SearchAnimation({ paused = false }: { paused?: boolean }) {
   const [typed, setTyped] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const alive = useRef(true);
 
   useEffect(() => {
     alive.current = true;
+    if (paused) { setTyped(0); setShowResults(false); return; }
     const run = () => {
       if (!alive.current) return;
-      setTyped(0);
-      setShowResults(false);
+      setTyped(0); setShowResults(false);
       let i = 0;
       const next = () => {
         if (!alive.current) return;
-        i++;
-        setTyped(i);
+        i++; setTyped(i);
         if (i < SEARCH_QUERY.length) setTimeout(next, 90);
         else setTimeout(() => {
           if (!alive.current) return;
@@ -130,11 +122,11 @@ export function SearchAnimation() {
           setTimeout(run, 2600);
         }, 280);
       };
-      setTimeout(next, 500);
+      setTimeout(next, 400);
     };
     run();
     return () => { alive.current = false; };
-  }, []);
+  }, [paused]);
 
   return (
     <div className="mt-4 space-y-2">
@@ -160,29 +152,24 @@ export function SearchAnimation() {
 }
 
 // ─── Attachment Viewer ────────────────────────────────────────────────────────
-export function AttachmentAnimation() {
+export function AttachmentAnimation({ paused = false }: { paused?: boolean }) {
   const [pct, setPct] = useState(0);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
+    if (paused) { setPct(0); setDone(false); return; }
     const run = () => {
-      setPct(0);
-      setDone(false);
+      setPct(0); setDone(false);
       const iv = setInterval(() => {
         setPct(p => {
-          if (p >= 100) {
-            clearInterval(iv);
-            setDone(true);
-            setTimeout(run, 2200);
-            return 100;
-          }
+          if (p >= 100) { clearInterval(iv); setDone(true); setTimeout(run, 2200); return 100; }
           return p + 4;
         });
       }, 55);
       return () => clearInterval(iv);
     };
     run();
-  }, []);
+  }, [paused]);
 
   return (
     <div className="mt-4 space-y-2">
@@ -192,10 +179,10 @@ export function AttachmentAnimation() {
           style={{ background: done ? "rgba(239,68,68,0.10)" : "var(--cm-surface3)" }}>
           <span className="text-[15px]">📄</span>
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="mb-1.5 flex items-center justify-between gap-2">
-            <span className="text-[12px] font-[600] truncate" style={{ color: "var(--cm-text)" }}>Q3_Report.pdf</span>
-            <span className="shrink-0 text-[10px] font-[700]" style={{ color: done ? "#10B981" : "var(--cm-text3)" }}>
+            <span className="truncate text-[12px] font-[600]" style={{ color: "var(--cm-text)" }}>Q3_Report.pdf</span>
+            <span className="ml-2 shrink-0 text-[10px] font-[700]" style={{ color: done ? "#10B981" : "var(--cm-text3)" }}>
               {done ? "Open preview" : `${pct}%`}
             </span>
           </div>
@@ -206,7 +193,7 @@ export function AttachmentAnimation() {
         </div>
       </div>
       {done && (
-        <div className="overflow-hidden rounded-xl border px-3 py-2.5 space-y-1.5"
+        <div className="space-y-1.5 overflow-hidden rounded-xl border px-3 py-2.5"
           style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)", animation: "fcSlideIn 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
           {[80, 62, 75, 48].map((w, i) => (
             <div key={i} className="h-1.5 rounded-full" style={{ width: `${w}%`, background: "var(--cm-border2)" }} />
@@ -219,19 +206,20 @@ export function AttachmentAnimation() {
 
 // ─── Keyboard Shortcuts ───────────────────────────────────────────────────────
 const KB_SHORTCUTS = [
-  { keys: ["G", "I"], label: "Go to Inbox" },
+  { keys: ["G", "I"], label: "Go to Inbox"   },
   { keys: ["⌘", "K"], label: "Quick actions" },
-  { keys: ["R"],      label: "Reply" },
-  { keys: ["E"],      label: "Archive" },
+  { keys: ["R"],      label: "Reply"          },
+  { keys: ["E"],      label: "Archive"        },
 ];
 
-export function KeyboardAnimation() {
+export function KeyboardAnimation({ paused = false }: { paused?: boolean }) {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
+    if (paused) { setActive(0); return; }
     const id = setInterval(() => setActive(a => (a + 1) % KB_SHORTCUTS.length), 1100);
     return () => clearInterval(id);
-  }, []);
+  }, [paused]);
 
   return (
     <div className="mt-4 space-y-2">
@@ -268,18 +256,19 @@ export function KeyboardAnimation() {
 
 // ─── AI Categorisation ────────────────────────────────────────────────────────
 const AI_ITEMS = [
-  { label: "Primary",  color: "#0044BC", bg: "rgba(0,68,188,0.09)",   sub: "Re: Project kickoff" },
-  { label: "Finance",  color: "#D97706", bg: "rgba(217,119,6,0.09)",   sub: "Invoice #2048 due" },
-  { label: "Updates",  color: "#059669", bg: "rgba(5,150,105,0.09)",   sub: "GitHub digest" },
+  { label: "Primary", color: "#0044BC", bg: "rgba(0,68,188,0.09)",  sub: "Re: Project kickoff"  },
+  { label: "Finance", color: "#D97706", bg: "rgba(217,119,6,0.09)", sub: "Invoice #2048 due"    },
+  { label: "Updates", color: "#059669", bg: "rgba(5,150,105,0.09)", sub: "GitHub digest"        },
 ];
 
-export function AiAnimation() {
+export function AiAnimation({ paused = false }: { paused?: boolean }) {
   const [hi, setHi] = useState(0);
 
   useEffect(() => {
+    if (paused) { setHi(0); return; }
     const id = setInterval(() => setHi(h => (h + 1) % AI_ITEMS.length), 1500);
     return () => clearInterval(id);
-  }, []);
+  }, [paused]);
 
   return (
     <div className="mt-4 space-y-1.5">
@@ -288,17 +277,11 @@ export function AiAnimation() {
         return (
           <div key={e.label}
             className="flex items-center gap-2.5 rounded-xl border px-3 py-2 transition-all duration-400"
-            style={{
-              borderColor: on ? `${e.color}28` : "transparent",
-              background: on ? e.bg : "var(--cm-surface2)",
-            }}>
+            style={{ borderColor: on ? `${e.color}28` : "transparent", background: on ? e.bg : "var(--cm-surface2)" }}>
             <span className="text-[11px]">📧</span>
             <span className="flex-1 truncate text-[11.5px] font-[600]" style={{ color: "var(--cm-text2)" }}>{e.sub}</span>
             <span className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-[800] transition-all duration-400"
-              style={{
-                background: on ? e.bg : "var(--cm-surface3)",
-                color: on ? e.color : "var(--cm-text3)",
-              }}>
+              style={{ background: on ? e.bg : "var(--cm-surface3)", color: on ? e.color : "var(--cm-text3)" }}>
               {e.label}
             </span>
           </div>
@@ -316,13 +299,14 @@ const TEAM = [
   { initials: "KT", g: "from-[#059669] to-[#047857]" },
 ];
 
-export function TeamAnimation() {
+export function TeamAnimation({ paused = false }: { paused?: boolean }) {
   const [typer, setTyper] = useState(0);
 
   useEffect(() => {
+    if (paused) { setTyper(0); return; }
     const id = setInterval(() => setTyper(t => (t + 1) % TEAM.length), 1800);
     return () => clearInterval(id);
-  }, []);
+  }, [paused]);
 
   return (
     <div className="mt-4 rounded-xl border px-3 py-3"
@@ -360,12 +344,13 @@ function makeCode() {
   return `${Math.floor(100 + Math.random() * 900)} ${Math.floor(100 + Math.random() * 900)}`;
 }
 
-export function TotpAnimation() {
+export function TotpAnimation({ paused = false }: { paused?: boolean }) {
   const [code, setCode] = useState("482 931");
   const [secs, setSecs] = useState(22);
   const [fade, setFade] = useState(false);
 
   useEffect(() => {
+    if (paused) { setCode("482 931"); setSecs(22); setFade(false); return; }
     const id = setInterval(() => {
       setSecs(s => {
         if (s <= 1) {
@@ -377,7 +362,7 @@ export function TotpAnimation() {
       });
     }, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [paused]);
 
   const pct = (secs / 30) * 100;
   const barColor = secs > 10 ? "#10B981" : "#EF4444";
@@ -403,35 +388,32 @@ export function TotpAnimation() {
 }
 
 // ─── No Lock-in (provider cycling) ───────────────────────────────────────────
-const PROVIDERS = ["Gmail", "Outlook", "Hostcari", "Fastmail", "Proton Mail"];
+const PROVIDERS = ["Gmail", "Outlook", "Hostcari", "Fastmail"];
 
-export function ProviderAnimation() {
+export function ProviderAnimation({ paused = false }: { paused?: boolean }) {
   const [hi, setHi] = useState(0);
 
   useEffect(() => {
+    if (paused) { setHi(0); return; }
     const id = setInterval(() => setHi(h => (h + 1) % PROVIDERS.length), 1200);
     return () => clearInterval(id);
-  }, []);
+  }, [paused]);
 
   return (
     <div className="mt-4 space-y-1">
-      {PROVIDERS.slice(0, 4).map((p, i) => {
-        const on = i === hi % 4;
+      {PROVIDERS.map((p, i) => {
+        const on = i === hi;
         return (
           <div key={p} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 transition-all duration-300"
             style={{ background: on ? "rgba(0,68,188,0.07)" : "transparent" }}>
             <div className="h-2 w-2 rounded-full transition-all duration-300"
-              style={{
-                background: on ? "#10B981" : "var(--cm-border2)",
-                boxShadow: on ? "0 0 6px #10B981" : "none",
-              }} />
+              style={{ background: on ? "#10B981" : "var(--cm-border2)", boxShadow: on ? "0 0 6px #10B981" : "none" }} />
             <span className="flex-1 text-[12px] font-[600] transition-colors duration-300"
               style={{ color: on ? "var(--cm-text)" : "var(--cm-text3)" }}>
               {p}
             </span>
             {on && (
-              <span className="text-[9px] font-[800] text-emerald-500"
-                style={{ animation: "fcSlideIn 0.2s both" }}>
+              <span className="text-[9px] font-[800] text-emerald-500" style={{ animation: "fcSlideIn 0.2s both" }}>
                 Connected
               </span>
             )}

@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 
 interface FeatureCardProps {
   icon: string;
@@ -78,7 +78,9 @@ export function FeatureCard({ icon, title, desc, visual }: FeatureCardProps) {
         <p className="mt-2 text-[13.5px] leading-relaxed" style={{ color: "var(--cm-text2)" }}>
           {desc}
         </p>
-        {visual}
+        {visual && React.isValidElement(visual)
+          ? React.cloneElement(visual as React.ReactElement<{ paused?: boolean }>, { paused: !hovered })
+          : visual}
       </div>
     </div>
   );
