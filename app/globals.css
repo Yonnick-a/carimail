@@ -256,6 +256,20 @@ body {
   to   { transform: translateX(-50%); }
 }
 
+/* ── Feature card animations ── */
+@keyframes fcSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes typingDot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%            { transform: translateY(-4px); opacity: 1; }
+}
+@keyframes fcPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.85); }
+}
+
 /* ── Theme transitions (only on color props) ── */
 *, *::before, *::after {
   transition-property: background-color, border-color, color;

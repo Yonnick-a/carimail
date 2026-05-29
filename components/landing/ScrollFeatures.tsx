@@ -130,7 +130,7 @@ const features: Feature[] = [
           </div>
           <div className="space-y-2">
             {[
-              { initials: "YA", name: "Yonnick A.", role: "owner", color: "from-[#F97316] to-[#EA580C]" },
+              { initials: "JD", name: "Jordan D.", role: "owner", color: "from-[#F97316] to-[#EA580C]" },
               { initials: "SL", name: "Sarah L.", role: "admin", color: "from-[#0044BC] to-[#003399]" },
               { initials: "MR", name: "Marc R.", role: "member", color: "from-[#7C3AED] to-[#6D28D9]" },
             ].map(m => (
@@ -243,16 +243,11 @@ export function ScrollFeatures() {
   // Mobile: stacked sections
   if (isMobile) {
     return (
-      <div className="space-y-24">
+      <div className="mx-auto max-w-xl space-y-20 px-4 sm:max-w-2xl sm:space-y-24 sm:px-8">
         {features.map(f => (
           <div key={f.tag} className="flex flex-col gap-10">
             <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-[800] uppercase tracking-[0.18em]"
-                style={{ background: f.bg, color: f.color }}>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: f.color }} />
-                {f.tag}
-              </span>
-              <h3 className="mt-4 text-[30px] font-[900] leading-tight tracking-tight"
+              <h3 className="text-[30px] font-[900] leading-tight tracking-tight"
                 style={{ color: "var(--cm-text)", whiteSpace: "pre-line" }}>{f.title}</h3>
               <p className="mt-4 text-[16px] leading-[1.7]" style={{ color: "var(--cm-text2)" }}>{f.desc}</p>
               <ul className="mt-6 space-y-2.5">
@@ -343,16 +338,8 @@ export function ScrollFeatures() {
                         width: "100%",
                       }}
                     >
-                      <span
-                        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-[800] uppercase tracking-[0.18em]"
-                        style={{ background: f.bg, color: f.color }}
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: f.color }} />
-                        {f.tag}
-                      </span>
-
                       <h3
-                        className="mt-4 font-[900] leading-[1.08] tracking-[-0.03em]"
+                        className="font-[900] leading-[1.08] tracking-[-0.03em]"
                         style={{
                           fontSize: "clamp(32px, 4vw, 52px)",
                           color: "var(--cm-text)",
@@ -395,8 +382,7 @@ export function ScrollFeatures() {
 
               {/* Height placeholder */}
               <div aria-hidden style={{ visibility: "hidden" }}>
-                <span className="inline-flex rounded-full px-3 py-1 text-[11px]">{feature.tag}</span>
-                <h3 className="mt-4 font-[900] leading-[1.08]" style={{ fontSize: "clamp(32px,4vw,52px)", whiteSpace: "pre-line" }}>{feature.title}</h3>
+                <h3 className="font-[900] leading-[1.08]" style={{ fontSize: "clamp(32px,4vw,52px)", whiteSpace: "pre-line" }}>{feature.title}</h3>
                 <p className="mt-5 text-[17px]">{feature.desc}</p>
                 <ul className="mt-7 space-y-3">
                   {feature.points.map(p => <li key={p} className="text-[15px]">{p}</li>)}

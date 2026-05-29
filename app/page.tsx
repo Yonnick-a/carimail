@@ -9,6 +9,18 @@ import { LogoCarousel } from "@/components/landing/LogoCarousel";
 import { AnimateIn } from "@/components/landing/AnimateIn";
 import { TiltCard } from "@/components/landing/TiltCard";
 import { ScrollFeatures } from "@/components/landing/ScrollFeatures";
+import { FeatureCard } from "@/components/landing/FeatureCard";
+import {
+  EncryptAnimation,
+  ThemeAnimation,
+  SearchAnimation,
+  AttachmentAnimation,
+  KeyboardAnimation,
+  AiAnimation,
+  TeamAnimation,
+  TotpAnimation,
+  ProviderAnimation,
+} from "@/components/landing/FeatureCardAnimations";
 
 export default async function RootPage() {
   const user = await getSession();
@@ -28,7 +40,7 @@ export default async function RootPage() {
             style={{ background: "radial-gradient(circle, rgba(0,68,188,0.10) 0%, transparent 70%)", animation: "orbFloat2 25s ease-in-out infinite" }} />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-5 pb-4 pt-24 text-center sm:px-8 sm:pt-32">
+        <div className="relative mx-auto max-w-6xl px-4 pb-4 pt-20 text-center sm:px-8 sm:pt-32">
           {/* Headline — staggered word reveal */}
           <div className="animate-fade-up overflow-hidden">
             <h1
@@ -206,7 +218,7 @@ export default async function RootPage() {
       {/* ─────────────────────── FEATURES ─────────────────────── */}
       <section id="features">
         {/* Section header */}
-        <div className="mx-auto max-w-6xl px-5 pb-16 pt-28 sm:px-8">
+        <div className="mx-auto max-w-6xl px-4 pb-12 pt-20 sm:px-8 sm:pb-16 sm:pt-28">
           <AnimateIn className="text-center">
             <h2 className="text-[36px] font-[900] tracking-[-0.025em] sm:text-[48px]" style={{ color: "var(--cm-text)" }}>
               Everything you need.
@@ -223,26 +235,21 @@ export default async function RootPage() {
         <ScrollFeatures />
 
         {/* Feature grid */}
-        <div className="mx-auto max-w-6xl px-5 pb-28 pt-24 sm:px-8">
+        <div className="mx-auto max-w-6xl px-4 pb-24 pt-20 sm:px-8 sm:pb-28 sm:pt-24">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { icon: "🔒", title: "AES-256 encrypted", desc: "Your credentials are encrypted before storage. Never logged, never exposed." },
-              { icon: "🌙", title: "Dark & light mode", desc: "Carefully tuned themes for any hour. Respects your system preference automatically." },
-              { icon: "⚡", title: "Live search", desc: "Real-time search across all your mail as you type. Instant results, no waiting." },
-              { icon: "📎", title: "Inline attachment viewer", desc: "Preview PDFs, images, and documents inline — without leaving the app." },
-              { icon: "⌨", title: "Keyboard-first design", desc: "Every action has a shortcut. Press ? to see the full list. Stay in the flow." },
-              { icon: "🤖", title: "AI categorisation", desc: "Emails are automatically sorted into Primary, Updates, Finance, Security, and more." },
-              { icon: "👥", title: "Team collaboration", desc: "Share mailboxes with your team. Invite members, assign roles, manage access." },
-              { icon: "🔐", title: "Two-factor auth", desc: "Add an extra layer of protection with TOTP two-factor authentication and backup codes." },
-              { icon: "🔓", title: "No lock-in", desc: "Works with any IMAP/SMTP server. Your data stays with your email provider." },
+              { icon: "🔒", title: "AES-256 encrypted",      desc: "Your credentials are encrypted before storage. Never logged, never exposed.",             visual: <EncryptAnimation /> },
+              { icon: "🌙", title: "Dark & light mode",       desc: "Carefully tuned themes for any hour. Respects your system preference automatically.",      visual: <ThemeAnimation /> },
+              { icon: "⚡", title: "Live search",             desc: "Real-time search across all your mail as you type. Instant results, no waiting.",          visual: <SearchAnimation /> },
+              { icon: "📎", title: "Inline attachment viewer",desc: "Preview PDFs, images, and documents inline — without leaving the app.",                    visual: <AttachmentAnimation /> },
+              { icon: "⌨", title: "Keyboard-first design",   desc: "Every action has a shortcut. Press ? to see the full list. Stay in the flow.",              visual: <KeyboardAnimation /> },
+              { icon: "🤖", title: "AI categorisation",       desc: "Emails are automatically sorted into Primary, Updates, Finance, Security, and more.",       visual: <AiAnimation /> },
+              { icon: "👥", title: "Team collaboration",      desc: "Share mailboxes with your team. Invite members, assign roles, manage access.",              visual: <TeamAnimation /> },
+              { icon: "🔐", title: "Two-factor auth",         desc: "Add an extra layer of protection with TOTP two-factor authentication and backup codes.",    visual: <TotpAnimation /> },
+              { icon: "🔓", title: "No lock-in",              desc: "Works with any IMAP/SMTP server. Your data stays with your email provider.",                visual: <ProviderAnimation /> },
             ].map((f, i) => (
               <AnimateIn key={f.title} direction="up" delay={i * 0.06}>
-                <div className="group h-full rounded-[24px] border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                  style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)", boxShadow: "var(--cm-shadow)" }}>
-                  <div className="mb-4 text-3xl">{f.icon}</div>
-                  <h4 className="text-[15px] font-[800]" style={{ color: "var(--cm-text)" }}>{f.title}</h4>
-                  <p className="mt-2 text-[13.5px] leading-relaxed" style={{ color: "var(--cm-text2)" }}>{f.desc}</p>
-                </div>
+                <FeatureCard icon={f.icon} title={f.title} desc={f.desc} visual={f.visual} />
               </AnimateIn>
             ))}
           </div>
