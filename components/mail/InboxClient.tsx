@@ -12,6 +12,7 @@ import {
 import { extractMeetingLinksFromHtml, type MeetingLink } from "@/lib/mail/calendar";
 import { CATEGORY_LABELS, type Category } from "@/lib/mail/categorize";
 import Link from "next/link";
+import { useMailFocus } from "./MailFocusContext";
 
 type Message = {
   uid: number; seq: number; subject: string;
@@ -214,6 +215,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
   const rootRef = useRef<HTMLDivElement>(null);
   const replyRef = useRef<HTMLTextAreaElement>(null);
   const totalPages = Math.ceil(total / PAGE_SIZE);
+  const { focusMode, setFocusMode } = useMailFocus();
 
   function notify(msg: string, type: "ok" | "err" = "ok") {
     setToast({ msg, type });
@@ -346,19 +348,22 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
   // Keyboard shortcuts in reader
   useEffect(() => {
     function handler(e: KeyboardEvent) {
-      if (!selected) return;
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.contentEditable === "true") return;
-      if (e.key === "r") openReply("reply");
-      if (e.key === "a") openReply("reply-all");
-      if (e.key === "f") openReply("forward");
-      if (e.key === "s") doAction(selected.flagged ? "unflag" : "flag", selected.uid);
-      if (e.key === "Delete" || e.key === "Backspace") doAction("trash", selected.uid);
-      if (e.key === "Escape") setSelected(null);
+      if (e.key === "z" && selected) setFocusMode(!focusMode);
+      if (selected) {
+        if (e.key === "r") openReply("reply");
+        if (e.key === "a") openReply("reply-all");
+        if (e.key === "f") openReply("forward");
+        if (e.key === "s") doAction(selected.flagged ? "unflag" : "flag", selected.uid);
+        if (e.key === "Delete" || e.key === "Backspace") doAction("trash", selected.uid);
+        if (e.key === "Escape") { if (focusMode) setFocusMode(false); else setSelected(null); }
+      }
     }
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [selected]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, focusMode]);
 
   async function openMessage(msg: Message) {
     if (!accountId) return;
@@ -513,7 +518,8 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
 
   const unread = messages.filter(m => !m.seen).length;
   const toolBtnBase = "inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11.5px] font-[600] transition";
-  const showListWithReader = workspaceMode !== "focus";
+  // In focus mode with an email open, hide the list entirely
+  const showListWithReader = focusMode && selected ? false : workspaceMode !== "focus";
   const visibleMessages = messages.filter((msg) => {
     if (mailFilter === "all") return true;
     if (mailFilter === "unread") return !msg.seen;
@@ -525,6 +531,26 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
     ? showListWithReader ? "hidden md:flex" : "hidden"
     : `flex flex-1 md:flex-none ${workspaceMode === "compact" ? "md:w-[300px] lg:w-[330px]" : "md:w-[340px] lg:w-[380px]"}`;
   const listRowPadding = workspaceMode === "compact" ? "px-3 py-2.5" : "px-4 py-3";
+
+  // Focus mode prev/next navigation
+  const selectedIdx = visibleMessages.findIndex(m => m.uid === selected?.uid);
+  function goToPrev() { if (selectedIdx > 0) openMessage(visibleMessages[selectedIdx - 1]); }
+  function goToNext() { if (selectedIdx < visibleMessages.length - 1) openMessage(visibleMessages[selectedIdx + 1]); }
+
+  // J / K keyboard nav (declared after visibleMessages/selectedIdx to avoid temporal dead zone)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (!selected) return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.contentEditable === "true") return;
+      if (e.key === "j" && selectedIdx < visibleMessages.length - 1) openMessage(visibleMessages[selectedIdx + 1]);
+      if (e.key === "k" && selectedIdx > 0) openMessage(visibleMessages[selectedIdx - 1]);
+    }
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, selectedIdx, visibleMessages]);
 
   return (
     <div ref={rootRef} className="flex min-h-0 flex-1 overflow-hidden">
@@ -836,8 +862,77 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
       )}
 
       {/* Message reader */}
-      <div className={`flex min-w-0 flex-1 flex-col ${!selected && !msgLoading ? "hidden md:flex" : "flex"}`}
+      <div className={`relative flex min-w-0 flex-1 flex-col ${!selected && !msgLoading ? "hidden md:flex" : "flex"}`}
         style={{ background: "var(--cm-bg)" }}>
+
+        {/* Focus mode HUD */}
+        {focusMode && selected && (
+          <div className="flex shrink-0 items-center gap-2 border-b px-4 py-2"
+            style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
+            {/* Left: back + counter + nav */}
+            <button type="button" onClick={() => setFocusMode(false)}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-[600] transition"
+              style={{ color: "var(--cm-text2)" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+              <ChevronLeft className="h-3.5 w-3.5" />
+              List
+            </button>
+            <div className="h-4 w-px" style={{ background: "var(--cm-border)" }} />
+            <span className="text-[11.5px] font-[600] tabular-nums" style={{ color: "var(--cm-text3)" }}>
+              {selectedIdx + 1} / {visibleMessages.length}
+            </span>
+            <button type="button" onClick={goToPrev} disabled={selectedIdx <= 0}
+              className="flex h-7 w-7 items-center justify-center rounded-lg transition disabled:opacity-30"
+              style={{ color: "var(--cm-text2)" }}
+              onMouseEnter={e => { if (selectedIdx > 0) e.currentTarget.style.background = "var(--cm-hover-bg)"; }}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </button>
+            <button type="button" onClick={goToNext} disabled={selectedIdx >= visibleMessages.length - 1}
+              className="flex h-7 w-7 items-center justify-center rounded-lg transition disabled:opacity-30"
+              style={{ color: "var(--cm-text2)" }}
+              onMouseEnter={e => { if (selectedIdx < visibleMessages.length - 1) e.currentTarget.style.background = "var(--cm-hover-bg)"; }}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+
+            {/* Right: quick actions + hint */}
+            <div className="ml-auto flex items-center gap-1">
+              <button type="button" onClick={() => openReply("reply")}
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-[600] transition"
+                style={{ color: "var(--cm-text2)" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                <Reply className="h-3.5 w-3.5" />Reply
+              </button>
+              <button type="button" onClick={() => doAction("archive", selected.uid)}
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-[600] transition"
+                style={{ color: "var(--cm-text2)" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                <Archive className="h-3.5 w-3.5" />Archive
+              </button>
+              <button type="button" onClick={() => doAction(selected.flagged ? "unflag" : "flag", selected.uid)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg transition"
+                style={{ color: selected.flagged ? "var(--cm-starred)" : "var(--cm-text2)" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--cm-hover-bg)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                {selected.flagged ? <Star className="h-3.5 w-3.5 fill-current" /> : <Star className="h-3.5 w-3.5" />}
+              </button>
+              <div className="mx-1 h-4 w-px" style={{ background: "var(--cm-border)" }} />
+              <span className="mr-2 hidden text-[11px] lg:block" style={{ color: "var(--cm-text3)" }}>
+                <kbd className="rounded border px-1 py-0.5 text-[10px]" style={{ borderColor: "var(--cm-border2)", background: "var(--cm-surface2)" }}>Z</kbd> exit ·{" "}
+                <kbd className="rounded border px-1 py-0.5 text-[10px]" style={{ borderColor: "var(--cm-border2)", background: "var(--cm-surface2)" }}>J</kbd>/<kbd className="rounded border px-1 py-0.5 text-[10px]" style={{ borderColor: "var(--cm-border2)", background: "var(--cm-surface2)" }}>K</kbd> nav
+              </span>
+              <button type="button" onClick={() => setFocusMode(false)}
+                className="flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-[700] transition"
+                style={{ borderColor: "var(--cm-border)", color: "var(--cm-text3)", background: "var(--cm-surface2)" }}>
+                Exit focus
+              </button>
+            </div>
+          </div>
+        )}
 
         {msgLoading ? (
           <div className="flex flex-1 items-center justify-center gap-3 text-[13px]" style={{ color: "var(--cm-text3)" }}>
@@ -857,8 +952,8 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
           </div>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
-            {/* Toolbar */}
-            <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b px-4 py-2.5"
+            {/* Toolbar — hidden in focus mode (HUD replaces it) */}
+            <div className={`flex shrink-0 flex-wrap items-center gap-1.5 border-b px-4 py-2.5 ${focusMode ? "hidden" : ""}`}
               style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
               <button type="button" onClick={() => setSelected(null)}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border transition md:hidden"
@@ -964,7 +1059,7 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto">
-              <div className={`mx-auto grid w-full gap-5 px-5 py-6 sm:px-8 sm:py-7 ${workspaceMode === "compact" ? "max-w-3xl" : "max-w-6xl xl:grid-cols-[minmax(0,1fr)_280px]"}`}>
+              <div className={`mx-auto grid w-full gap-5 px-5 py-6 sm:px-8 sm:py-7 ${focusMode ? "max-w-3xl" : workspaceMode === "compact" ? "max-w-3xl" : "max-w-6xl xl:grid-cols-[minmax(0,1fr)_280px]"}`}>
                 <article className="min-w-0">
                 <h1 className="text-[20px] font-[800] leading-tight tracking-tight" style={{ color: "var(--cm-text)" }}>{selected.subject}</h1>
 

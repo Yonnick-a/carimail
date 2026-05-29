@@ -12,6 +12,8 @@ import {
   Send, Settings, Star, Sun, Trash2, Underline, X,
 } from "lucide-react";
 
+import { MailFocusProvider, useMailFocus } from "./MailFocusContext";
+
 // ── Keyboard shortcuts modal ─────────────────────────────────────────
 const SHORTCUT_GROUPS = [
   {
@@ -133,7 +135,8 @@ function useTheme() {
   return { theme, toggle };
 }
 
-export default function MailShell({ user, accounts, children }: { user: SessionUser; accounts: Account[]; children: React.ReactNode }) {
+function MailShellInner({ user, accounts, children }: { user: SessionUser; accounts: Account[]; children: React.ReactNode }) {
+  const { focusMode, paletteOpen, setPaletteOpen } = useMailFocus();
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentAccountId = searchParams.get("accountId") || accounts[0]?.id || "";
@@ -258,7 +261,8 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
       if (e.key === "c" && !e.metaKey && !e.ctrlKey) setComposing(true);
       if (e.key === "/" && !e.metaKey) { e.preventDefault(); searchRef.current?.focus(); }
       if (e.key === "?") setShortcutsOpen(v => !v);
-      if (e.key === "Escape") { setMobileSidebarOpen(false); setAccountMenuOpen(false); setShortcutsOpen(false); }
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setPaletteOpen(true); }
+      if (e.key === "Escape") { setMobileSidebarOpen(false); setAccountMenuOpen(false); setShortcutsOpen(false); setPaletteOpen(false); }
     }
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
@@ -520,7 +524,9 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
     <div data-cm-readable className="flex h-screen overflow-hidden" style={{ background: "var(--cm-bg)" }}>
       {shortcutsOpen && <KeyboardShortcutsModal onClose={() => setShortcutsOpen(false)} />}
       {/* Desktop sidebar */}
-      <aside className={`hidden lg:flex flex-col border-r shrink-0 transition-[width] duration-250 ease-out overflow-hidden ${sidebarOpen ? "w-[232px]" : "w-[60px]"}`}
+      <aside className={`hidden lg:flex flex-col border-r shrink-0 overflow-hidden transition-[width] duration-300 ease-out ${
+        focusMode ? "w-0 border-0" : sidebarOpen ? "w-[232px]" : "w-[60px]"
+      }`}
         style={{ borderColor: "var(--cm-sidebar-border)", background: "var(--cm-sidebar-bg)" }}>
         <SidebarContent />
       </aside>
@@ -538,8 +544,8 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
 
       {/* Main */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* Top bar */}
-        <header className="flex h-[52px] shrink-0 items-center gap-3 border-b px-4"
+        {/* Top bar — hidden in focus mode */}
+        <header className={`flex h-[52px] shrink-0 items-center gap-3 border-b px-4 transition-all duration-300 ${focusMode ? "h-0 overflow-hidden border-0 p-0" : ""}`}
           style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface)" }}>
           <button type="button" onClick={() => setMobileSidebarOpen(true)}
             className="flex lg:hidden h-8 w-8 items-center justify-center rounded-lg transition"
@@ -625,6 +631,204 @@ export default function MailShell({ user, accounts, children }: { user: SessionU
           onClose={() => setComposing(false)}
         />
       )}
+
+      {paletteOpen && (
+        <CommandPalette
+          folders={sortedFolders}
+          accounts={accounts}
+          currentAccountId={currentAccountId}
+          currentFolder={currentFolder}
+          onClose={() => setPaletteOpen(false)}
+          onNavigate={folder => { navigateTo(folder); setPaletteOpen(false); }}
+          onSwitchAccount={id => { switchAccount(id); setPaletteOpen(false); }}
+          onCompose={() => { setComposing(true); setPaletteOpen(false); }}
+        />
+      )}
+    </div>
+  );
+}
+
+export default function MailShell({ user, accounts, children }: { user: SessionUser; accounts: Account[]; children: React.ReactNode }) {
+  return (
+    <MailFocusProvider>
+      <MailShellInner user={user} accounts={accounts}>{children}</MailShellInner>
+    </MailFocusProvider>
+  );
+}
+
+// ── Command palette ───────────────────────────────────────────────────────────
+type PaletteItem =
+  | { kind: "folder"; path: string; name: string; unread?: number }
+  | { kind: "account"; id: string; email: string; label: string | null }
+  | { kind: "action"; id: string; label: string; icon: React.ReactNode; hint?: string };
+
+function CommandPalette({
+  folders, accounts, currentAccountId, currentFolder,
+  onClose, onNavigate, onSwitchAccount, onCompose,
+}: {
+  folders: Folder[];
+  accounts: Account[];
+  currentAccountId: string;
+  currentFolder: string;
+  onClose: () => void;
+  onNavigate: (folder: string) => void;
+  onSwitchAccount: (id: string) => void;
+  onCompose: () => void;
+}) {
+  const { setFocusMode, focusMode } = useMailFocus();
+  const [query, setQuery] = useState("");
+  const [cursor, setCursor] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const allItems: PaletteItem[] = [
+    ...folders.map(f => ({ kind: "folder" as const, path: f.path, name: f.name, unread: f.unread })),
+    ...accounts.map(a => ({ kind: "account" as const, id: a.id, email: a.emailAddress, label: a.label })),
+    { kind: "action", id: "compose",  label: "Compose new message", icon: <Pencil className="h-3.5 w-3.5" />, hint: "C" },
+    { kind: "action", id: "settings", label: "Settings",            icon: <Settings className="h-3.5 w-3.5" /> },
+    { kind: "action", id: "focus",    label: focusMode ? "Exit focus mode" : "Enter focus mode", icon: focusMode ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />, hint: "Z" },
+  ];
+
+  const q = query.toLowerCase().trim();
+  const items = q
+    ? allItems.filter(item => {
+        if (item.kind === "folder")  return item.name.toLowerCase().includes(q);
+        if (item.kind === "account") return item.email.toLowerCase().includes(q) || (item.label || "").toLowerCase().includes(q);
+        return item.label.toLowerCase().includes(q);
+      })
+    : allItems;
+
+  const clampedCursor = Math.min(cursor, Math.max(0, items.length - 1));
+
+  function execute(item: PaletteItem) {
+    if (item.kind === "folder")  { onNavigate(item.path); return; }
+    if (item.kind === "account") { onSwitchAccount(item.id); return; }
+    if (item.id === "compose")   { onCompose(); return; }
+    if (item.id === "settings")  { window.location.href = "/settings"; onClose(); return; }
+    if (item.id === "focus")     { setFocusMode(!focusMode); onClose(); return; }
+  }
+
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "ArrowDown")  { e.preventDefault(); setCursor(c => Math.min(c + 1, items.length - 1)); }
+    if (e.key === "ArrowUp")    { e.preventDefault(); setCursor(c => Math.max(c - 1, 0)); }
+    if (e.key === "Enter")      { e.preventDefault(); if (items[clampedCursor]) execute(items[clampedCursor]); }
+    if (e.key === "Escape")     { onClose(); }
+  }
+
+  // Group visible items
+  const folderItems  = items.filter(i => i.kind === "folder");
+  const accountItems = items.filter(i => i.kind === "account");
+  const actionItems  = items.filter(i => i.kind === "action");
+
+  let idx = -1;
+  function itemBlock(item: PaletteItem) {
+    idx++;
+    const active = idx === clampedCursor;
+    let icon: React.ReactNode;
+    let primary: string;
+    let secondary: string | null = null;
+    let hint: string | undefined;
+
+    if (item.kind === "folder") {
+      icon = <span style={{ color: active ? "var(--cm-accent)" : "var(--cm-text3)" }}>{getFolderIcon(item.path)}</span>;
+      primary = item.name;
+      if (item.unread) secondary = `${item.unread} unread`;
+    } else if (item.kind === "account") {
+      icon = <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-[#F97316] to-[#0044BC] text-[8px] font-[700] text-white">{item.email.charAt(0).toUpperCase()}</div>;
+      primary = item.email;
+      secondary = item.label || (item.id === currentAccountId ? "Active" : null);
+    } else {
+      icon = <span style={{ color: active ? "var(--cm-accent)" : "var(--cm-text3)" }}>{item.icon}</span>;
+      primary = item.label;
+      hint = item.hint;
+    }
+
+    return (
+      <button
+        key={item.kind === "folder" ? item.path : item.kind === "account" ? item.id : item.id}
+        type="button"
+        onClick={() => execute(item)}
+        onMouseEnter={() => setCursor(idx)}
+        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-none"
+        style={{
+          background: active ? "var(--cm-accent-dim)" : "transparent",
+          borderLeft: active ? "2px solid var(--cm-accent)" : "2px solid transparent",
+        }}
+      >
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center">{icon}</span>
+        <span className="flex-1 text-[13px] font-[500]" style={{ color: "var(--cm-text)" }}>{primary}</span>
+        {secondary && <span className="text-[11px]" style={{ color: "var(--cm-text3)" }}>{secondary}</span>}
+        {hint && <kbd className="rounded border px-1.5 py-0.5 text-[10px] font-[700]" style={{ borderColor: "var(--cm-border2)", background: "var(--cm-surface3)", color: "var(--cm-text3)" }}>{hint}</kbd>}
+      </button>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-start justify-center px-4 pt-[15vh]"
+      style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
+      onClick={onClose}>
+      <div
+        className="w-full max-w-lg overflow-hidden rounded-2xl border shadow-2xl animate-scale-in"
+        style={{ background: "var(--cm-surface)", borderColor: "var(--cm-border)" }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Search input */}
+        <div className="flex items-center gap-3 border-b px-4 py-3.5" style={{ borderColor: "var(--cm-border)" }}>
+          <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ color: "var(--cm-text3)" }}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={e => { setQuery(e.target.value); setCursor(0); }}
+            onKeyDown={onKeyDown}
+            placeholder="Search or jump to…"
+            className="flex-1 bg-transparent text-[14px] outline-none"
+            style={{ color: "var(--cm-text)" }}
+          />
+          <kbd className="rounded border px-1.5 py-0.5 text-[10px]" style={{ borderColor: "var(--cm-border2)", background: "var(--cm-surface2)", color: "var(--cm-text3)" }}>esc</kbd>
+        </div>
+
+        {/* Results */}
+        <div className="max-h-[360px] overflow-y-auto p-2">
+          {items.length === 0 ? (
+            <p className="px-3 py-6 text-center text-[13px]" style={{ color: "var(--cm-text3)" }}>No results for &ldquo;{query}&rdquo;</p>
+          ) : (
+            <>
+              {folderItems.length > 0 && (
+                <div>
+                  <p className="px-3 pb-1 pt-2 text-[10px] font-[700] uppercase tracking-[0.18em]" style={{ color: "var(--cm-text3)" }}>Folders</p>
+                  {folderItems.map(itemBlock)}
+                </div>
+              )}
+              {accountItems.length > 0 && (
+                <div>
+                  <p className="px-3 pb-1 pt-2 text-[10px] font-[700] uppercase tracking-[0.18em]" style={{ color: "var(--cm-text3)" }}>Accounts</p>
+                  {accountItems.map(itemBlock)}
+                </div>
+              )}
+              {actionItems.length > 0 && (
+                <div>
+                  <p className="px-3 pb-1 pt-2 text-[10px] font-[700] uppercase tracking-[0.18em]" style={{ color: "var(--cm-text3)" }}>Actions</p>
+                  {actionItems.map(itemBlock)}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center gap-3 border-t px-4 py-2.5" style={{ borderColor: "var(--cm-border)", background: "var(--cm-surface2)" }}>
+          {[["↑↓", "navigate"], ["↵", "select"], ["esc", "close"]].map(([key, label]) => (
+            <span key={key} className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--cm-text3)" }}>
+              <kbd className="rounded border px-1.5 py-0.5 text-[10px]" style={{ borderColor: "var(--cm-border2)", background: "var(--cm-surface3)" }}>{key}</kbd>
+              {label}
+            </span>
+          ))}
+          <span className="ml-auto text-[11px]" style={{ color: "var(--cm-text3)" }}>⌘K to open</span>
+        </div>
+      </div>
     </div>
   );
 }
