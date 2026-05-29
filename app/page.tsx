@@ -355,7 +355,7 @@ export default async function RootPage() {
                 </p>
                 <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                   <a
-                    href="https://ko-fi.com/hostcari"
+                    href="https://ko-fi.com/carimail"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl px-7 py-3.5 text-[14px] font-[800] text-white transition hover:-translate-y-0.5 sm:w-auto"

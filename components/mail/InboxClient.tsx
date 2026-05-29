@@ -20,6 +20,7 @@ type Message = {
   date: string; seen: boolean; flagged: boolean;
   hasAttachment: boolean; size?: number; messageId?: string;
   conversationId?: string; threadCount?: number; snippet?: string;
+  folder?: string;
 };
 type MessageFull = Message & {
   cc: string; replyTo: string;
@@ -379,9 +380,12 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
 
   async function openMessage(msg: Message) {
     if (!accountId) return;
-    setMsgLoading(true); setReplyOpen(false); setThreadOpen(false); // keep `selected` so reader doesn't blank
+    const isThreadNav = !!(selected?.conversationId && selected.conversationId === msg.conversationId);
+    setMsgLoading(true); setReplyOpen(false);
+    if (!isThreadNav) setThreadOpen(false);
     try {
-      const res = await fetch(`/api/mail/messages?accountId=${accountId}&action=message&folder=${encodeURIComponent(folder)}&uid=${msg.uid}${msg.conversationId ? `&conversationId=${encodeURIComponent(msg.conversationId)}` : ""}`, { cache: "no-store" });
+      const msgFolder = msg.folder || folder;
+      const res = await fetch(`/api/mail/messages?accountId=${accountId}&action=message&folder=${encodeURIComponent(msgFolder)}&uid=${msg.uid}${msg.conversationId ? `&conversationId=${encodeURIComponent(msg.conversationId)}` : ""}`, { cache: "no-store" });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "Failed.");
       setSelected(data.message);

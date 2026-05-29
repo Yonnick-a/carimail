@@ -76,6 +76,8 @@ export async function GET(req: NextRequest) {
           flagged: m.flagged,
           hasAttachment: m.hasAttachment,
           snippet: m.snippet,
+          conversationId,
+          folder: m.folder,
         })) || [];
       }
       return json({ ok: true, message: message ? { ...message, conversationId, threadMessages } : message });
