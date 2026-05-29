@@ -67,32 +67,40 @@ export async function testConnection(config: ImapConfig): Promise<void> {
   await client.logout();
 }
 
+// Folders worth calling STATUS on — these are the ones users actually care about.
+// Running STATUS on every folder (20+) causes a burst of IMAP commands that is slow
+// and can return "command not found" on servers that rate-limit STATUS.
+const STATUS_FOLDERS = new Set(["inbox", "sent", "drafts", "spam", "junk", "trash"]);
+
 export async function getFolders(config: ImapConfig): Promise<Folder[]> {
   const client = makeClient(config);
   try {
     await client.connect();
     const list = await client.list();
-    const folders = await Promise.all(list.map(async (f) => {
-      let unread = 0;
-      let total = 0;
-      try {
-        const status = await client.status(f.path, { messages: true, unseen: true });
-        unread = status.unseen ?? 0;
-        total = status.messages ?? 0;
-      } catch {
-        // Some virtual or provider-owned folders do not support STATUS.
-      }
-      return {
-        path: f.path,
-        name: f.name,
-        delimiter: f.delimiter ?? "/",
-        specialUse: (f as any).specialUse,
-        flags: Array.from(f.flags ?? []),
-        unread,
-        total,
-      };
+    // Run STATUS only on key folders to avoid hammering the server
+    const statusTargets = list.filter(f => {
+      const p = f.path.toLowerCase();
+      const su = ((f as any).specialUse || "").toLowerCase();
+      return STATUS_FOLDERS.has(p) || [...STATUS_FOLDERS].some(k => p.includes(k) || su.includes(k));
+    });
+    const statusMap = new Map<string, { unread: number; total: number }>();
+    await Promise.allSettled(
+      statusTargets.map(async f => {
+        try {
+          const s = await client.status(f.path, { messages: true, unseen: true });
+          statusMap.set(f.path, { unread: s.unseen ?? 0, total: s.messages ?? 0 });
+        } catch {}
+      })
+    );
+    return list.map(f => ({
+      path: f.path,
+      name: f.name,
+      delimiter: f.delimiter ?? "/",
+      specialUse: (f as any).specialUse,
+      flags: Array.from(f.flags ?? []),
+      unread: statusMap.get(f.path)?.unread ?? 0,
+      total: statusMap.get(f.path)?.total ?? 0,
     }));
-    return folders;
   } finally {
     await client.logout().catch(() => {});
   }

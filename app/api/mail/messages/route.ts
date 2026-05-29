@@ -85,16 +85,36 @@ export async function GET(req: NextRequest) {
 
     const page = parseInt(sp.get("page") || "1");
     const pageSize = parseInt(sp.get("pageSize") || "30");
+    const forceFresh = sp.get("fresh") === "1";
+    const lastSyncedAt = account.lastSyncedAt ? new Date(account.lastSyncedAt).getTime() : 0;
+    // Stale threshold: 5 minutes. DB reads are instant; IMAP syncs are expensive.
+    const STALE_MS = 5 * 60_000;
+    const isStale = !lastSyncedAt || Date.now() - lastSyncedAt > STALE_MS || forceFresh;
+
     try {
-      const lastSyncedAt = account.lastSyncedAt ? new Date(account.lastSyncedAt).getTime() : 0;
-      if (!lastSyncedAt || Date.now() - lastSyncedAt > 30_000 || sp.get("fresh") === "1") {
-        await syncFolderToDb(accountId, imap, folder, Math.min(40, pageSize * 2));
+      // Try to serve from DB cache first — always fast
+      const cached = await getIndexedConversations(accountId, folder, page, pageSize);
+
+      if (cached.messages.length > 0) {
+        // Cache hit: return immediately. If stale, sync in background (fire-and-forget).
+        if (isStale) {
+          syncFolderToDb(accountId, imap, folder, Math.min(60, pageSize * 2)).catch(() => {});
+        }
+        return json({ ok: true, threaded: true, stale: isStale, ...cached });
       }
+
+      // Cache miss (first load or empty folder): sync now, then return results
+      await syncFolderToDb(accountId, imap, folder, Math.min(60, pageSize * 2));
       const result = await getIndexedConversations(accountId, folder, page, pageSize);
       return json({ ok: true, threaded: true, ...result });
     } catch {
-      const result = await getMessages(imap, folder, page, pageSize);
-      return json({ ok: true, threaded: false, ...result });
+      // DB unavailable — fall back to live IMAP
+      try {
+        const result = await getMessages(imap, folder, page, pageSize);
+        return json({ ok: true, threaded: false, ...result });
+      } catch (imapErr) {
+        return json({ ok: false, error: imapErr instanceof Error ? imapErr.message : "Failed to fetch mail." }, { status: 400 });
+      }
     }
   } catch (err) {
     return json({ ok: false, error: err instanceof Error ? err.message : "Failed." }, { status: 400 });

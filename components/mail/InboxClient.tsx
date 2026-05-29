@@ -270,6 +270,10 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
       setMessages(msgs);
       setTotal(data.total || msgs.length);
       indexContacts(msgs);
+      // If server returned stale cache + triggered background sync, poll once after 4s
+      if (data.stale && !silent) {
+        setTimeout(() => load(p, true), 4000);
+      }
       // Kick off async categorisation (fire and forget)
       if (msgs.length > 0 && accountId) {
         fetch("/api/mail/categorize", {
@@ -687,11 +691,30 @@ export default function InboxClient({ accountId, folder }: { accountId: string |
                 <span>All read</span>
               </button>
             )}
+            {/* Soft refresh (uses cache) */}
             <button type="button" onClick={() => load(page)} disabled={loading}
-              className="rounded-lg p-1.5 transition" style={{ color: "var(--cm-text3)" }}
+              title="Refresh" className="rounded-lg p-1.5 transition" style={{ color: "var(--cm-text3)" }}
               onMouseEnter={e => { e.currentTarget.style.background = "var(--cm-hover-bg)"; e.currentTarget.style.color = "var(--cm-blue)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--cm-text3)"; }}>
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            </button>
+            {/* Force-fresh from server (bypasses cache, re-syncs IMAP) */}
+            <button type="button"
+              title="Fetch latest from server"
+              onClick={() => {
+                const p = new URLSearchParams();
+                if (accountId) p.set("accountId", accountId);
+                p.set("folder", folder);
+                p.set("fresh", "1");
+                window.location.search = p.toString();
+              }}
+              disabled={loading}
+              className="hidden rounded-lg p-1.5 transition sm:block" style={{ color: "var(--cm-text3)" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "var(--cm-hover-bg)"; e.currentTarget.style.color = "var(--cm-blue)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--cm-text3)"; }}>
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+              </svg>
             </button>
           </div>
         </div>

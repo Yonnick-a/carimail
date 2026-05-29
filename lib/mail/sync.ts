@@ -119,17 +119,24 @@ async function refreshConversation(conversationId: string) {
 }
 
 export async function syncFolderToDb(accountId: string, config: ImapConfig, folder: string, limit = 60) {
+  // Fetch only envelope/flags — no full-body fetch per message.
+  // A full getMessage() for each message opens a separate IMAP connection, causing burst
+  // errors ("command not found") on servers that rate-limit and crushing latency.
   const page = await getMessages(config, folder, 1, limit);
   const newest = page.messages.slice(0, Math.min(limit, page.messages.length));
   for (const summary of newest) {
-    let full: MessageFull | undefined;
-    try {
-      full = await getMessage(config, folder, summary.uid, false) || undefined;
-    } catch {}
-    await upsertIndexedMessage(accountId, folder, summary, full);
+    await upsertIndexedMessage(accountId, folder, summary).catch(() => {});
   }
   await (db as any).mailAccount.update({ where: { id: accountId }, data: { lastSyncedAt: new Date() } }).catch(() => {});
   return { total: page.total, synced: newest.length };
+}
+
+// Fetch a single message's full body and update its DB snippet (called lazily on open).
+export async function syncMessageSnippet(accountId: string, config: ImapConfig, folder: string, summary: import("./imap").MessageSummary) {
+  try {
+    const full = await getMessage(config, folder, summary.uid, false);
+    if (full) await upsertIndexedMessage(accountId, folder, summary, full).catch(() => {});
+  } catch {}
 }
 
 export async function getIndexedConversations(accountId: string, folder: string, page: number, pageSize: number) {
