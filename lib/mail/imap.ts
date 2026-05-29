@@ -2,6 +2,25 @@
 import "server-only";
 import { ImapFlow } from "imapflow";
 
+// ── Module-level caches ───────────────────────────────────────────────────────
+// Vercel Lambda instances are reused ("warm"), so these survive across requests
+// on the same instance. Not guaranteed to hit, but meaningfully reduces IMAP calls.
+
+interface FolderCacheEntry { data: Folder[]; at: number }
+const _folderCache = new Map<string, FolderCacheEntry>();
+const FOLDER_CACHE_TTL = 2 * 60_000; // 2 minutes
+
+function folderCacheKey(config: ImapConfig) { return `${config.host}:${config.user}`; }
+
+function getFolderCache(config: ImapConfig): Folder[] | null {
+  const e = _folderCache.get(folderCacheKey(config));
+  if (!e || Date.now() - e.at > FOLDER_CACHE_TTL) { _folderCache.delete(folderCacheKey(config)); return null; }
+  return e.data;
+}
+function setFolderCache(config: ImapConfig, data: Folder[]) {
+  _folderCache.set(folderCacheKey(config), { data, at: Date.now() });
+}
+
 export type ImapConfig = {
   host: string;
   port: number;
@@ -73,6 +92,10 @@ export async function testConnection(config: ImapConfig): Promise<void> {
 const STATUS_FOLDERS = new Set(["inbox", "sent", "drafts", "spam", "junk", "trash"]);
 
 export async function getFolders(config: ImapConfig): Promise<Folder[]> {
+  // Serve from cache if fresh — avoids a full IMAP round-trip on every sidebar poll
+  const cached = getFolderCache(config);
+  if (cached) return cached;
+
   const client = makeClient(config);
   try {
     await client.connect();
@@ -92,7 +115,7 @@ export async function getFolders(config: ImapConfig): Promise<Folder[]> {
         } catch {}
       })
     );
-    return list.map(f => ({
+    const result = list.map(f => ({
       path: f.path,
       name: f.name,
       delimiter: f.delimiter ?? "/",
@@ -101,6 +124,8 @@ export async function getFolders(config: ImapConfig): Promise<Folder[]> {
       unread: statusMap.get(f.path)?.unread ?? 0,
       total: statusMap.get(f.path)?.total ?? 0,
     }));
+    setFolderCache(config, result);
+    return result;
   } finally {
     await client.logout().catch(() => {});
   }
@@ -159,7 +184,12 @@ export async function getMessage(
   try {
     await client.connect();
     await client.mailboxOpen(folder);
-    if (markSeen) await client.messageFlagsAdd({ uid }, ["\\Seen"], { uid: true });
+
+    // Fire-and-forget markSeen: don't block the fetch on a STORE round-trip.
+    // The email is displayed immediately; seen status syncs in the background.
+    if (markSeen) {
+      client.messageFlagsAdd({ uid }, ["\\Seen"], { uid: true }).catch(() => {});
+    }
 
     let result: MessageFull | null = null;
     for await (const msg of client.fetch({ uid }, {
@@ -170,7 +200,9 @@ export async function getMessage(
       const source = Buffer.isBuffer(msg.source)
         ? msg.source
         : Buffer.from(String(msg.source || ""), "utf8");
-      const { html, text, attachments } = parseMime(source);
+      // skipAttachmentContent=true: don't decode attachment binaries on initial open.
+      // Attachment content is fetched on demand via /api/mail/messages?action=attachment.
+      const { html, text, attachments } = parseMime(source, 0, new Set(), true);
       const rawHeaders = source.toString("latin1").slice(0, Math.max(0, source.toString("latin1").indexOf("\r\n\r\n")));
 
       result = {
@@ -338,7 +370,12 @@ function checkAttachment(structure: any): boolean {
   return false;
 }
 
-function parseMime(rawSource: Buffer | string, depth = 0, seen = new Set<string>()): {
+function parseMime(
+  rawSource: Buffer | string,
+  depth = 0,
+  seen = new Set<string>(),
+  skipAttachmentContent = false,
+): {
   html: string | null;
   text: string | null;
   attachments: ParsedAttachment[];
@@ -381,14 +418,24 @@ function parseMime(rawSource: Buffer | string, depth = 0, seen = new Set<string>
     const fname = decodeHeaderParam(partHeaders.match(/filename\*?=\s*"?([^";\r\n]+)"?/i)?.[1]?.trim());
 
     if (disp === "attachment" && fname) {
-      const content = decodePartToBuffer(pb, partHeaders);
-      attachments.push({ id: attachments.length, filename: fname, size: content.length, contentType: ct || "application/octet-stream", content });
+      if (skipAttachmentContent) {
+        // Skip decoding the binary — estimate size from base64 length and store empty buffer.
+        // Actual content is fetched on demand via ?action=attachment.
+        const enc = ph.match(/content-transfer-encoding:\s*([^\r\n]+)/)?.[1]?.trim().toLowerCase();
+        const estimatedSize = enc === "base64"
+          ? Math.floor(pb.replace(/\s/g, "").length * 0.75)
+          : pb.length;
+        attachments.push({ id: attachments.length, filename: fname, size: estimatedSize, contentType: ct || "application/octet-stream", content: Buffer.alloc(0) });
+      } else {
+        const content = decodePartToBuffer(pb, partHeaders);
+        attachments.push({ id: attachments.length, filename: fname, size: content.length, contentType: ct || "application/octet-stream", content });
+      }
       continue;
     }
     if (ct.includes("text/html") && !html) { html = decodeBody(pb, partHeaders); }
     else if (ct.includes("text/plain") && !text) { text = decodeBody(pb, partHeaders); }
     else if (ct.includes("multipart/")) {
-      const n = parseMime(part, depth + 1, seen);
+      const n = parseMime(part, depth + 1, seen, skipAttachmentContent);
       if (!html && n.html) html = n.html;
       if (!text && n.text) text = n.text;
       attachments.push(...n.attachments);

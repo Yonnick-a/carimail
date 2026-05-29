@@ -11,6 +11,30 @@ function json(data: unknown, init?: ResponseInit) {
   return NextResponse.json(data, { ...init, headers });
 }
 
+// Module-level message body cache — survives across requests on the same warm Lambda instance.
+// Key: `${accountId}:${folder}:${uid}`
+interface MsgCacheEntry { msg: Awaited<ReturnType<typeof getMessage>>; at: number }
+const _msgCache = new Map<string, MsgCacheEntry>();
+const MSG_CACHE_MAX = 80;
+const MSG_CACHE_TTL = 20 * 60_000; // 20 minutes
+
+function msgCacheGet(key: string) {
+  const e = _msgCache.get(key);
+  if (!e) return null;
+  if (Date.now() - e.at > MSG_CACHE_TTL) { _msgCache.delete(key); return null; }
+  return e.msg;
+}
+function msgCacheSet(key: string, msg: NonNullable<Awaited<ReturnType<typeof getMessage>>>) {
+  if (_msgCache.size >= MSG_CACHE_MAX) {
+    // Evict the oldest entry
+    let oldestKey = "";
+    let oldestAt = Infinity;
+    for (const [k, v] of _msgCache) { if (v.at < oldestAt) { oldestAt = v.at; oldestKey = k; } }
+    if (oldestKey) _msgCache.delete(oldestKey);
+  }
+  _msgCache.set(key, { msg, at: Date.now() });
+}
+
 export async function GET(req: NextRequest) {
   const user = await getSession();
   if (!user) return json({ ok: false, error: "Unauthorized.", code: "NO_SESSION" }, { status: 401 });
@@ -31,7 +55,12 @@ export async function GET(req: NextRequest) {
     if (action === "message") {
       const uid = parseInt(sp.get("uid") || "0");
       if (!uid) return json({ ok: false, error: "UID required." }, { status: 400 });
-      const message = await getMessage(imap, folder, uid);
+      const cacheKey = `${accountId}:${folder}:${uid}`;
+      let message = msgCacheGet(cacheKey);
+      if (!message) {
+        message = await getMessage(imap, folder, uid);
+        if (message) msgCacheSet(cacheKey, message);
+      }
       const conversationId = sp.get("conversationId") || "";
       let threadMessages = [];
       if (conversationId) {
